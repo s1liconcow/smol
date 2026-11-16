@@ -1,0 +1,40 @@
+package users
+use context http
+var ErrNotFound=errors.New("user not found")
+type User struct@json{
+ID int64
+FirstName string
+LastName string
+Email string `json:"email,omitempty"`
+}
+type Store interface{
+Find(ctx,id int64)*User!
+List(ctx)[]*User!
+}
+type Server struct{
+store Store
+}
+(s*Server)Get(ctx,id int64)*User!{
+if id<=0{!ErrNotFound}
+u:=store.Find(ctx id)?"find user %d",id
+^u
+}
+.Emails(ctx)[]string!{
+users:=store.List(ctx)?
+var out[]string for u in users{
+if u.Email!=""{out=append(out u.Email)}
+}
+^out
+}
+.ServeHTTP(w,r){
+id:=strconv.ParseInt(r.URL.Query().Get("id"),10 64)?{
+Error(w "bad id" StatusBadRequest)
+return
+}
+u:=Get(r.Context(),id)?{
+Error(w err.Error(),StatusNotFound)
+return
+}
+json.NewEncoder(w).Encode(u)?{Error(w err.Error(),StatusInternalServerError)}
+}
+(u*User)FullName()string=>FirstName+" "+LastName

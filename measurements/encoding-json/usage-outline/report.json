@@ -1,0 +1,77 @@
+{
+  "model": "gpt-6.1-sol",
+  "codex_version": "codex-cli 0.164.0",
+  "method": "Codex turn.completed.usage.input_tokens",
+  "baseline": "same prompt with empty source markers",
+  "stable": true,
+  "sources": {
+    "go": {
+      "sha256": "02999eb86ef2859db0a9d1a720063082ee765e89c88409d44b8065a8e8266ee0",
+      "bytes": 118081
+    },
+    "smol": {
+      "sha256": "c4b80ef0365fb985f48fa9beb77be59f2dd262587d21537e76e622bcbcc10f79",
+      "bytes": 11879
+    }
+  },
+  "comparisons": [
+    {
+      "repeat": 1,
+      "baseline_input_tokens": 14475,
+      "go_input_tokens": 47384,
+      "smol_input_tokens": 18046,
+      "go_source_tokens": 32909,
+      "smol_source_tokens": 3571,
+      "tokens_saved": 29338,
+      "source_savings_percent": 89.149,
+      "request_savings_percent": 61.915
+    }
+  ],
+  "records": [
+    {
+      "repeat": 1,
+      "kind": "baseline",
+      "usage": {
+        "input_tokens": 14475,
+        "cached_input_tokens": 12288,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 5,
+        "reasoning_output_tokens": 0
+      },
+      "prompt_sha256": "2e8ebc0bab6069c7e3e1650b6657c4db89b4fb449d5df7c7b4654f38007bc547",
+      "elapsed_seconds": 7.905
+    },
+    {
+      "repeat": 1,
+      "kind": "go",
+      "usage": {
+        "input_tokens": 47384,
+        "cached_input_tokens": 12288,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 5,
+        "reasoning_output_tokens": 0
+      },
+      "prompt_sha256": "e29ae759d8df78b07b207050ab3bb7c85759c6bd6f218b385e722cd972994c3f",
+      "elapsed_seconds": 5.06
+    },
+    {
+      "repeat": 1,
+      "kind": "smol",
+      "usage": {
+        "input_tokens": 18046,
+        "cached_input_tokens": 12288,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 5,
+        "reasoning_output_tokens": 0
+      },
+      "prompt_sha256": "ecc32631ceb75120c3808b11f0782bb436d488dc90f471f01d3816d1b30f7748",
+      "elapsed_seconds": 5.733
+    }
+  ],
+  "limitations": [
+    "Input usage only; no generation-accuracy or dollar-cost claim.",
+    "Source counts subtract an identical empty-input baseline.",
+    "Cached tokens are included in input_tokens and reported separately.",
+    "One example does not establish corpus-wide savings."
+  ]
+}

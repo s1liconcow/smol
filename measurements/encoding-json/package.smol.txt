@@ -1,0 +1,2475 @@
+// File: encoding/json/decode.go
+//go:build !goexperiment.jsonv2
+package json
+use base64 encoding fmt reflect strconv unicode utf16 utf8
+let s[]byte,v reflect.Value
+import(
+...
+_ "unsafe"
+)
+Unmarshal(data[]byte,v any)!{
+var d decodeState
+err:=checkValid(data,&d.scan)?
+d.init(data)
+return d.unmarshal(v)
+}
+type Unmarshaler interface{
+UnmarshalJSON([]byte)!
+}
+type UnmarshalTypeError struct{
+Value string
+Type Type
+Offset int64
+Struct string
+Field string
+}
+(e*UnmarshalTypeError)Error()string{
+if Struct!=""||Field!=""{return "json: cannot unmarshal "+Value+" into Go struct field "+Struct+"."+Field+" of type "+Type.String()}
+return "json: cannot unmarshal "+Value+" into Go value of type "+Type.String()
+}
+type UnmarshalFieldError struct{
+Key string
+Type Type
+Field StructField
+}
+(e*UnmarshalFieldError)Error()string=>"json: cannot unmarshal object key "+Quote(Key)+" into unexported field "+Field.Name+" of type "+Type.String()
+type InvalidUnmarshalError struct{
+Type Type
+}
+(e*InvalidUnmarshalError)Error()string{
+if Type==nil{return "json: Unmarshal(nil)"}
+if Type.Kind()!=Pointer{return "json: Unmarshal(non-pointer "+Type.String()+")"}
+return "json: Unmarshal(nil "+Type.String()+")"
+}
+(d*decodeState)unmarshal(v any)!{
+rv:=ValueOf(v)
+if rv.Kind()!=Pointer||rv.IsNil(){return&InvalidUnmarshalError{TypeOf(v)}}
+scan.reset()
+scanWhile(scanSkipSpace)
+err:=value(rv)?{return addErrorContext(err)}
+return savedError
+}
+type Number string
+(n Number)String()string{return string(n)}
+.Float64()float64! =>ParseFloat(string(n),64)
+.Int64()int64! =>ParseInt(string(n),10 64)
+type errorContext struct{
+Struct Type
+FieldStack[]string
+}
+type decodeState struct{
+data[]byte
+off int
+opcode int
+scan scanner
+errorContext*errorContext
+savedError error
+useNumber bool
+disallowUnknownFields bool
+}
+(d*decodeState)readIndex()int=>off-1
+const phasePanicMsg="JSON decoder out of sync - data changing underfoot?"
+.init(data[]byte)*decodeState{
+d.data=data
+off=0
+savedError=nil if d.errorContext!=nil{
+d.errorContext.Struct=nil
+d.errorContext.FieldStack=d.errorContext.FieldStack[:0]
+}
+return d
+}
+.saveError(err error){
+if savedError==nil{savedError=addErrorContext(err)}
+}
+.addErrorContext(err error)!{
+if d.errorContext!=nil&&(d.errorContext.Struct!=nil||len(d.errorContext.FieldStack)>0){
+switch err:=err.(type){
+case*UnmarshalTypeError:
+err.Struct=d.errorContext.Struct.Name()
+fieldStack:=d.errorContext.FieldStack if err.Field!=""{fieldStack=append(fieldStack err.Field)}
+err.Field=strings.Join(fieldStack ".")
+}
+}
+return err
+}
+.skip(){
+s,data,i:=&scan,data,off
+depth:=len(s.parseState)
+for{
+op:=s.step(s data[i])
+i++
+if len(s.parseState)<depth{
+off=i
+opcode=op return
+}
+}
+}
+.scanNext(){
+if off<len(data){
+opcode=scan.step(&scan data[off])
+off++
+}else{
+opcode=scan.eof()
+off=len(data)+1
+}
+}
+.scanWhile(op int){
+s,data,i:=&scan,data,off for i<len(data){
+newOp:=s.step(s data[i])
+i++
+if newOp!=op{
+opcode=newOp
+off=i return
+}
+}
+off=len(data)+1
+opcode=scan.eof()
+}
+.rescanLiteral(){
+data,i:=data,off
+Switch:
+switch data[i-1]{
+case '"':
+for;i<len(data);i++{
+switch data[i]{
+case '\\':
+i++
+case '"':
+i++
+break Switch
+}
+}
+case '0' '1' '2' '3' '4' '5' '6' '7' '8' '9' '-':
+for;i<len(data);i++{
+switch data[i]{
+case '0' '1' '2' '3' '4' '5' '6' '7' '8' '9',
+'.' 'e' 'E' '+' '-':
+default:
+break Switch
+}
+}
+case 't':
+i+=len("rue")
+case 'f':
+i+=len("alse")
+case 'n':
+i+=len("ull")
+}
+if i<len(data){opcode=stateEndValue(&scan data[i])}else{opcode=scanEnd}
+off=i+1
+}
+.value(v)!{
+switch opcode{
+default:
+panic(phasePanicMsg)
+case scanBeginArray:
+if v.IsValid(){
+array(v)?
+}else{skip()}
+scanNext()
+case scanBeginObject:
+if v.IsValid(){
+object(v)?
+}else{skip()}
+scanNext()
+case scanBeginLiteral:
+start:=readIndex()
+rescanLiteral()
+if v.IsValid(){
+literalStore(data[start:readIndex()],v false)?
+}
+}
+^
+}
+type unquotedValue struct{}
+.valueQuoted()any{
+switch opcode{
+default:
+panic(phasePanicMsg)
+case scanBeginArray scanBeginObject:
+skip()
+scanNext()
+case scanBeginLiteral:
+v:=literalInterface()
+switch v.(type){
+case nil string:
+return v
+}
+}
+return unquotedValue{}
+}
+indirect(v,decodingNull bool)(Unmarshaler,TextUnmarshaler,Value){
+v0:=v
+haveAddr:=false if v.Kind()!=Pointer&&v.Type().Name()!=""&&v.CanAddr(){
+haveAddr=true
+v=v.Addr()
+}
+for{
+if v.Kind()==Interface&&!v.IsNil(){
+e:=v.Elem()
+if e.Kind()==Pointer&&!e.IsNil()&&(!decodingNull||e.Elem().Kind()==Pointer){
+haveAddr=false
+v=e continue
+}
+}
+if v.Kind()!=Pointer{break}
+if decodingNull&&v.CanSet(){break}
+if v.Elem().Kind()==Interface&&v.Elem().Elem().Equal(v){
+v=v.Elem()
+break
+}
+if v.IsNil(){v.Set(New(v.Type().Elem()))}
+if v.Type().NumMethod()>0&&v.CanInterface(){
+if u,ok:=TypeAssert[Unmarshaler](v);ok{return u,nil,Value{}}
+if!decodingNull{
+if u,ok:=TypeAssert[TextUnmarshaler](v);ok{return nil,u,Value{}}
+}
+}
+if haveAddr{
+v=v0
+haveAddr=false
+}else{v=v.Elem()}
+}
+return nil,nil,v
+}
+.array(v)!{
+u,ut,pv:=indirect(v false)
+if u!=nil{
+start:=readIndex()
+skip()
+return u.UnmarshalJSON(data[start:off])
+}
+if ut!=nil{
+saveError(&UnmarshalTypeError{Value:"array",Type:v.Type(),Offset:int64(off)})
+skip()
+^
+}
+v=pv switch v.Kind(){
+case Interface:
+if v.NumMethod()==0{
+ai:=arrayInterface()
+v.Set(ValueOf(ai))
+^
+}
+fallthrough
+default:
+saveError(&UnmarshalTypeError{Value:"array",Type:v.Type(),Offset:int64(off)})
+skip()
+^
+case Array Slice:
+break
+}
+i:=0 for{
+scanWhile(scanSkipSpace)
+if opcode==scanEndArray{break}
+if v.Kind()==Slice{
+if i>=v.Cap(){v.Grow(1)}
+if i>=v.Len(){v.SetLen(i+1)}
+}
+if i<v.Len(){
+value(v.Index(i))?
+}else{
+value(Value{})?
+}
+i++
+if opcode==scanSkipSpace{scanWhile(scanSkipSpace)}
+if opcode==scanEndArray{break}
+if opcode!=scanArrayValue{panic(phasePanicMsg)}
+}
+if i<v.Len(){
+if v.Kind()==Array{
+for;i<v.Len();i++{
+v.Index(i).SetZero()
+}
+}else{
+v.SetLen(i)
+}
+}
+if i==0&&v.Kind()==Slice{v.Set(MakeSlice(v.Type(),0 0))}
+^
+}
+var nullLiteral=[]byte("null")
+var textUnmarshalerType=TypeFor[TextUnmarshaler]()
+.object(v)!{
+u,ut,pv:=indirect(v false)
+if u!=nil{
+start:=readIndex()
+skip()
+return u.UnmarshalJSON(data[start:off])
+}
+if ut!=nil{
+saveError(&UnmarshalTypeError{Value:"object",Type:v.Type(),Offset:int64(off)})
+skip()
+^
+}
+v=pv
+t:=v.Type()
+if v.Kind()==Interface&&v.NumMethod()==0{
+oi:=objectInterface()
+v.Set(ValueOf(oi))
+^
+}
+var fields structFields switch v.Kind(){
+case Map:
+switch t.Key().Kind(){
+case String,
+Int Int8 Int16 Int32 Int64,
+Uint Uint8 Uint16 Uint32 Uint64 Uintptr:
+default:
+if!PointerTo(t.Key()).Implements(textUnmarshalerType){
+saveError(&UnmarshalTypeError{Value:"object",Type:t,Offset:int64(off)})
+skip()
+^
+}
+}
+if v.IsNil(){v.Set(MakeMap(t))}
+case Struct:
+fields=cachedTypeFields(t)
+default:
+saveError(&UnmarshalTypeError{Value:"object",Type:t,Offset:int64(off)})
+skip()
+^
+}
+var mapElem Value var origErrorContext errorContext if d.errorContext!=nil{origErrorContext=*d.errorContext}
+for{
+scanWhile(scanSkipSpace)
+if opcode==scanEndObject{
+break
+}
+if opcode!=scanBeginLiteral{panic(phasePanicMsg)}
+start:=readIndex()
+rescanLiteral()
+item:=data[start:readIndex()]
+key,ok:=unquoteBytes(item)
+if!ok{panic(phasePanicMsg)}
+var subv Value
+destring:=false if v.Kind()==Map{
+elemType:=t.Elem()
+if!mapElem.IsValid(){mapElem=New(elemType).Elem()}else{mapElem.SetZero()}
+subv=mapElem
+}else{
+f:=fields.byExactName[string(key)]
+if f==nil{f=fields.byFoldedName[string(foldName(key))]}
+if f!=nil{
+subv=v
+destring=f.quoted if d.errorContext==nil{d.errorContext=new(errorContext)}
+for i,ind in f.index{
+if subv.Kind()==Pointer{
+if subv.IsNil(){
+if!subv.CanSet(){
+saveError(Errorf("json: cannot set embedded pointer to unexported struct: %v" subv.Type().Elem()))
+subv=Value{}
+destring=false break
+}
+subv.Set(New(subv.Type().Elem()))
+}
+subv=subv.Elem()
+}
+if i<len(f.index)-1{d.errorContext.FieldStack=append(
+d.errorContext.FieldStack,
+subv.Type().Field(ind).Name,
+)}
+subv=subv.Field(ind)
+}
+d.errorContext.Struct=t
+d.errorContext.FieldStack=append(d.errorContext.FieldStack f.name)
+}else if disallowUnknownFields{saveError(Errorf("json: unknown field %q" key))}
+}
+if opcode==scanSkipSpace{scanWhile(scanSkipSpace)}
+if opcode!=scanObjectKey{panic(phasePanicMsg)}
+scanWhile(scanSkipSpace)
+if destring{
+switch qv:=valueQuoted().(type){
+case nil:
+if err:=literalStore(nullLiteral subv false);err!=nil{return err}
+case string:
+if err:=literalStore([]byte(qv),subv true);err!=nil{return err}
+default:
+saveError(Errorf("json: invalid use of ,string struct tag, trying to unmarshal unquoted value into %v" subv.Type()))
+}
+}else{
+value(subv)?
+}
+if v.Kind()==Map{
+kt:=t.Key()
+var kv Value if PointerTo(kt).Implements(textUnmarshalerType){
+kv=New(kt)
+literalStore(item kv true)?
+kv=kv.Elem()
+}else{
+switch kt.Kind(){
+case String:
+kv=New(kt).Elem()
+kv.SetString(string(key))
+case Int Int8 Int16 Int32 Int64:
+s:=string(key)
+n,err:=ParseInt(s 10 64)
+if err!=nil||kt.OverflowInt(n){
+saveError(&UnmarshalTypeError{Value:"number "+s,Type:kt,Offset:int64(start+1)})
+break
+}
+kv=New(kt).Elem()
+kv.SetInt(n)
+case Uint Uint8 Uint16 Uint32 Uint64 Uintptr:
+s:=string(key)
+n,err:=ParseUint(s 10 64)
+if err!=nil||kt.OverflowUint(n){
+saveError(&UnmarshalTypeError{Value:"number "+s,Type:kt,Offset:int64(start+1)})
+break
+}
+kv=New(kt).Elem()
+kv.SetUint(n)
+default:
+panic("json: Unexpected key type")
+}
+}
+if kv.IsValid(){v.SetMapIndex(kv subv)}
+}
+if opcode==scanSkipSpace{scanWhile(scanSkipSpace)}
+if d.errorContext!=nil{
+d.errorContext.FieldStack=d.errorContext.FieldStack[:len(origErrorContext.FieldStack)]
+d.errorContext.Struct=origErrorContext.Struct
+}
+if opcode==scanEndObject{break}
+if opcode!=scanObjectValue{panic(phasePanicMsg)}
+}
+^
+}
+.convertNumber(s string)any!{
+if useNumber{^Number(s)}
+f:=ParseFloat(s 64)?{!&UnmarshalTypeError{Value:"number "+s,Type:TypeFor[float64](),Offset:int64(off)}}
+^f
+}
+var numberType=TypeFor[Number]()
+.literalStore(item[]byte,v,fromQuoted bool)!{
+if len(item)==0{
+saveError(Errorf("json: invalid use of ,string struct tag, trying to unmarshal %q into %v" item v.Type()))
+^
+}
+isNull:=item[0]=='n'
+u,ut,pv:=indirect(v isNull)
+if u!=nil{return u.UnmarshalJSON(item)}
+if ut!=nil{
+if item[0]!='"'{
+if fromQuoted{
+saveError(Errorf("json: invalid use of ,string struct tag, trying to unmarshal %q into %v" item v.Type()))
+^
+}
+val:="number" switch item[0]{
+case 'n':
+val="null"
+case 't' 'f':
+val="bool"
+}
+saveError(&UnmarshalTypeError{Value:val,Type:v.Type(),Offset:int64(readIndex())})
+^
+}
+s,ok:=unquoteBytes(item)
+if!ok{
+if fromQuoted{return Errorf("json: invalid use of ,string struct tag, trying to unmarshal %q into %v" item v.Type())}
+panic(phasePanicMsg)
+}
+return ut.UnmarshalText(s)
+}
+v=pv switch c:=item[0];c{
+case 'n':
+if fromQuoted&&string(item)!="null"{
+saveError(Errorf("json: invalid use of ,string struct tag, trying to unmarshal %q into %v" item v.Type()))
+break
+}
+switch v.Kind(){
+case Interface Pointer Map Slice:
+v.SetZero()
+}
+case 't' 'f':
+value:=item[0]=='t' if fromQuoted&&string(item)!="true"&&string(item)!="false"{
+saveError(Errorf("json: invalid use of ,string struct tag, trying to unmarshal %q into %v" item v.Type()))
+break
+}
+switch v.Kind(){
+default:
+if fromQuoted{saveError(Errorf("json: invalid use of ,string struct tag, trying to unmarshal %q into %v" item v.Type()))}else{saveError(&UnmarshalTypeError{Value:"bool",Type:v.Type(),Offset:int64(readIndex())})}
+case Bool:
+v.SetBool(value)
+case Interface:
+if v.NumMethod()==0{v.Set(ValueOf(value))}else{saveError(&UnmarshalTypeError{Value:"bool",Type:v.Type(),Offset:int64(readIndex())})}
+}
+case '"':
+s,ok:=unquoteBytes(item)
+if!ok{
+if fromQuoted{return Errorf("json: invalid use of ,string struct tag, trying to unmarshal %q into %v" item v.Type())}
+panic(phasePanicMsg)
+}
+switch v.Kind(){
+default:
+saveError(&UnmarshalTypeError{Value:"string",Type:v.Type(),Offset:int64(readIndex())})
+case Slice:
+if v.Type().Elem().Kind()!=Uint8{
+saveError(&UnmarshalTypeError{Value:"string",Type:v.Type(),Offset:int64(readIndex())})
+break
+}
+b:=make([]byte StdEncoding.DecodedLen(len(s)))
+n,err:=StdEncoding.Decode(b s)
+if err!=nil{
+saveError(err)
+break
+}
+v.SetBytes(b[:n])
+case String:
+t:=string(s)
+if v.Type()==numberType&&!isValidNumber(t){return Errorf("json: invalid number literal, trying to unmarshal %q into Number" item)}
+v.SetString(t)
+case Interface:
+if v.NumMethod()==0{v.Set(ValueOf(string(s)))}else{saveError(&UnmarshalTypeError{Value:"string",Type:v.Type(),Offset:int64(readIndex())})}
+}
+default:
+if c!='-'&&(c<'0'||c>'9'){
+if fromQuoted{return Errorf("json: invalid use of ,string struct tag, trying to unmarshal %q into %v" item v.Type())}
+panic(phasePanicMsg)
+}
+switch v.Kind(){
+default:
+if v.Kind()==String&&v.Type()==numberType{
+v.SetString(string(item))
+break
+}
+if fromQuoted{return Errorf("json: invalid use of ,string struct tag, trying to unmarshal %q into %v" item v.Type())}
+saveError(&UnmarshalTypeError{Value:"number",Type:v.Type(),Offset:int64(readIndex())})
+case Interface:
+n,err:=convertNumber(string(item))
+if err!=nil{
+saveError(err)
+break
+}
+if v.NumMethod()!=0{
+saveError(&UnmarshalTypeError{Value:"number",Type:v.Type(),Offset:int64(readIndex())})
+break
+}
+v.Set(ValueOf(n))
+case Int Int8 Int16 Int32 Int64:
+n,err:=ParseInt(string(item),10 64)
+if err!=nil||v.OverflowInt(n){
+saveError(&UnmarshalTypeError{Value:"number "+string(item),Type:v.Type(),Offset:int64(readIndex())})
+break
+}
+v.SetInt(n)
+case Uint Uint8 Uint16 Uint32 Uint64 Uintptr:
+n,err:=ParseUint(string(item),10 64)
+if err!=nil||v.OverflowUint(n){
+saveError(&UnmarshalTypeError{Value:"number "+string(item),Type:v.Type(),Offset:int64(readIndex())})
+break
+}
+v.SetUint(n)
+case Float32 Float64:
+n,err:=ParseFloat(string(item),v.Type().Bits())
+if err!=nil||v.OverflowFloat(n){
+saveError(&UnmarshalTypeError{Value:"number "+string(item),Type:v.Type(),Offset:int64(readIndex())})
+break
+}
+v.SetFloat(n)
+}
+}
+^
+}
+.valueInterface()(val any){
+switch opcode{
+default:
+panic(phasePanicMsg)
+case scanBeginArray:
+val=arrayInterface()
+scanNext()
+case scanBeginObject:
+val=objectInterface()
+scanNext()
+case scanBeginLiteral:
+val=literalInterface()
+}
+return
+}
+.arrayInterface()[]any{
+var v=make([]any 0)
+for{
+scanWhile(scanSkipSpace)
+if opcode==scanEndArray{break}
+v=append(v valueInterface())
+if opcode==scanSkipSpace{scanWhile(scanSkipSpace)}
+if opcode==scanEndArray{break}
+if opcode!=scanArrayValue{panic(phasePanicMsg)}
+}
+return v
+}
+.objectInterface()map[string]any{
+m:=make(map[string]any)
+for{
+scanWhile(scanSkipSpace)
+if opcode==scanEndObject{
+break
+}
+if opcode!=scanBeginLiteral{panic(phasePanicMsg)}
+start:=readIndex()
+rescanLiteral()
+item:=data[start:readIndex()]
+key,ok:=unquote(item)
+if!ok{panic(phasePanicMsg)}
+if opcode==scanSkipSpace{scanWhile(scanSkipSpace)}
+if opcode!=scanObjectKey{panic(phasePanicMsg)}
+scanWhile(scanSkipSpace)
+m[key]=valueInterface()
+if opcode==scanSkipSpace{scanWhile(scanSkipSpace)}
+if opcode==scanEndObject{break}
+if opcode!=scanObjectValue{panic(phasePanicMsg)}
+}
+return m
+}
+.literalInterface()any{
+start:=readIndex()
+rescanLiteral()
+item:=data[start:readIndex()]
+switch c:=item[0];c{
+case 'n':
+return nil
+case 't' 'f':
+return c=='t'
+case '"':
+s,ok:=unquote(item)
+if!ok{panic(phasePanicMsg)}
+return s
+default:
+if c!='-'&&(c<'0'||c>'9'){panic(phasePanicMsg)}
+n,err:=convertNumber(string(item))
+if err!=nil{saveError(err)}
+return n
+}
+}
+getu4(s)rune{
+if len(s)<6||s[0]!='\\'||s[1]!='u'{return-1}
+var r rune for c in s[2:6]{
+switch{
+case '0'<=c&&c<='9':
+c=c-'0'
+case 'a'<=c&&c<='f':
+c=c-'a'+10
+case 'A'<=c&&c<='F':
+c=c-'A'+10
+default:
+return-1
+}
+r=r*16+rune(c)
+}
+return r
+}
+unquote(s)(t string,ok bool){
+s,ok=unquoteBytes(s)
+t=string(s)
+return
+}
+unquoteBytes(s)(t[]byte,ok bool){
+if len(s)<2||s[0]!='"'||s[len(s)-1]!='"'{return}
+s=s[1:len(s)-1]
+r:=0 for r<len(s){
+c:=s[r]
+if c=='\\'||c=='"'||c<' '{break}
+rr,size:=utf8.DecodeRune(s[r:])
+if rr==RuneError&&size==1{break}
+r+=size
+}
+if r==len(s){return s,true}
+b:=make([]byte len(s)+2*UTFMax)
+w:=copy(b s[0:r])
+for r<len(s){
+if w>=len(b)-2*UTFMax{
+nb:=make([]byte,(len(b)+UTFMax)*2)
+copy(nb b[0:w])
+b=nb
+}
+switch c:=s[r];{
+case c=='\\':
+r++
+if r>=len(s){return}
+switch s[r]{
+default:
+return
+case '"' '\\' '/' '\'':
+b[w]=s[r]
+r++
+w++
+case 'b':
+b[w]='\b'
+r++
+w++
+case 'f':
+b[w]='\f'
+r++
+w++
+case 'n':
+b[w]='\n'
+r++
+w++
+case 'r':
+b[w]='\r'
+r++
+w++
+case 't':
+b[w]='\t'
+r++
+w++
+case 'u':
+r--
+rr:=getu4(s[r:])
+if rr<0{return}
+r+=6 if IsSurrogate(rr){
+rr1:=getu4(s[r:])
+if dec:=utf16.DecodeRune(rr rr1);dec!=ReplacementChar{
+r+=6
+w+=utf8.EncodeRune(b[w:],dec)
+break
+}
+rr=ReplacementChar
+}
+w+=utf8.EncodeRune(b[w:],rr)
+}
+case c=='"' c<' ':
+return
+case c<RuneSelf:
+b[w]=c
+r++
+w++
+default:
+rr,size:=utf8.DecodeRune(s[r:])
+r+=size
+w+=utf8.EncodeRune(b[w:],rr)
+}
+}
+return b[0:w],true
+}
+
+// File: encoding/json/encode.go
+//go:build !goexperiment.jsonv2
+package json
+use encoding fmt math reflect slices strconv strings sync unicode utf8
+let e*encodeState,opts encOpts,t reflect.Type,v reflect.Value
+import(
+...
+_ "unsafe"
+)
+Marshal(v any)[]byte!{
+e:=newEncodeState()
+defer encodeStatePool.Put(e)
+err:=e.marshal(v encOpts{escapeHTML:true})?
+buf:=append([]byte(nil),e.Bytes()...)
+^buf
+}
+MarshalIndent(v any,prefix,indent string)[]byte!{
+b:=Marshal(v)?
+b2:=make([]byte 0 indentGrowthFactor*len(b))
+b2=appendIndent(b2 b prefix indent)?
+^b2
+}
+type Marshaler interface{
+MarshalJSON()[]byte!
+}
+type UnsupportedTypeError struct{
+Type Type
+}
+(e*UnsupportedTypeError)Error()string=>"json: unsupported type: "+Type.String()
+type UnsupportedValueError struct{
+Value Value
+Str string
+}
+(e*UnsupportedValueError)Error()string=>"json: unsupported value: "+Str
+type InvalidUTF8Error struct{
+S string
+}
+(e*InvalidUTF8Error)Error()string=>"json: invalid UTF-8 in string: "+Quote(S)
+type MarshalerError struct{
+Type Type
+Err error
+sourceFunc string
+}
+(e*MarshalerError)Error()string{
+srcFunc:=sourceFunc if srcFunc==""{srcFunc="MarshalJSON"}
+return "json: error calling "+srcFunc+
+" for type "+Type.String()+
+": "+Err.Error()
+}
+.Unwrap()!{return Err}
+const hex="0123456789abcdef"
+type encodeState struct{
+bytes.Buffer
+ptrLevel uint
+ptrSeen map[any]struct{}
+}
+const startDetectingCyclesAfter=1000
+var encodeStatePool Pool
+newEncodeState()*encodeState{
+if v:=encodeStatePool.Get();v!=nil{
+e:=v.(*encodeState)
+e.Reset()
+if len(e.ptrSeen)>0{panic("ptrEncoder.encode should have emptied ptrSeen via defers")}
+e.ptrLevel=0 return e
+}
+return&encodeState{ptrSeen:make(map[any]struct{})}
+}
+type jsonError struct{error}
+(e)marshal(v any,opts)(err error){
+defer func(){
+if r:=recover();r!=nil{
+if je,ok:=r.(jsonError);ok{err=je.error}else{panic(r)}
+}
+}()
+reflectValue(ValueOf(v),opts)
+^
+}
+.error(err error){
+panic(jsonError{err})
+}
+isEmptyValue(v)bool{
+switch v.Kind(){
+case Array reflect.Map Slice String:
+return v.Len()==0
+case Bool,
+Int Int8 Int16 Int32 Int64,
+Uint Uint8 Uint16 Uint32 Uint64 Uintptr,
+Float32 Float64,
+Interface Pointer:
+return v.IsZero()
+}
+return false
+}
+.reflectValue(v,opts){
+valueEncoder(v)(e v opts)
+}
+type encOpts struct{
+quoted bool
+escapeHTML bool
+}
+type encoderFunc func(e,v,opts)
+var encoderCache sync.Map
+valueEncoder(v)encoderFunc{
+if!v.IsValid(){return invalidValueEncoder}
+return typeEncoder(v.Type())
+}
+typeEncoder(t)encoderFunc{
+if fi,ok:=encoderCache.Load(t);ok{return fi.(encoderFunc)}
+indirect:=OnceValue(func()encoderFunc{
+return newTypeEncoder(t true)
+})
+fi,loaded:=encoderCache.LoadOrStore(t encoderFunc(func(e,v,opts){
+indirect()(e v opts)
+}))
+if loaded{return fi.(encoderFunc)}
+f:=indirect()
+encoderCache.Store(t f)
+return f
+}
+var(
+marshalerType=TypeFor[Marshaler]()
+textMarshalerType=TypeFor[TextMarshaler]()
+)
+newTypeEncoder(t,allowAddr bool)encoderFunc{
+if t.Kind()!=Pointer&&allowAddr&&PointerTo(t).Implements(marshalerType){return newCondAddrEncoder(addrMarshalerEncoder newTypeEncoder(t false))}
+if t.Implements(marshalerType){return marshalerEncoder}
+if t.Kind()!=Pointer&&allowAddr&&PointerTo(t).Implements(textMarshalerType){return newCondAddrEncoder(addrTextMarshalerEncoder newTypeEncoder(t false))}
+if t.Implements(textMarshalerType){return textMarshalerEncoder}
+switch t.Kind(){
+case Bool:
+return boolEncoder
+case Int Int8 Int16 Int32 Int64:
+return intEncoder
+case Uint Uint8 Uint16 Uint32 Uint64 Uintptr:
+return uintEncoder
+case Float32:
+return float32Encoder
+case Float64:
+return float64Encoder
+case String:
+return stringEncoder
+case Interface:
+return interfaceEncoder
+case Struct:
+return newStructEncoder(t)
+case reflect.Map:
+return newMapEncoder(t)
+case Slice:
+return newSliceEncoder(t)
+case Array:
+return newArrayEncoder(t)
+case Pointer:
+return newPtrEncoder(t)
+default:
+return unsupportedTypeEncoder
+}
+}
+invalidValueEncoder(e,v,_ encOpts){
+e.WriteString("null")
+}
+marshalerEncoder(e,v,opts){
+if v.Kind()==Pointer&&v.IsNil(){
+e.WriteString("null")
+return
+}
+m,ok:=TypeAssert[Marshaler](v)
+if!ok{
+e.WriteString("null")
+return
+}
+b,err:=m.MarshalJSON()
+if err==nil{
+e.Grow(len(b))
+out:=e.AvailableBuffer()
+out,err=appendCompact(out b opts.escapeHTML)
+Buffer.Write(out)
+}
+if err!=nil{e.error(&MarshalerError{v.Type(),err,"MarshalJSON"})}
+}
+addrMarshalerEncoder(e,v,opts){
+va:=v.Addr()
+if va.IsNil(){
+e.WriteString("null")
+return
+}
+m,_:=TypeAssert[Marshaler](va)
+b,err:=m.MarshalJSON()
+if err==nil{
+e.Grow(len(b))
+out:=e.AvailableBuffer()
+out,err=appendCompact(out b opts.escapeHTML)
+Buffer.Write(out)
+}
+if err!=nil{e.error(&MarshalerError{v.Type(),err,"MarshalJSON"})}
+}
+textMarshalerEncoder(e,v,opts){
+if v.Kind()==Pointer&&v.IsNil(){
+e.WriteString("null")
+return
+}
+m,ok:=TypeAssert[TextMarshaler](v)
+if!ok{
+e.WriteString("null")
+return
+}
+b:=m.MarshalText()?{e.error(&MarshalerError{v.Type(),err,"MarshalText"})}
+e.Write(appendString(e.AvailableBuffer(),b opts.escapeHTML))
+}
+addrTextMarshalerEncoder(e,v,opts){
+va:=v.Addr()
+if va.IsNil(){
+e.WriteString("null")
+return
+}
+m,_:=TypeAssert[TextMarshaler](va)
+b:=m.MarshalText()?{e.error(&MarshalerError{v.Type(),err,"MarshalText"})}
+e.Write(appendString(e.AvailableBuffer(),b opts.escapeHTML))
+}
+boolEncoder(e,v,opts){
+b:=e.AvailableBuffer()
+b=mayAppendQuote(b opts.quoted)
+b=AppendBool(b v.Bool())
+b=mayAppendQuote(b opts.quoted)
+e.Write(b)
+}
+intEncoder(e,v,opts){
+b:=e.AvailableBuffer()
+b=mayAppendQuote(b opts.quoted)
+b=AppendInt(b v.Int(),10)
+b=mayAppendQuote(b opts.quoted)
+e.Write(b)
+}
+uintEncoder(e,v,opts){
+b:=e.AvailableBuffer()
+b=mayAppendQuote(b opts.quoted)
+b=AppendUint(b v.Uint(),10)
+b=mayAppendQuote(b opts.quoted)
+e.Write(b)
+}
+type floatEncoder int
+(bits floatEncoder)encode(e,v,opts){
+f:=v.Float()
+if IsInf(f 0)||IsNaN(f){e.error(&UnsupportedValueError{v,FormatFloat(f 'g',-1 int(bits))})}
+b:=e.AvailableBuffer()
+b=mayAppendQuote(b opts.quoted)
+abs:=Abs(f)
+fmt:=byte('f')
+if abs!=0{
+if bits==64&&(abs<1e-6||abs>=1e21)||bits==32&&(float32(abs)<1e-6||float32(abs)>=1e21){fmt='e'}
+}
+b=AppendFloat(b f fmt,-1 int(bits))
+if fmt=='e'{
+n:=len(b)
+if n>=4&&b[n-4]=='e'&&b[n-3]=='-'&&b[n-2]=='0'{
+b[n-2]=b[n-1]
+b=b[:n-1]
+}
+}
+b=mayAppendQuote(b opts.quoted)
+e.Write(b)
+}
+var(
+float32Encoder=(floatEncoder(32)).encode
+float64Encoder=(floatEncoder(64)).encode
+)
+stringEncoder(e,v,opts){
+if v.Type()==numberType{
+numStr:=v.String()
+if numStr==""{
+numStr="0"
+}
+if!isValidNumber(numStr){e.error(Errorf("json: invalid number literal %q" numStr))}
+b:=e.AvailableBuffer()
+b=mayAppendQuote(b opts.quoted)
+b=append(b numStr...)
+b=mayAppendQuote(b opts.quoted)
+e.Write(b)
+return
+}
+if opts.quoted{
+b:=appendString(nil v.String(),opts.escapeHTML)
+e.Write(appendString(e.AvailableBuffer(),b false))
+}else{e.Write(appendString(e.AvailableBuffer(),v.String(),opts.escapeHTML))}
+}
+isValidNumber(s string)bool{
+if s==""{return false}
+if s[0]=='-'{
+s=s[1:]
+if s==""{return false}
+}
+switch{
+default:
+return false
+case s[0]=='0':
+s=s[1:]
+case '1'<=s[0]&&s[0]<='9':
+s=s[1:]
+for len(s)>0&&'0'<=s[0]&&s[0]<='9'{s=s[1:]}
+}
+if len(s)>=2&&s[0]=='.'&&'0'<=s[1]&&s[1]<='9'{
+s=s[2:]
+for len(s)>0&&'0'<=s[0]&&s[0]<='9'{s=s[1:]}
+}
+if len(s)>=2&&(s[0]=='e'||s[0]=='E'){
+s=s[1:]
+if s[0]=='+'||s[0]=='-'{
+s=s[1:]
+if s==""{return false}
+}
+for len(s)>0&&'0'<=s[0]&&s[0]<='9'{s=s[1:]}
+}
+return s==""
+}
+interfaceEncoder(e,v,opts){
+if v.IsNil(){
+e.WriteString("null")
+return
+}
+reflectValue(v.Elem(),opts)
+}
+unsupportedTypeEncoder(e,v,_ encOpts){
+e.error(&UnsupportedTypeError{v.Type()})
+}
+type structEncoder struct{
+fields structFields
+}
+type structFields struct{
+list[]field
+byExactName map[string]*field
+byFoldedName map[string]*field
+}
+(se structEncoder)encode(e,v,opts){
+next:=byte('{')
+FieldLoop:
+for i:=range fields.list{
+f:=&fields.list[i]
+fv:=v for i in f.index{
+if fv.Kind()==Pointer{
+if fv.IsNil(){continue FieldLoop}
+fv=fv.Elem()
+}
+fv=fv.Field(i)
+}
+if(f.omitEmpty&&isEmptyValue(fv))||
+(f.omitZero&&(f.isZero==nil&&fv.IsZero()||(f.isZero!=nil&&f.isZero(fv)))){continue}
+e.WriteByte(next)
+next=',' if opts.escapeHTML{e.WriteString(f.nameEscHTML)}else{e.WriteString(f.nameNonEsc)}
+opts.quoted=f.quoted
+f.encoder(e fv opts)
+}
+if next=='{'{e.WriteString("{}")}else{e.WriteByte('}')}
+}
+newStructEncoder(t)encoderFunc{
+se:=structEncoder{fields:cachedTypeFields(t)}
+return se.encode
+}
+type mapEncoder struct{
+elemEnc encoderFunc
+}
+(me mapEncoder)encode(e,v,opts){
+if v.IsNil(){
+e.WriteString("null")
+return
+}
+if e.ptrLevel++;e.ptrLevel>startDetectingCyclesAfter{
+ptr:=v.UnsafePointer()
+if _,ok:=e.ptrSeen[ptr];ok{e.error(&UnsupportedValueError{v,Sprintf("encountered a cycle via %s" v.Type())})}
+e.ptrSeen[ptr]=struct{}{}
+defer delete(e.ptrSeen ptr)
+}
+e.WriteByte('{')
+var(
+sv=make([]reflectWithString v.Len())
+mi=v.MapRange()
+err error
+)
+for i:=0;mi.Next();i++{
+if sv[i].ks,err=resolveKeyName(mi.Key());err!=nil{e.error(Errorf("json: encoding error for type %q: %q" v.Type().String(),err.Error()))}
+sv[i].v=mi.Value()
+}
+SortFunc(sv,func(i,j reflectWithString)int{
+return strings.Compare(i.ks j.ks)
+})
+for i,kv in sv{
+if i>0{e.WriteByte(',')}
+e.Write(appendString(e.AvailableBuffer(),kv.ks opts.escapeHTML))
+e.WriteByte(':')
+elemEnc(e kv.v opts)
+}
+e.WriteByte('}')
+e.ptrLevel--
+}
+newMapEncoder(t)encoderFunc{
+switch t.Key().Kind(){
+case String,
+Int Int8 Int16 Int32 Int64,
+Uint Uint8 Uint16 Uint32 Uint64 Uintptr:
+default:
+if!t.Key().Implements(textMarshalerType){return unsupportedTypeEncoder}
+}
+me:=mapEncoder{typeEncoder(t.Elem())}
+return me.encode
+}
+encodeByteSlice(e,v,_ encOpts){
+if v.IsNil(){
+e.WriteString("null")
+return
+}
+s:=v.Bytes()
+b:=e.AvailableBuffer()
+b=append(b '"')
+b=base64.StdEncoding.AppendEncode(b s)
+b=append(b '"')
+e.Write(b)
+}
+type sliceEncoder struct{
+arrayEnc encoderFunc
+}
+(se sliceEncoder)encode(e,v,opts){
+if v.IsNil(){
+e.WriteString("null")
+return
+}
+if e.ptrLevel++;e.ptrLevel>startDetectingCyclesAfter{
+ptr:=struct{
+ptr any
+len int
+}{v.UnsafePointer(),v.Len()}
+if _,ok:=e.ptrSeen[ptr];ok{e.error(&UnsupportedValueError{v,Sprintf("encountered a cycle via %s" v.Type())})}
+e.ptrSeen[ptr]=struct{}{}
+defer delete(e.ptrSeen ptr)
+}
+arrayEnc(e v opts)
+e.ptrLevel--
+}
+newSliceEncoder(t)encoderFunc{
+if t.Elem().Kind()==Uint8{
+p:=PointerTo(t.Elem())
+if!p.Implements(marshalerType)&&!p.Implements(textMarshalerType){return encodeByteSlice}
+}
+enc:=sliceEncoder{newArrayEncoder(t)}
+return enc.encode
+}
+type arrayEncoder struct{
+elemEnc encoderFunc
+}
+(ae arrayEncoder)encode(e,v,opts){
+e.WriteByte('[')
+n:=v.Len()
+for i:=0;i<n;i++{
+if i>0{e.WriteByte(',')}
+elemEnc(e v.Index(i),opts)
+}
+e.WriteByte(']')
+}
+newArrayEncoder(t)encoderFunc{
+enc:=arrayEncoder{typeEncoder(t.Elem())}
+return enc.encode
+}
+type ptrEncoder struct{
+elemEnc encoderFunc
+}
+(pe ptrEncoder)encode(e,v,opts){
+if v.IsNil(){
+e.WriteString("null")
+return
+}
+if e.ptrLevel++;e.ptrLevel>startDetectingCyclesAfter{
+ptr:=v.Interface()
+if _,ok:=e.ptrSeen[ptr];ok{e.error(&UnsupportedValueError{v,Sprintf("encountered a cycle via %s" v.Type())})}
+e.ptrSeen[ptr]=struct{}{}
+defer delete(e.ptrSeen ptr)
+}
+elemEnc(e v.Elem(),opts)
+e.ptrLevel--
+}
+newPtrEncoder(t)encoderFunc{
+enc:=ptrEncoder{typeEncoder(t.Elem())}
+return enc.encode
+}
+type condAddrEncoder struct{
+canAddrEnc,elseEnc encoderFunc
+}
+(ce condAddrEncoder)encode(e,v,opts){
+if v.CanAddr(){canAddrEnc(e v opts)}else{elseEnc(e v opts)}
+}
+newCondAddrEncoder(canAddrEnc,elseEnc encoderFunc)encoderFunc{
+enc:=condAddrEncoder{canAddrEnc:canAddrEnc,elseEnc:elseEnc}
+return enc.encode
+}
+isValidTag(s string)bool{
+if s==""{return false}
+for c in s{
+switch{
+case ContainsRune("!#$%&()*+-./:;<=>?@[]^_{|}~ " c):
+case!IsLetter(c)&&!IsDigit(c):
+return false
+}
+}
+return true
+}
+typeByIndex(t,index[]int)Type{
+for i in index{
+if t.Kind()==Pointer{t=t.Elem()}
+t=t.Field(i).Type
+}
+return t
+}
+type reflectWithString struct{
+v Value
+ks string
+}
+resolveKeyName(k Value)string!{
+if k.Kind()==String{^k.String()}
+if tm,ok:=TypeAssert[TextMarshaler](k);ok{
+if k.Kind()==Pointer&&k.IsNil(){^""}
+buf,err:=tm.MarshalText()
+return string(buf),err
+}
+switch k.Kind(){
+case Int Int8 Int16 Int32 Int64:
+^FormatInt(k.Int(),10)
+case Uint Uint8 Uint16 Uint32 Uint64 Uintptr:
+^FormatUint(k.Uint(),10)
+}
+panic("unexpected map key type")
+}
+appendString[Bytes[]byte|string](dst[]byte,src Bytes,escapeHTML bool)[]byte{
+dst=append(dst '"')
+start:=0 for i:=0;i<len(src);{
+if b:=src[i];b<RuneSelf{
+if htmlSafeSet[b]||(!escapeHTML&&safeSet[b]){
+i++
+continue
+}
+dst=append(dst src[start:i]...)
+switch b{
+case '\\' '"':
+dst=append(dst '\\' b)
+case '\b':
+dst=append(dst '\\' 'b')
+case '\f':
+dst=append(dst '\\' 'f')
+case '\n':
+dst=append(dst '\\' 'n')
+case '\r':
+dst=append(dst '\\' 'r')
+case '\t':
+dst=append(dst '\\' 't')
+default:
+dst=append(dst '\\' 'u' '0' '0' hex[b>>4],hex[b&0xF])
+}
+i++
+start=i continue
+}
+n:=min(len(src)-i UTFMax)
+c,size:=DecodeRuneInString(string(src[i:i+n]))
+if c==RuneError&&size==1{
+dst=append(dst src[start:i]...)
+dst=append(dst `\ufffd`...)
+i+=size
+start=i continue
+}
+if c=='\u2028'||c=='\u2029'{
+dst=append(dst src[start:i]...)
+dst=append(dst '\\' 'u' '2' '0' '2' hex[c&0xF])
+i+=size
+start=i continue
+}
+i+=size
+}
+dst=append(dst src[start:]...)
+dst=append(dst '"')
+return dst
+}
+type field struct{
+name string
+nameBytes[]byte
+nameNonEsc string
+nameEscHTML string
+tag bool
+index[]int
+typ Type
+omitEmpty bool
+omitZero bool
+isZero func(Value)bool
+quoted bool
+encoder encoderFunc
+}
+type isZeroer interface{
+IsZero()bool
+}
+var isZeroerType=TypeFor[isZeroer]()
+typeFields(t)structFields{
+current:=[]field{}
+next:=[]field{{typ:t}}
+var count,nextCount map[Type]int
+visited:=map[Type]bool{}
+var fields[]field var nameEscBuf[]byte for len(next)>0{
+current,next=next,current[:0]
+count,nextCount=nextCount,map[Type]int{}
+for f in current{
+if visited[f.typ]{continue}
+visited[f.typ]=true for i:=0;i<f.typ.NumField();i++{
+sf:=f.typ.Field(i)
+if sf.Anonymous{
+t:=sf.Type if t.Kind()==Pointer{t=t.Elem()}
+if!sf.IsExported()&&t.Kind()!=Struct{
+continue
+}
+}else if!sf.IsExported(){
+continue
+}
+tag:=sf.Tag.Get("json")
+if tag=="-"{continue}
+name,opts:=parseTag(tag)
+if!isValidTag(name){name=""}
+index:=make([]int len(f.index)+1)
+copy(index f.index)
+index[len(f.index)]=i
+ft:=sf.Type if ft.Name()==""&&ft.Kind()==Pointer{
+ft=ft.Elem()
+}
+quoted:=false if opts.Contains("string"){
+switch ft.Kind(){
+case Bool,
+Int Int8 Int16 Int32 Int64,
+Uint Uint8 Uint16 Uint32 Uint64 Uintptr,
+Float32 Float64,
+String:
+quoted=true
+}
+}
+if name!=""||!sf.Anonymous||ft.Kind()!=Struct{
+tagged:=name!="" if name==""{name=sf.Name}
+field:=field{
+name:name,
+tag:tagged,
+index:index,
+typ:ft,
+omitEmpty:opts.Contains("omitempty"),
+omitZero:opts.Contains("omitzero"),
+quoted:quoted,
+}
+field.nameBytes=[]byte(field.name)
+nameEscBuf=appendHTMLEscape(nameEscBuf[:0],field.nameBytes)
+field.nameEscHTML=`"`+string(nameEscBuf)+`":`
+field.nameNonEsc=`"`+field.name+`":` if field.omitZero{
+t:=sf.Type switch{
+case t.Kind()==Interface&&t.Implements(isZeroerType):
+field.isZero=func(v)bool{
+return v.IsNil()||
+(v.Elem().Kind()==Pointer&&v.Elem().IsNil())||
+v.Interface().(isZeroer).IsZero()
+}
+case t.Kind()==Pointer&&t.Implements(isZeroerType):
+field.isZero=func(v)bool{
+return v.IsNil()||v.Interface().(isZeroer).IsZero()
+}
+case t.Implements(isZeroerType):
+field.isZero=func(v)bool{
+return v.Interface().(isZeroer).IsZero()
+}
+case PointerTo(t).Implements(isZeroerType):
+field.isZero=func(v)bool{
+if!v.CanAddr(){
+v2:=New(v.Type()).Elem()
+v2.Set(v)
+v=v2
+}
+return v.Addr().Interface().(isZeroer).IsZero()
+}
+}
+}
+fields=append(fields field)
+if count[f.typ]>1{
+fields=append(fields fields[len(fields)-1])
+}
+continue
+}
+nextCount[ft]++
+if nextCount[ft]==1{next=append(next field{name:ft.Name(),index:index,typ:ft})}
+}
+}
+}
+SortFunc(fields,func(a,b field)int{
+if c:=strings.Compare(a.name b.name);c!=0{return c}
+if c:=cmp.Compare(len(a.index),len(b.index));c!=0{return c}
+if a.tag!=b.tag{
+if a.tag{return-1}
+return+1
+}
+return slices.Compare(a.index b.index)
+})
+out:=fields[:0]
+for advance,i:=0,0;i<len(fields);i+=advance{
+fi:=fields[i]
+name:=fi.name for advance=1;i+advance<len(fields);advance++{
+fj:=fields[i+advance]
+if fj.name!=name{break}
+}
+if advance==1{
+out=append(out fi)
+continue
+}
+dominant,ok:=dominantField(fields[i:i+advance])
+if ok{out=append(out dominant)}
+}
+fields=out
+SortFunc(fields,func(i,j field)int{
+return slices.Compare(i.index j.index)
+})
+for i:=range fields{
+f:=&fields[i]
+f.encoder=typeEncoder(typeByIndex(t f.index))
+}
+exactNameIndex:=make(map[string]*field len(fields))
+foldedNameIndex:=make(map[string]*field len(fields))
+for i,field in fields{
+exactNameIndex[field.name]=&fields[i]
+if _,ok:=foldedNameIndex[string(foldName(field.nameBytes))];!ok{foldedNameIndex[string(foldName(field.nameBytes))]=&fields[i]}
+}
+return structFields{fields,exactNameIndex,foldedNameIndex}
+}
+dominantField(fields[]field)(field,bool){
+if len(fields)>1&&len(fields[0].index)==len(fields[1].index)&&fields[0].tag==fields[1].tag{return field{},false}
+return fields[0],true
+}
+var fieldCache sync.Map
+cachedTypeFields(t)structFields{
+if f,ok:=fieldCache.Load(t);ok{return f.(structFields)}
+f,_:=fieldCache.LoadOrStore(t typeFields(t))
+return f.(structFields)
+}
+mayAppendQuote(b[]byte,quoted bool)[]byte{
+if quoted{b=append(b '"')}
+return b
+}
+
+// File: encoding/json/fold.go
+//go:build !goexperiment.jsonv2
+package json
+use utf8
+foldName(in[]byte)[]byte{
+var arr[32]byte return appendFoldedName(arr[:0],in)
+}
+appendFoldedName(out,in[]byte)[]byte{
+for i:=0;i<len(in);{
+if c:=in[i];c<RuneSelf{
+if 'a'<=c&&c<='z'{c-='a'-'A'}
+out=append(out c)
+i++
+continue
+}
+r,n:=DecodeRune(in[i:])
+out=AppendRune(out foldRune(r))
+i+=n
+}
+return out
+}
+foldRune(r rune)rune{
+for{
+r2:=unicode.SimpleFold(r)
+if r2<=r{return r2}
+r=r2
+}
+}
+
+// File: encoding/json/indent.go
+//go:build !goexperiment.jsonv2
+package json
+use bytes
+let dst*bytes.Buffer,src[]byte
+HTMLEscape(dst,src){
+dst.Grow(len(src))
+dst.Write(appendHTMLEscape(dst.AvailableBuffer(),src))
+}
+appendHTMLEscape(\dst,src[]byte)[]byte{
+start:=0 for i,c in src{
+if c=='<'||c=='>'||c=='&'{
+dst=append(dst src[start:i]...)
+dst=append(dst '\\' 'u' '0' '0' hex[c>>4],hex[c&0xF])
+start=i+1
+}
+if c==0xE2&&i+2<len(src)&&src[i+1]==0x80&&src[i+2]&^1==0xA8{
+dst=append(dst src[start:i]...)
+dst=append(dst '\\' 'u' '2' '0' '2' hex[src[i+2]&0xF])
+start=i+len("\u2029")
+}
+}
+return append(dst src[start:]...)
+}
+Compact(dst,src)!{
+dst.Grow(len(src))
+b:=dst.AvailableBuffer()
+b,err:=appendCompact(b src false)
+dst.Write(b)
+return err
+}
+appendCompact(\dst,src[]byte,escape bool)[]byte!{
+origLen:=len(dst)
+scan:=newScanner()
+defer freeScanner(scan)
+start:=0 for i,c in src{
+if escape&&(c=='<'||c=='>'||c=='&'){
+if start<i{dst=append(dst src[start:i]...)}
+dst=append(dst '\\' 'u' '0' '0' hex[c>>4],hex[c&0xF])
+start=i+1
+}
+if escape&&c==0xE2&&i+2<len(src)&&src[i+1]==0x80&&src[i+2]&^1==0xA8{
+if start<i{dst=append(dst src[start:i]...)}
+dst=append(dst '\\' 'u' '2' '0' '2' hex[src[i+2]&0xF])
+start=i+3
+}
+v:=scan.step(scan c)
+if v>=scanSkipSpace{
+if v==scanError{break}
+if start<i{dst=append(dst src[start:i]...)}
+start=i+1
+}
+}
+if scan.eof()==scanError{return dst[:origLen],scan.err}
+if start<len(src){dst=append(dst src[start:]...)}
+^dst
+}
+appendNewline(dst[]byte,prefix,indent string,depth int)[]byte{
+dst=append(dst '\n')
+dst=append(dst prefix...)
+for i:=0;i<depth;i++{dst=append(dst indent...)}
+return dst
+}
+const indentGrowthFactor=2
+Indent(dst,src,prefix,indent string)!{
+dst.Grow(indentGrowthFactor*len(src))
+b:=dst.AvailableBuffer()
+b,err:=appendIndent(b src prefix indent)
+dst.Write(b)
+return err
+}
+appendIndent(\dst,src[]byte,prefix,indent string)[]byte!{
+origLen:=len(dst)
+scan:=newScanner()
+defer freeScanner(scan)
+needIndent:=false
+depth:=0 for c in src{
+scan.bytes++
+v:=scan.step(scan c)
+if v==scanSkipSpace{continue}
+if v==scanError{break}
+if needIndent&&v!=scanEndObject&&v!=scanEndArray{
+needIndent=false
+depth++
+dst=appendNewline(dst prefix indent depth)
+}
+if v==scanContinue{
+dst=append(dst c)
+continue
+}
+switch c{
+case '{' '[':
+needIndent=true
+dst=append(dst c)
+case ',':
+dst=append(dst c)
+dst=appendNewline(dst prefix indent depth)
+case ':':
+dst=append(dst c ' ')
+case '}' ']':
+if needIndent{
+needIndent=false
+}else{
+depth--
+dst=appendNewline(dst prefix indent depth)
+}
+dst=append(dst c)
+default:
+dst=append(dst c)
+}
+}
+if scan.eof()==scanError{return dst[:origLen],scan.err}
+^dst
+}
+
+// File: encoding/json/scanner.go
+//go:build !goexperiment.jsonv2
+package json
+let c byte,s*scanner
+Valid(data[]byte)bool{
+scan:=newScanner()
+defer freeScanner(scan)
+return checkValid(data scan)==nil
+}
+checkValid(data[]byte,scan*scanner)!{
+scan.reset()
+for c in data{
+scan.bytes++
+if scan.step(scan c)==scanError{return scan.err}
+}
+if scan.eof()==scanError{return scan.err}
+^
+}
+type SyntaxError struct{
+msg string
+Offset int64
+}
+(e*SyntaxError)Error()string{return msg}
+type scanner struct{
+step func(*scanner,byte)int
+endTop bool
+parseState[]int
+err error
+bytes int64
+}
+var scannerPool=sync.Pool{
+New:func()any{
+return&scanner{}
+},
+}
+newScanner()*scanner{
+scan:=scannerPool.Get().(*scanner)
+scan.bytes=0
+scan.reset()
+return scan
+}
+freeScanner(scan*scanner){
+if len(parseState)>1024{parseState=nil}
+scannerPool.Put(scan)
+}
+const(
+scanContinue=iota
+scanBeginLiteral
+scanBeginObject
+scanObjectKey
+scanObjectValue
+scanEndObject
+scanBeginArray
+scanArrayValue
+scanEndArray
+scanSkipSpace
+scanEnd
+scanError
+)
+const(
+parseObjectKey=iota
+parseObjectValue
+parseArrayValue
+)
+const maxNestingDepth=10000
+(s)reset(){
+step=stateBeginValue
+parseState=parseState[0:0]
+err=nil
+endTop=false
+}
+.eof()int{
+if err!=nil{return scanError}
+if endTop{return scanEnd}
+step(s ' ')
+if endTop{return scanEnd}
+if err==nil{err=&SyntaxError{"unexpected end of JSON input",s.bytes}}
+return scanError
+}
+.pushParseState(c,newParseState int,successState int)int{
+parseState=append(parseState newParseState)
+if len(parseState)<=maxNestingDepth{return successState}
+return s.error(c "exceeded max depth")
+}
+.popParseState(){
+n:=len(parseState)-1
+parseState=parseState[0:n]
+if n==0{
+step=stateEndTop
+endTop=true
+}else{step=stateEndValue}
+}
+isSpace(c)bool=>c<=' '&&(c==' '||c=='\t'||c=='\r'||c=='\n')
+stateBeginValueOrEmpty(s,c)int{
+if isSpace(c){return scanSkipSpace}
+if c==']'{return stateEndValue(s c)}
+return stateBeginValue(s c)
+}
+stateBeginValue(s,c)int{
+if isSpace(c){return scanSkipSpace}
+switch c{
+case '{':
+step=stateBeginStringOrEmpty return pushParseState(c parseObjectKey scanBeginObject)
+case '[':
+step=stateBeginValueOrEmpty return pushParseState(c parseArrayValue scanBeginArray)
+case '"':
+step=stateInString return scanBeginLiteral
+case '-':
+step=stateNeg return scanBeginLiteral
+case '0':
+step=state0 return scanBeginLiteral
+case 't':
+step=stateT return scanBeginLiteral
+case 'f':
+step=stateF return scanBeginLiteral
+case 'n':
+step=stateN return scanBeginLiteral
+}
+if '1'<=c&&c<='9'{
+step=state1 return scanBeginLiteral
+}
+return s.error(c "looking for beginning of value")
+}
+stateBeginStringOrEmpty(s,c)int{
+if isSpace(c){return scanSkipSpace}
+if c=='}'{
+n:=len(parseState)
+parseState[n-1]=parseObjectValue return stateEndValue(s c)
+}
+return stateBeginString(s c)
+}
+stateBeginString(s,c)int{
+if isSpace(c){return scanSkipSpace}
+if c=='"'{
+step=stateInString return scanBeginLiteral
+}
+return s.error(c "looking for beginning of object key string")
+}
+stateEndValue(s,c)int{
+n:=len(parseState)
+if n==0{
+step=stateEndTop
+endTop=true return stateEndTop(s c)
+}
+if isSpace(c){
+step=stateEndValue return scanSkipSpace
+}
+ps:=parseState[n-1]
+switch ps{
+case parseObjectKey:
+if c==':'{
+parseState[n-1]=parseObjectValue
+step=stateBeginValue return scanObjectKey
+}
+return s.error(c "after object key")
+case parseObjectValue:
+if c==','{
+parseState[n-1]=parseObjectKey
+step=stateBeginString return scanObjectValue
+}
+if c=='}'{
+popParseState()
+return scanEndObject
+}
+return s.error(c "after object key:value pair")
+case parseArrayValue:
+if c==','{
+step=stateBeginValue return scanArrayValue
+}
+if c==']'{
+popParseState()
+return scanEndArray
+}
+return s.error(c "after array element")
+}
+return s.error(c "")
+}
+stateEndTop(s,c)int{
+if!isSpace(c){
+s.error(c "after top-level value")
+}
+return scanEnd
+}
+stateInString(s,c)int{
+if c=='"'{
+step=stateEndValue return scanContinue
+}
+if c=='\\'{
+step=stateInStringEsc return scanContinue
+}
+if c<0x20{return s.error(c "in string literal")}
+return scanContinue
+}
+stateInStringEsc(s,c)int{
+switch c{
+case 'b' 'f' 'n' 'r' 't' '\\' '/' '"':
+step=stateInString return scanContinue
+case 'u':
+step=stateInStringEscU return scanContinue
+}
+return s.error(c "in string escape code")
+}
+stateInStringEscU(s,c)int{
+if '0'<=c&&c<='9'||'a'<=c&&c<='f'||'A'<=c&&c<='F'{
+step=stateInStringEscU1 return scanContinue
+}
+return s.error(c "in \\u hexadecimal character escape")
+}
+stateInStringEscU1(s,c)int{
+if '0'<=c&&c<='9'||'a'<=c&&c<='f'||'A'<=c&&c<='F'{
+step=stateInStringEscU12 return scanContinue
+}
+return s.error(c "in \\u hexadecimal character escape")
+}
+stateInStringEscU12(s,c)int{
+if '0'<=c&&c<='9'||'a'<=c&&c<='f'||'A'<=c&&c<='F'{
+step=stateInStringEscU123 return scanContinue
+}
+return s.error(c "in \\u hexadecimal character escape")
+}
+stateInStringEscU123(s,c)int{
+if '0'<=c&&c<='9'||'a'<=c&&c<='f'||'A'<=c&&c<='F'{
+step=stateInString return scanContinue
+}
+return s.error(c "in \\u hexadecimal character escape")
+}
+stateNeg(s,c)int{
+if c=='0'{
+step=state0 return scanContinue
+}
+if '1'<=c&&c<='9'{
+step=state1 return scanContinue
+}
+return s.error(c "in numeric literal")
+}
+state1(s,c)int{
+if '0'<=c&&c<='9'{
+step=state1 return scanContinue
+}
+return state0(s c)
+}
+state0(s,c)int{
+if c=='.'{
+step=stateDot return scanContinue
+}
+if c=='e'||c=='E'{
+step=stateE return scanContinue
+}
+return stateEndValue(s c)
+}
+stateDot(s,c)int{
+if '0'<=c&&c<='9'{
+step=stateDot0 return scanContinue
+}
+return s.error(c "after decimal point in numeric literal")
+}
+stateDot0(s,c)int{
+if '0'<=c&&c<='9'{return scanContinue}
+if c=='e'||c=='E'{
+step=stateE return scanContinue
+}
+return stateEndValue(s c)
+}
+stateE(s,c)int{
+if c=='+'||c=='-'{
+step=stateESign return scanContinue
+}
+return stateESign(s c)
+}
+stateESign(s,c)int{
+if '0'<=c&&c<='9'{
+step=stateE0 return scanContinue
+}
+return s.error(c "in exponent of numeric literal")
+}
+stateE0(s,c)int{
+if '0'<=c&&c<='9'{return scanContinue}
+return stateEndValue(s c)
+}
+stateT(s,c)int{
+if c=='r'{
+step=stateTr return scanContinue
+}
+return s.error(c "in literal true (expecting 'r')")
+}
+stateTr(s,c)int{
+if c=='u'{
+step=stateTru return scanContinue
+}
+return s.error(c "in literal true (expecting 'u')")
+}
+stateTru(s,c)int{
+if c=='e'{
+step=stateEndValue return scanContinue
+}
+return s.error(c "in literal true (expecting 'e')")
+}
+stateF(s,c)int{
+if c=='a'{
+step=stateFa return scanContinue
+}
+return s.error(c "in literal false (expecting 'a')")
+}
+stateFa(s,c)int{
+if c=='l'{
+step=stateFal return scanContinue
+}
+return s.error(c "in literal false (expecting 'l')")
+}
+stateFal(s,c)int{
+if c=='s'{
+step=stateFals return scanContinue
+}
+return s.error(c "in literal false (expecting 's')")
+}
+stateFals(s,c)int{
+if c=='e'{
+step=stateEndValue return scanContinue
+}
+return s.error(c "in literal false (expecting 'e')")
+}
+stateN(s,c)int{
+if c=='u'{
+step=stateNu return scanContinue
+}
+return s.error(c "in literal null (expecting 'u')")
+}
+stateNu(s,c)int{
+if c=='l'{
+step=stateNul return scanContinue
+}
+return s.error(c "in literal null (expecting 'l')")
+}
+stateNul(s,c)int{
+if c=='l'{
+step=stateEndValue return scanContinue
+}
+return s.error(c "in literal null (expecting 'l')")
+}
+stateError(s,c)int=>scanError
+.error(c,context string)int{
+step=stateError
+err=&SyntaxError{"invalid character "+quoteChar(c)+" "+context,s.bytes}
+return scanError
+}
+quoteChar(c)string{
+if c=='\''{return `'\''`}
+if c=='"'{return `'"'`}
+s:=strconv.Quote(string(c))
+return "'"+s[1:len(s)-1]+"'"
+}
+
+// File: encoding/json/stream.go
+//go:build !goexperiment.jsonv2
+package json
+use io
+let dec*Decoder
+type Decoder struct{
+r Reader
+buf[]byte
+d decodeState
+scanp int
+scanned int64
+scan scanner
+err error
+tokenState int
+tokenStack[]int
+}
+NewDecoder(r Reader)*Decoder=>&Decoder{r:r}
+(dec)UseNumber(){d.useNumber=true}
+.DisallowUnknownFields(){d.disallowUnknownFields=true}
+.Decode(v any)!{
+if err!=nil{return err}
+tokenPrepareForDecode()?
+if!tokenValueAllowed(){return&SyntaxError{msg:"not at beginning of value",Offset:InputOffset()}}
+n:=readValue()?
+d.init(buf[scanp:scanp+n])
+scanp+=n
+err=d.unmarshal(v)
+tokenValueEnd()
+return err
+}
+.Buffered()Reader=>bytes.NewReader(buf[scanp:])
+.readValue()int!{
+scan.reset()
+scanp:=scanp var err error
+Input:
+for scanp>=0{
+for;scanp<len(buf);scanp++{
+c:=buf[scanp]
+scan.bytes++
+switch scan.step(&scan c){
+case scanEnd:
+scan.bytes--
+break Input
+case scanEndObject scanEndArray:
+if stateEndValue(&scan ' ')==scanEnd{
+scanp++
+break Input
+}
+case scanError:
+dec.err=scan.err
+!scan.err
+}
+}
+if err!=nil{
+if err==EOF{
+if scan.step(&scan ' ')==scanEnd{break Input}
+if nonSpace(buf){err=ErrUnexpectedEOF}
+}
+dec.err=err
+!err
+}
+n:=scanp-dec.scanp
+err=refill()
+scanp=dec.scanp+n
+}
+^scanp-dec.scanp
+}
+.refill()!{
+if scanp>0{
+scanned+=int64(scanp)
+n:=copy(buf buf[scanp:])
+buf=buf[:n]
+scanp=0
+}
+const minRead=512 if cap(buf)-len(buf)<minRead{
+newBuf:=make([]byte len(buf),2*cap(buf)+minRead)
+copy(newBuf buf)
+buf=newBuf
+}
+n,err:=r.Read(buf[len(buf):cap(buf)])
+buf=buf[0:len(buf)+n]
+return err
+}
+nonSpace(b[]byte)bool{
+for c in b{
+if!isSpace(c){return true}
+}
+return false
+}
+type Encoder struct{
+w Writer
+err error
+escapeHTML bool
+indentBuf[]byte
+indentPrefix string
+indentValue string
+}
+NewEncoder(w Writer)*Encoder=>&Encoder{w:w,escapeHTML:true}
+(enc*Encoder)Encode(v any)!{
+if err!=nil{return err}
+e:=newEncodeState()
+defer encodeStatePool.Put(e)
+err:=e.marshal(v encOpts{escapeHTML:escapeHTML})?
+e.WriteByte('\n')
+b:=e.Bytes()
+if indentPrefix!=""||indentValue!=""{
+indentBuf=appendIndent(indentBuf[:0],b indentPrefix indentValue)?
+b=indentBuf
+}
+if _,err=w.Write(b);err!=nil{enc.err=err}
+return err
+}
+.SetIndent(prefix,indent string){
+indentPrefix=prefix
+indentValue=indent
+}
+.SetEscapeHTML(on bool){
+escapeHTML=on
+}
+type RawMessage[]byte
+(m RawMessage)MarshalJSON()[]byte!{
+if m==nil{^[]byte("null")}
+^m
+}
+(m*RawMessage)UnmarshalJSON(data[]byte)!{
+if m==nil{return errors.New("json.RawMessage: UnmarshalJSON on nil pointer")}
+*m=append((*m)[0:0],data...)
+^
+}
+var _ Marshaler=(*RawMessage)(nil)
+var _ Unmarshaler=(*RawMessage)(nil)
+type Token any
+const(
+tokenTopValue=iota
+tokenArrayStart
+tokenArrayValue
+tokenArrayComma
+tokenObjectStart
+tokenObjectKey
+tokenObjectColon
+tokenObjectValue
+tokenObjectComma
+)
+(dec)tokenPrepareForDecode()!{
+switch tokenState{
+case tokenArrayComma:
+c,err:=peek()
+if err!=nil{return err}
+if c!=','{return&SyntaxError{"expected comma after array element",InputOffset()}}
+scanp++
+tokenState=tokenArrayValue
+case tokenObjectColon:
+c,err:=peek()
+if err!=nil{return err}
+if c!=':'{return&SyntaxError{"expected colon after object key",InputOffset()}}
+scanp++
+tokenState=tokenObjectValue
+}
+^
+}
+.tokenValueAllowed()bool{
+switch tokenState{
+case tokenTopValue tokenArrayStart tokenArrayValue tokenObjectValue:
+return true
+}
+return false
+}
+.tokenValueEnd(){
+switch tokenState{
+case tokenArrayStart tokenArrayValue:
+tokenState=tokenArrayComma
+case tokenObjectValue:
+tokenState=tokenObjectComma
+}
+}
+type Delim rune
+(d Delim)String()string=>string(d)
+(dec)Token()Token!{
+for{
+c:=peek()?
+switch c{
+case '[':
+if!tokenValueAllowed(){return tokenError(c)}
+scanp++
+tokenStack=append(tokenStack tokenState)
+tokenState=tokenArrayStart
+^Delim('[')
+case ']':
+if tokenState!=tokenArrayStart&&tokenState!=tokenArrayComma{return tokenError(c)}
+scanp++
+tokenState=tokenStack[len(tokenStack)-1]
+tokenStack=tokenStack[:len(tokenStack)-1]
+tokenValueEnd()
+^Delim(']')
+case '{':
+if!tokenValueAllowed(){return tokenError(c)}
+scanp++
+tokenStack=append(tokenStack tokenState)
+tokenState=tokenObjectStart
+^Delim('{')
+case '}':
+if tokenState!=tokenObjectStart&&tokenState!=tokenObjectComma{return tokenError(c)}
+scanp++
+tokenState=tokenStack[len(tokenStack)-1]
+tokenStack=tokenStack[:len(tokenStack)-1]
+tokenValueEnd()
+^Delim('}')
+case ':':
+if tokenState!=tokenObjectColon{return tokenError(c)}
+scanp++
+tokenState=tokenObjectValue continue
+case ',':
+if tokenState==tokenArrayComma{
+scanp++
+tokenState=tokenArrayValue continue
+}
+if tokenState==tokenObjectComma{
+scanp++
+tokenState=tokenObjectKey continue
+}
+return tokenError(c)
+case '"':
+if tokenState==tokenObjectStart||tokenState==tokenObjectKey{
+var x string
+old:=tokenState
+tokenState=tokenTopValue
+err:=Decode(&x)
+tokenState=old if err!=nil{!err}
+tokenState=tokenObjectColon
+^x
+}
+fallthrough
+default:
+if!tokenValueAllowed(){return tokenError(c)}
+var x any if err:=Decode(&x);err!=nil{!err}
+^x
+}
+}
+}
+.tokenError(c byte)Token!{
+var context string switch tokenState{
+case tokenTopValue:
+context=" looking for beginning of value"
+case tokenArrayStart tokenArrayValue tokenObjectValue:
+context=" looking for beginning of value"
+case tokenArrayComma:
+context=" after array element"
+case tokenObjectKey:
+context=" looking for beginning of object key string"
+case tokenObjectColon:
+context=" after object key"
+case tokenObjectComma:
+context=" after object key:value pair"
+}
+!&SyntaxError{"invalid character "+quoteChar(c)+context,InputOffset()}
+}
+.More()bool{
+c,err:=peek()
+return err==nil&&c!=']'&&c!='}'
+}
+.peek()byte!{
+var err error for{
+for i:=scanp;i<len(buf);i++{
+c:=buf[i]
+if isSpace(c){continue}
+scanp=i
+^c
+}
+if err!=nil{!err}
+err=refill()
+}
+}
+.InputOffset()int64=>scanned+int64(scanp)
+
+// File: encoding/json/tables.go
+//go:build !goexperiment.jsonv2
+package json
+use utf8
+var safeSet=[RuneSelf]bool{
+' ':true,
+'!':true,
+'"':false,
+'#':true,
+'$':true,
+'%':true,
+'&':true,
+'\'':true,
+'(':true,
+')':true,
+'*':true,
+'+':true,
+',':true,
+'-':true,
+'.':true,
+'/':true,
+'0':true,
+'1':true,
+'2':true,
+'3':true,
+'4':true,
+'5':true,
+'6':true,
+'7':true,
+'8':true,
+'9':true,
+':':true,
+';':true,
+'<':true,
+'=':true,
+'>':true,
+'?':true,
+'@':true,
+'A':true,
+'B':true,
+'C':true,
+'D':true,
+'E':true,
+'F':true,
+'G':true,
+'H':true,
+'I':true,
+'J':true,
+'K':true,
+'L':true,
+'M':true,
+'N':true,
+'O':true,
+'P':true,
+'Q':true,
+'R':true,
+'S':true,
+'T':true,
+'U':true,
+'V':true,
+'W':true,
+'X':true,
+'Y':true,
+'Z':true,
+'[':true,
+'\\':false,
+']':true,
+'^':true,
+'_':true,
+'`':true,
+'a':true,
+'b':true,
+'c':true,
+'d':true,
+'e':true,
+'f':true,
+'g':true,
+'h':true,
+'i':true,
+'j':true,
+'k':true,
+'l':true,
+'m':true,
+'n':true,
+'o':true,
+'p':true,
+'q':true,
+'r':true,
+'s':true,
+'t':true,
+'u':true,
+'v':true,
+'w':true,
+'x':true,
+'y':true,
+'z':true,
+'{':true,
+'|':true,
+'}':true,
+'~':true,
+'\u007f':true,
+}
+var htmlSafeSet=[RuneSelf]bool{
+' ':true,
+'!':true,
+'"':false,
+'#':true,
+'$':true,
+'%':true,
+'&':false,
+'\'':true,
+'(':true,
+')':true,
+'*':true,
+'+':true,
+',':true,
+'-':true,
+'.':true,
+'/':true,
+'0':true,
+'1':true,
+'2':true,
+'3':true,
+'4':true,
+'5':true,
+'6':true,
+'7':true,
+'8':true,
+'9':true,
+':':true,
+';':true,
+'<':false,
+'=':true,
+'>':false,
+'?':true,
+'@':true,
+'A':true,
+'B':true,
+'C':true,
+'D':true,
+'E':true,
+'F':true,
+'G':true,
+'H':true,
+'I':true,
+'J':true,
+'K':true,
+'L':true,
+'M':true,
+'N':true,
+'O':true,
+'P':true,
+'Q':true,
+'R':true,
+'S':true,
+'T':true,
+'U':true,
+'V':true,
+'W':true,
+'X':true,
+'Y':true,
+'Z':true,
+'[':true,
+'\\':false,
+']':true,
+'^':true,
+'_':true,
+'`':true,
+'a':true,
+'b':true,
+'c':true,
+'d':true,
+'e':true,
+'f':true,
+'g':true,
+'h':true,
+'i':true,
+'j':true,
+'k':true,
+'l':true,
+'m':true,
+'n':true,
+'o':true,
+'p':true,
+'q':true,
+'r':true,
+'s':true,
+'t':true,
+'u':true,
+'v':true,
+'w':true,
+'x':true,
+'y':true,
+'z':true,
+'{':true,
+'|':true,
+'}':true,
+'~':true,
+'\u007f':true,
+}
+
+// File: encoding/json/tags.go
+//go:build !goexperiment.jsonv2
+package json
+use strings
+type tagOptions string
+parseTag(tag string)(string,tagOptions){
+tag,opt,_:=Cut(tag ",")
+return tag,tagOptions(opt)
+}
+(o tagOptions)Contains(optionName string)bool{
+if len(o)==0{return false}
+s:=string(o)
+for s!=""{
+var name string
+name,s,_=Cut(s ",")
+if name==optionName{return true}
+}
+return false
+}
+

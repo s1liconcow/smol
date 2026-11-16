@@ -1,0 +1,186 @@
+{
+  "spec": "SPEC.md v0.2 (draft)",
+  "audit_date": "2026-11-15",
+  "verdict": "NOT CONFORMANT",
+  "implementation_changed_by_audit": false,
+  "go_version": "go version go1.26.3 darwin/arm64",
+  "source_sha256": {
+    "SPEC.md": "1c80a057622a7fc1eec702cfa1397d4627cb89306a8f78f18b122103bee42a29",
+    "go.mod": "88d988089a86883d55c2e39fdd6da272d0a1480243c14f47f239b10311b0fc46",
+    "internal/smol/conformance_test.go": "5e83f4d696413316c9f3a9976256983fafc5ae3dbe5fdbcb53a038ce82e995d0",
+    "internal/smol/imports.go": "d4d49ebda1f77d3afb729db80377656003b1b15bb7a18662d2dae3699ed28c28",
+    "internal/smol/lift.go": "f3e1bc1ca9d72f264a1545423f2d401f7838b55c303de6ec11d7e3d2eca8ef26",
+    "internal/smol/lower.go": "39be9a385effa4935cb33a7b6cedcdb6ae6eca27c5ca3d9c58d132cd8c7916c8",
+    "internal/smol/pack.go": "5520c05920881432a475a1be62ad6c3d9e09c73a7fcd41d90fc76a54c5f989b0",
+    "internal/smol/pack_test.go": "fd8cff0eb305d131c2c71597a29a272b7d5c5c1d1867d2511f13ef9b7adb4b40",
+    "internal/smol/package.go": "102e2a8d92afefe07fa5ae684e88a98034e81bc3eacc7bd172c06fdfee7e7a3d",
+    "internal/smol/print.go": "b66d5e8b2b5b4c2d54fd6dc4271dc71f9be95617c578b298d55768b2e5886e8e",
+    "internal/smol/scope.go": "82e04fb8accbf6524861854d3f6ccafb10f78aabb513ad8cc02556b54303fa53",
+    "internal/smol/source.go": "f70428cef7d0da2871af8fcfa314f196ef248062e5891aa09ec02ec0fd88c9e4",
+    "internal/smol/zero.go": "a102fe876d214a1c266a13487007f4d108f36bc8dc68c7ea4dcd7fe45c33eb18",
+    "cmd/smol/main.go": "852473c3dc0a43110830371125e1eedcf032738526760f526a26dc61ad4daddc",
+    "cmd/smol/main_test.go": "49eb583acba4f897edad2028ad649e4777cb49c6c4f764b82dd815e96ab7e63e"
+  },
+  "baseline_tests": {
+    "pass": 70,
+    "fail": 0,
+    "skip": 0
+  },
+  "final_tests": {
+    "pass": 70,
+    "fail": 0,
+    "skip": 0
+  },
+  "vet": {
+    "command": "go vet ./...",
+    "exit_code": 0,
+    "log": "vet.log"
+  },
+  "stdlib": {
+    "go_version": "go version go1.26.3 darwin/arm64",
+    "command": [
+      "/tmp/smol-spec-validation",
+      "check",
+      "std"
+    ],
+    "exit_code": 0,
+    "passed_files": 2800,
+    "failed_files": 0,
+    "elapsed_seconds": 238.252,
+    "scope": "Host GOOS/GOARCH and build constraints; GoFiles, CgoFiles, TestGoFiles, XTestGoFiles.",
+    "meaning": "Byte equality, deterministic lifting, and formatter idempotence. Not mandatory-fold completeness or all package test suites."
+  },
+  "original_module": {
+    "go_version": "go version go1.26.3 darwin/arm64",
+    "command": [
+      "/tmp/smol-spec-validation",
+      "check",
+      "./..."
+    ],
+    "exit_code": 1,
+    "passed_files": 12,
+    "failed_files": 1,
+    "elapsed_seconds": 2.849,
+    "scope": "Host GOOS/GOARCH and build constraints; GoFiles, CgoFiles, TestGoFiles, XTestGoFiles.",
+    "meaning": "Byte equality, deterministic lifting, and formatter idempotence. Not mandatory-fold completeness or all package test suites."
+  },
+  "final_module": {
+    "go_version": "go version go1.26.3 darwin/arm64",
+    "command": [
+      "/tmp/smol-spec-validation",
+      "check",
+      "./..."
+    ],
+    "exit_code": 1,
+    "passed_files": 13,
+    "failed_files": 1,
+    "elapsed_seconds": 3.516,
+    "scope": "Host GOOS/GOARCH and build constraints; GoFiles, CgoFiles, TestGoFiles, XTestGoFiles.",
+    "meaning": "Byte equality, deterministic lifting, and formatter idempotence. Not mandatory-fold completeness or all package test suites."
+  },
+  "probes": {
+    "passed": 27,
+    "failed": 7,
+    "total": 34,
+    "failures": [
+      "open_comment",
+      "subject_embedded_pointer",
+      "convention_comment",
+      "import_marker_literal_roundtrip",
+      "trailing_directive_without_notes",
+      "outline_removes_literal_bodies",
+      "outline_docs_dense_layout"
+    ]
+  },
+  "lowered_behavior": [
+    {
+      "mode": "with-notes",
+      "command": [
+        "go",
+        "test",
+        "-count=1",
+        "-json",
+        "-overlay",
+        "<overlay>",
+        "fmt",
+        "encoding/json",
+        "go/parser"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 3.0,
+      "passed_cases": 857,
+      "failed_cases": [],
+      "skipped_cases": 0,
+      "packages": [
+        {
+          "package": "fmt",
+          "status": "pass"
+        },
+        {
+          "package": "encoding/json",
+          "status": "pass"
+        },
+        {
+          "package": "go/parser",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "mode": "without-notes",
+      "command": [
+        "go",
+        "test",
+        "-count=1",
+        "-json",
+        "-overlay",
+        "<overlay>",
+        "fmt",
+        "encoding/json",
+        "go/parser"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 3.685,
+      "passed_cases": 857,
+      "failed_cases": [],
+      "skipped_cases": 0,
+      "packages": [
+        {
+          "package": "fmt",
+          "status": "pass"
+        },
+        {
+          "package": "encoding/json",
+          "status": "pass"
+        },
+        {
+          "package": "go/parser",
+          "status": "pass"
+        }
+      ]
+    }
+  ],
+  "uplift": {
+    "extra_tokens_saved_vs_v0.1": 12521,
+    "source_reduction_vs_v0.1_percent": 43.32825801093501,
+    "source_reduction_vs_go_percent": 50.23549788811571,
+    "v0.1_source_reduction_vs_go_percent": 12.188155215898387,
+    "source_reduction_gain_percentage_points": 38.047342672217326,
+    "source_capacity_multiplier_vs_go": 2.009464492886365,
+    "request_reduction_vs_v0.1_percent": 28.87218391864782,
+    "request_reduction_vs_go_percent": 34.893832580522606,
+    "code_only_reduction_vs_comment_free_go_percent": 26.64606288632088,
+    "both_channels_reduction_vs_go_percent": -3.597799993922635
+  },
+  "fresh_api_requests": 0,
+  "limits": [
+    "Targeted probes do not enumerate every normative requirement.",
+    "Host active-file corpus only.",
+    "Behavior tested on three lowered standard packages, not the complete stdlib suite."
+  ],
+  "spec_fixture_matches": {
+    "users.go": true,
+    "users.smol": true,
+    "users.smol.notes": true
+  }
+}

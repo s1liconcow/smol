@@ -1,0 +1,595 @@
+// File: encoding/json/decode.go
+//go:build !goexperiment.jsonv2
+package json
+import(
+...
+_ "unsafe"
+)
+Unmarshal(data[]byte,v any)!
+type Unmarshaler interface{
+UnmarshalJSON([]byte)!
+}
+type UnmarshalTypeError struct{
+Value string
+Type reflect.Type
+Offset int64
+Struct string
+Field string
+}
+(e*UnmarshalTypeError)Error()string
+type UnmarshalFieldError struct{
+Key string
+Type reflect.Type
+Field reflect.StructField
+}
+(e*UnmarshalFieldError)Error()string
+type InvalidUnmarshalError struct{
+Type reflect.Type
+}
+(e*InvalidUnmarshalError)Error()string
+(d*decodeState)unmarshal(v any)!
+type Number string
+(n Number)String()string
+.Float64()float64!
+.Int64()int64!
+type errorContext struct{
+Struct reflect.Type
+FieldStack[]string
+}
+type decodeState struct{
+data[]byte
+off int
+opcode int
+scan scanner
+errorContext*errorContext
+savedError error
+useNumber bool
+disallowUnknownFields bool
+}
+(d*decodeState)readIndex()int
+const phasePanicMsg="JSON decoder out of sync - data changing underfoot?"
+.init(data[]byte)*decodeState
+.saveError(err error)
+.addErrorContext(err error)!
+.skip()
+.scanNext()
+.scanWhile(op int)
+.rescanLiteral()
+.value(v reflect.Value)!
+type unquotedValue struct{}
+.valueQuoted()any
+indirect(v reflect.Value,decodingNull bool)(Unmarshaler,encoding.TextUnmarshaler,reflect.Value)
+.array(v reflect.Value)!
+var nullLiteral=[]byte("null")
+var textUnmarshalerType=reflect.TypeFor[encoding.TextUnmarshaler]()
+.object(v reflect.Value)!
+.convertNumber(s string)any!
+var numberType=reflect.TypeFor[Number]()
+.literalStore(item[]byte,v reflect.Value,fromQuoted bool)!
+.valueInterface()(val any)
+.arrayInterface()[]any
+.objectInterface()map[string]any
+.literalInterface()any
+getu4(s[]byte)rune
+unquote(s[]byte)(t string,ok bool)
+unquoteBytes(s[]byte)(t[]byte,ok bool)
+
+// File: encoding/json/encode.go
+//go:build !goexperiment.jsonv2
+package json
+import(
+...
+_ "unsafe"
+)
+Marshal(v any)[]byte!
+MarshalIndent(v any,prefix,indent string)[]byte!
+type Marshaler interface{
+MarshalJSON()[]byte!
+}
+type UnsupportedTypeError struct{
+Type reflect.Type
+}
+(e*UnsupportedTypeError)Error()string
+type UnsupportedValueError struct{
+Value reflect.Value
+Str string
+}
+(e*UnsupportedValueError)Error()string
+type InvalidUTF8Error struct{
+S string
+}
+(e*InvalidUTF8Error)Error()string
+type MarshalerError struct{
+Type reflect.Type
+Err error
+sourceFunc string
+}
+(e*MarshalerError)Error()string
+.Unwrap()!
+const hex="0123456789abcdef"
+type encodeState struct{
+bytes.Buffer
+ptrLevel uint
+ptrSeen map[any]struct{}
+}
+const startDetectingCyclesAfter=1000
+var encodeStatePool sync.Pool
+newEncodeState()*encodeState
+type jsonError struct{error}
+(e*encodeState)marshal(v any,opts encOpts)(err error)
+.error(err error)
+isEmptyValue(v reflect.Value)bool
+.reflectValue(v reflect.Value,opts encOpts)
+type encOpts struct{
+quoted bool
+escapeHTML bool
+}
+type encoderFunc func(e*encodeState,v reflect.Value,opts encOpts)
+var encoderCache sync.Map
+valueEncoder(v reflect.Value)encoderFunc
+typeEncoder(t reflect.Type)encoderFunc
+var(
+marshalerType=reflect.TypeFor[Marshaler]()
+textMarshalerType=reflect.TypeFor[encoding.TextMarshaler]()
+)
+newTypeEncoder(t reflect.Type,allowAddr bool)encoderFunc
+invalidValueEncoder(e*encodeState,v reflect.Value,_ encOpts)
+marshalerEncoder(e*encodeState,v reflect.Value,opts encOpts)
+addrMarshalerEncoder(e*encodeState,v reflect.Value,opts encOpts)
+textMarshalerEncoder(e*encodeState,v reflect.Value,opts encOpts)
+addrTextMarshalerEncoder(e*encodeState,v reflect.Value,opts encOpts)
+boolEncoder(e*encodeState,v reflect.Value,opts encOpts)
+intEncoder(e*encodeState,v reflect.Value,opts encOpts)
+uintEncoder(e*encodeState,v reflect.Value,opts encOpts)
+type floatEncoder int
+(bits floatEncoder)encode(e*encodeState,v reflect.Value,opts encOpts)
+var(
+float32Encoder=(floatEncoder(32)).encode
+float64Encoder=(floatEncoder(64)).encode
+)
+stringEncoder(e*encodeState,v reflect.Value,opts encOpts)
+isValidNumber(s string)bool
+interfaceEncoder(e*encodeState,v reflect.Value,opts encOpts)
+unsupportedTypeEncoder(e*encodeState,v reflect.Value,_ encOpts)
+type structEncoder struct{
+fields structFields
+}
+type structFields struct{
+list[]field
+byExactName map[string]*field
+byFoldedName map[string]*field
+}
+(se structEncoder)encode(e*encodeState,v reflect.Value,opts encOpts)
+newStructEncoder(t reflect.Type)encoderFunc
+type mapEncoder struct{
+elemEnc encoderFunc
+}
+(me mapEncoder)encode(e*encodeState,v reflect.Value,opts encOpts)
+newMapEncoder(t reflect.Type)encoderFunc
+encodeByteSlice(e*encodeState,v reflect.Value,_ encOpts)
+type sliceEncoder struct{
+arrayEnc encoderFunc
+}
+(se sliceEncoder)encode(e*encodeState,v reflect.Value,opts encOpts)
+newSliceEncoder(t reflect.Type)encoderFunc
+type arrayEncoder struct{
+elemEnc encoderFunc
+}
+(ae arrayEncoder)encode(e*encodeState,v reflect.Value,opts encOpts)
+newArrayEncoder(t reflect.Type)encoderFunc
+type ptrEncoder struct{
+elemEnc encoderFunc
+}
+(pe ptrEncoder)encode(e*encodeState,v reflect.Value,opts encOpts)
+newPtrEncoder(t reflect.Type)encoderFunc
+type condAddrEncoder struct{
+canAddrEnc,elseEnc encoderFunc
+}
+(ce condAddrEncoder)encode(e*encodeState,v reflect.Value,opts encOpts)
+newCondAddrEncoder(canAddrEnc,elseEnc encoderFunc)encoderFunc
+isValidTag(s string)bool
+typeByIndex(t reflect.Type,index[]int)reflect.Type
+type reflectWithString struct{
+v reflect.Value
+ks string
+}
+resolveKeyName(k reflect.Value)string!
+appendString[Bytes[]byte|string](dst[]byte,src Bytes,escapeHTML bool)[]byte
+type field struct{
+name string
+nameBytes[]byte
+nameNonEsc string
+nameEscHTML string
+tag bool
+index[]int
+typ reflect.Type
+omitEmpty bool
+omitZero bool
+isZero func(reflect.Value)bool
+quoted bool
+encoder encoderFunc
+}
+type isZeroer interface{
+IsZero()bool
+}
+var isZeroerType=reflect.TypeFor[isZeroer]()
+typeFields(t reflect.Type)structFields
+dominantField(fields[]field)(field,bool)
+var fieldCache sync.Map
+cachedTypeFields(t reflect.Type)structFields
+mayAppendQuote(b[]byte,quoted bool)[]byte
+
+// File: encoding/json/fold.go
+//go:build !goexperiment.jsonv2
+package json
+foldName(in[]byte)[]byte
+appendFoldedName(out,in[]byte)[]byte
+foldRune(r rune)rune
+
+// File: encoding/json/indent.go
+//go:build !goexperiment.jsonv2
+package json
+use bytes
+let dst*bytes.Buffer,src[]byte
+HTMLEscape(dst,src)
+appendHTMLEscape(\dst,src[]byte)[]byte
+Compact(dst,src)!
+appendCompact(\dst,src[]byte,escape bool)[]byte!
+appendNewline(dst[]byte,prefix,indent string,depth int)[]byte
+const indentGrowthFactor=2
+Indent(dst,src,prefix,indent string)!
+appendIndent(\dst,src[]byte,prefix,indent string)[]byte!
+
+// File: encoding/json/scanner.go
+//go:build !goexperiment.jsonv2
+package json
+Valid(data[]byte)bool
+checkValid(data[]byte,scan*scanner)!
+type SyntaxError struct{
+msg string
+Offset int64
+}
+(e*SyntaxError)Error()string
+type scanner struct{
+step func(*scanner,byte)int
+endTop bool
+parseState[]int
+err error
+bytes int64
+}
+var scannerPool=sync.Pool{
+New:func()any{
+return&scanner{}
+},
+}
+newScanner()*scanner
+freeScanner(scan*scanner)
+const(
+scanContinue=iota
+scanBeginLiteral
+scanBeginObject
+scanObjectKey
+scanObjectValue
+scanEndObject
+scanBeginArray
+scanArrayValue
+scanEndArray
+scanSkipSpace
+scanEnd
+scanError
+)
+const(
+parseObjectKey=iota
+parseObjectValue
+parseArrayValue
+)
+const maxNestingDepth=10000
+(s*scanner)reset()
+.eof()int
+.pushParseState(c byte,newParseState int,successState int)int
+.popParseState()
+isSpace(c byte)bool
+stateBeginValueOrEmpty(s*scanner,c byte)int
+stateBeginValue(s*scanner,c byte)int
+stateBeginStringOrEmpty(s*scanner,c byte)int
+stateBeginString(s*scanner,c byte)int
+stateEndValue(s*scanner,c byte)int
+stateEndTop(s*scanner,c byte)int
+stateInString(s*scanner,c byte)int
+stateInStringEsc(s*scanner,c byte)int
+stateInStringEscU(s*scanner,c byte)int
+stateInStringEscU1(s*scanner,c byte)int
+stateInStringEscU12(s*scanner,c byte)int
+stateInStringEscU123(s*scanner,c byte)int
+stateNeg(s*scanner,c byte)int
+state1(s*scanner,c byte)int
+state0(s*scanner,c byte)int
+stateDot(s*scanner,c byte)int
+stateDot0(s*scanner,c byte)int
+stateE(s*scanner,c byte)int
+stateESign(s*scanner,c byte)int
+stateE0(s*scanner,c byte)int
+stateT(s*scanner,c byte)int
+stateTr(s*scanner,c byte)int
+stateTru(s*scanner,c byte)int
+stateF(s*scanner,c byte)int
+stateFa(s*scanner,c byte)int
+stateFal(s*scanner,c byte)int
+stateFals(s*scanner,c byte)int
+stateN(s*scanner,c byte)int
+stateNu(s*scanner,c byte)int
+stateNul(s*scanner,c byte)int
+stateError(s*scanner,c byte)int
+.error(c byte,context string)int
+quoteChar(c byte)string
+
+// File: encoding/json/stream.go
+//go:build !goexperiment.jsonv2
+package json
+type Decoder struct{
+r io.Reader
+buf[]byte
+d decodeState
+scanp int
+scanned int64
+scan scanner
+err error
+tokenState int
+tokenStack[]int
+}
+NewDecoder(r io.Reader)*Decoder
+(dec*Decoder)UseNumber()
+.DisallowUnknownFields()
+.Decode(v any)!
+.Buffered()io.Reader
+.readValue()int!
+.refill()!
+nonSpace(b[]byte)bool
+type Encoder struct{
+w io.Writer
+err error
+escapeHTML bool
+indentBuf[]byte
+indentPrefix string
+indentValue string
+}
+NewEncoder(w io.Writer)*Encoder
+(enc*Encoder)Encode(v any)!
+.SetIndent(prefix,indent string)
+.SetEscapeHTML(on bool)
+type RawMessage[]byte
+(m RawMessage)MarshalJSON()[]byte!
+(m*RawMessage)UnmarshalJSON(data[]byte)!
+var _ Marshaler=(*RawMessage)(nil)
+var _ Unmarshaler=(*RawMessage)(nil)
+type Token any
+const(
+tokenTopValue=iota
+tokenArrayStart
+tokenArrayValue
+tokenArrayComma
+tokenObjectStart
+tokenObjectKey
+tokenObjectColon
+tokenObjectValue
+tokenObjectComma
+)
+(dec*Decoder)tokenPrepareForDecode()!
+.tokenValueAllowed()bool
+.tokenValueEnd()
+type Delim rune
+(d Delim)String()string
+(dec*Decoder)Token()Token!
+.tokenError(c byte)Token!
+.More()bool
+.peek()byte!
+.InputOffset()int64
+
+// File: encoding/json/tables.go
+//go:build !goexperiment.jsonv2
+package json
+use utf8
+var safeSet=[RuneSelf]bool{
+' ':true,
+'!':true,
+'"':false,
+'#':true,
+'$':true,
+'%':true,
+'&':true,
+'\'':true,
+'(':true,
+')':true,
+'*':true,
+'+':true,
+',':true,
+'-':true,
+'.':true,
+'/':true,
+'0':true,
+'1':true,
+'2':true,
+'3':true,
+'4':true,
+'5':true,
+'6':true,
+'7':true,
+'8':true,
+'9':true,
+':':true,
+';':true,
+'<':true,
+'=':true,
+'>':true,
+'?':true,
+'@':true,
+'A':true,
+'B':true,
+'C':true,
+'D':true,
+'E':true,
+'F':true,
+'G':true,
+'H':true,
+'I':true,
+'J':true,
+'K':true,
+'L':true,
+'M':true,
+'N':true,
+'O':true,
+'P':true,
+'Q':true,
+'R':true,
+'S':true,
+'T':true,
+'U':true,
+'V':true,
+'W':true,
+'X':true,
+'Y':true,
+'Z':true,
+'[':true,
+'\\':false,
+']':true,
+'^':true,
+'_':true,
+'`':true,
+'a':true,
+'b':true,
+'c':true,
+'d':true,
+'e':true,
+'f':true,
+'g':true,
+'h':true,
+'i':true,
+'j':true,
+'k':true,
+'l':true,
+'m':true,
+'n':true,
+'o':true,
+'p':true,
+'q':true,
+'r':true,
+'s':true,
+'t':true,
+'u':true,
+'v':true,
+'w':true,
+'x':true,
+'y':true,
+'z':true,
+'{':true,
+'|':true,
+'}':true,
+'~':true,
+'\u007f':true,
+}
+var htmlSafeSet=[RuneSelf]bool{
+' ':true,
+'!':true,
+'"':false,
+'#':true,
+'$':true,
+'%':true,
+'&':false,
+'\'':true,
+'(':true,
+')':true,
+'*':true,
+'+':true,
+',':true,
+'-':true,
+'.':true,
+'/':true,
+'0':true,
+'1':true,
+'2':true,
+'3':true,
+'4':true,
+'5':true,
+'6':true,
+'7':true,
+'8':true,
+'9':true,
+':':true,
+';':true,
+'<':false,
+'=':true,
+'>':false,
+'?':true,
+'@':true,
+'A':true,
+'B':true,
+'C':true,
+'D':true,
+'E':true,
+'F':true,
+'G':true,
+'H':true,
+'I':true,
+'J':true,
+'K':true,
+'L':true,
+'M':true,
+'N':true,
+'O':true,
+'P':true,
+'Q':true,
+'R':true,
+'S':true,
+'T':true,
+'U':true,
+'V':true,
+'W':true,
+'X':true,
+'Y':true,
+'Z':true,
+'[':true,
+'\\':false,
+']':true,
+'^':true,
+'_':true,
+'`':true,
+'a':true,
+'b':true,
+'c':true,
+'d':true,
+'e':true,
+'f':true,
+'g':true,
+'h':true,
+'i':true,
+'j':true,
+'k':true,
+'l':true,
+'m':true,
+'n':true,
+'o':true,
+'p':true,
+'q':true,
+'r':true,
+'s':true,
+'t':true,
+'u':true,
+'v':true,
+'w':true,
+'x':true,
+'y':true,
+'z':true,
+'{':true,
+'|':true,
+'}':true,
+'~':true,
+'\u007f':true,
+}
+
+// File: encoding/json/tags.go
+//go:build !goexperiment.jsonv2
+package json
+type tagOptions string
+parseTag(tag string)(string,tagOptions)
+(o tagOptions)Contains(optionName string)bool
+

@@ -1,0 +1,159 @@
+{
+  "spec": "SPEC.md version 0.2 draft",
+  "tokenizer": "o200k_base",
+  "tiktoken_version": "0.14.0",
+  "method": "Fresh local tokenization of regenerated bundles; SHA-256 and raw JSONL verification of preserved API measurements. No fresh API requests.",
+  "counts": {
+    "go": 32909,
+    "smol": 16377,
+    "notes": 17716,
+    "outline": 3571,
+    "outline-docs": 10616,
+    "v0.1": 28898,
+    "go-without-notes": 22326,
+    "both-channels": 34093
+  },
+  "uplift": {
+    "extra_tokens_saved_vs_v0.1": 12521,
+    "source_reduction_vs_v0.1_percent": 43.32825801093501,
+    "source_reduction_vs_go_percent": 50.23549788811571,
+    "v0.1_source_reduction_vs_go_percent": 12.188155215898387,
+    "source_reduction_gain_percentage_points": 38.047342672217326,
+    "source_capacity_multiplier_vs_go": 2.009464492886365,
+    "request_reduction_vs_v0.1_percent": 28.87218391864782,
+    "request_reduction_vs_go_percent": 34.893832580522606,
+    "code_only_reduction_vs_comment_free_go_percent": 26.64606288632088,
+    "both_channels_reduction_vs_go_percent": -3.597799993922635
+  },
+  "example": {
+    "go_tokens": 455,
+    "smol_tokens": 250
+  },
+  "payloads": {
+    "go": {
+      "sha256": "02999eb86ef2859db0a9d1a720063082ee765e89c88409d44b8065a8e8266ee0",
+      "bytes": 118081,
+      "raw_text_tokens": 32910
+    },
+    "smol": {
+      "sha256": "d5199a700d9fd77f40c04a49d177a6f6a9e3a5ed10282a37daca962e51869fda",
+      "bytes": 52085,
+      "raw_text_tokens": 16378
+    },
+    "notes": {
+      "sha256": "652cd273d5608aabcbf741f1ee8aecfef1490d8cfa70e325b8563fccaecd6286",
+      "bytes": 63293,
+      "raw_text_tokens": 17717
+    },
+    "outline": {
+      "sha256": "c4b80ef0365fb985f48fa9beb77be59f2dd262587d21537e76e622bcbcc10f79",
+      "bytes": 11879,
+      "raw_text_tokens": 3572
+    },
+    "outline-docs": {
+      "sha256": "732c8cc56b7ef7ad9bce4f3e488af0411ee42a4bf24c54895c819e6d0db63b9d",
+      "bytes": 43729,
+      "raw_text_tokens": 10617
+    },
+    "v0.1": {
+      "sha256": "7680aec1eb93b5c4778ec719c1bc44280a3ed43c7dbd10cd621c7d1fd657cf92",
+      "bytes": 107869,
+      "raw_text_tokens": 28899
+    },
+    "go-without-notes": {
+      "sha256": "37fc76e499441740fb744515a79af41a15a10704c0256268e0ea86e70c8583ee",
+      "bytes": 71546,
+      "raw_text_tokens": 22327
+    },
+    "both-channels": {
+      "sha256": "3702d34c9ab5c2623224118c3acbbf6ffaba6c84008fdabe7645494800748a60",
+      "bytes": 115378,
+      "raw_text_tokens": 34094
+    }
+  },
+  "verified_historical_evidence": [
+    {
+      "input": "v0.1",
+      "report": "measurements/encoding-json-v0.1/usage/report.json",
+      "repetitions": 3,
+      "payload_hashes_match": true,
+      "raw_usage_matches": true,
+      "local_token_delta_matches": true,
+      "comparison": {
+        "repeat": 1,
+        "baseline_input_tokens": 14469,
+        "go_input_tokens": 47378,
+        "smol_input_tokens": 43367,
+        "go_source_tokens": 32909,
+        "smol_source_tokens": 28898,
+        "tokens_saved": 4011,
+        "source_savings_percent": 12.188,
+        "request_savings_percent": 8.466
+      }
+    },
+    {
+      "input": "v0.2",
+      "report": "measurements/encoding-json/usage/report.json",
+      "repetitions": 3,
+      "payload_hashes_match": true,
+      "raw_usage_matches": true,
+      "local_token_delta_matches": true,
+      "comparison": {
+        "repeat": 1,
+        "baseline_input_tokens": 14469,
+        "go_input_tokens": 47378,
+        "smol_input_tokens": 30846,
+        "go_source_tokens": 32909,
+        "smol_source_tokens": 16377,
+        "tokens_saved": 16532,
+        "source_savings_percent": 50.235,
+        "request_savings_percent": 34.894
+      }
+    },
+    {
+      "input": "outline",
+      "report": "measurements/encoding-json/usage-outline/report.json",
+      "repetitions": 1,
+      "payload_hashes_match": true,
+      "raw_usage_matches": true,
+      "local_token_delta_matches": true,
+      "comparison": {
+        "repeat": 1,
+        "baseline_input_tokens": 14475,
+        "go_input_tokens": 47384,
+        "smol_input_tokens": 18046,
+        "go_source_tokens": 32909,
+        "smol_source_tokens": 3571,
+        "tokens_saved": 29338,
+        "source_savings_percent": 89.149,
+        "request_savings_percent": 61.915
+      }
+    },
+    {
+      "input": "outline-docs",
+      "report": "measurements/encoding-json/usage-outline-docs/report.json",
+      "repetitions": 1,
+      "payload_hashes_match": true,
+      "raw_usage_matches": true,
+      "local_token_delta_matches": true,
+      "comparison": {
+        "repeat": 1,
+        "baseline_input_tokens": 14469,
+        "go_input_tokens": 47378,
+        "smol_input_tokens": 25085,
+        "go_source_tokens": 32909,
+        "smol_source_tokens": 10616,
+        "tokens_saved": 22293,
+        "source_savings_percent": 67.741,
+        "request_savings_percent": 47.053
+      }
+    }
+  ],
+  "limitations": [
+    "Source savings apply to code-only loading. Notes are necessary for byte-exact reconstruction.",
+    "Outlines omit bodies and are not complete programs; current outline conformance defects are reported separately.",
+    "One package and one example; no task-accuracy, latency, dollar-cost, or cross-tokenizer claim.",
+    "Request percentages use the recorded 14,469-token harness; a different harness changes them.",
+    "Go-without-notes is the actual code-only lowered Go, with identical production file selection and bundle markers."
+  ]
+}

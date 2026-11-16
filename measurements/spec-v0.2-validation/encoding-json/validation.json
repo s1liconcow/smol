@@ -1,0 +1,43 @@
+[
+  {
+    "command": [
+      "smol-spec-validation",
+      "check",
+      "<package>"
+    ],
+    "stdout": "",
+    "stderr": "check: 8 files passed\n",
+    "exit_code": 0
+  },
+  {
+    "command": [
+      "smol-spec-validation",
+      "lift",
+      "<package>"
+    ],
+    "stdout": "",
+    "stderr": "lift: 8 files passed\n",
+    "exit_code": 0
+  },
+  {
+    "command": [
+      "smol-spec-validation",
+      "fmt",
+      "-check",
+      "<package>"
+    ],
+    "stdout": "",
+    "stderr": "fmt: 8 files passed\n",
+    "exit_code": 0
+  },
+  {
+    "command": [
+      "smol-spec-validation",
+      "lower",
+      "<package>"
+    ],
+    "stdout": "",
+    "stderr": "lower: 8 files passed\n",
+    "exit_code": 0
+  }
+]

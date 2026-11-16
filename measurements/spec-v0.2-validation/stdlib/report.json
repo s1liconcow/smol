@@ -1,0 +1,14 @@
+{
+  "go_version": "go version go1.26.3 darwin/arm64",
+  "command": [
+    "/tmp/smol-spec-validation",
+    "check",
+    "std"
+  ],
+  "exit_code": 0,
+  "passed_files": 2800,
+  "failed_files": 0,
+  "elapsed_seconds": 238.252,
+  "scope": "Host GOOS/GOARCH and build constraints; GoFiles, CgoFiles, TestGoFiles, XTestGoFiles.",
+  "meaning": "Byte equality, deterministic lifting, and formatter idempotence. Not mandatory-fold completeness or all package test suites."
+}

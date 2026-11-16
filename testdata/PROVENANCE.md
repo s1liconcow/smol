@@ -1,0 +1,21 @@
+# Fixture provenance
+
+`example/users.go`, `example/users.smol`, and `example/users.smol.notes` match
+the three code blocks in §11 of SPEC.md v0.2 (draft) verbatim. The 2026-11-15
+validation independently extracted and compared those blocks. `TestSpecExample`
+checks canonical code/notes, normalized round-trip output, and code-only lowering.
+No fixture was regenerated from the implementation during this audit.
+
+The preserved `measurements/example/` request evidence belongs to **v0.1** and
+does not measure today's `users.smol`. Its payload hashes and recorded counts
+are authoritative for the older example only.
+
+The current §11 example was freshly tokenized as 455 Go tokens and 250 Smol
+code tokens. See `measurements/spec-v0.2-validation/uplift.json` for the method.
+The encoding/json v0.1 and v0.2 API measurements retain their original payloads,
+hashes and raw usage events. The audit regenerated the v0.2 bundles and verified
+all recorded counts locally without new API requests.
+
+To update the example after an intentional spec change, extract §11's three
+code blocks and review their differences. Do not generate expected output from
+the implementation under test.

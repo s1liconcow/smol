@@ -1,0 +1,177 @@
+{
+  "model": "gpt-6.1-sol",
+  "codex_version": "codex-cli 0.164.0",
+  "method": "Codex turn.completed.usage.input_tokens",
+  "baseline": "same prompt with empty source markers",
+  "stable": true,
+  "sources": {
+    "go": {
+      "sha256": "72555271950474b3a6a56f6b1ca699d3a0d40bedf844afb3a488e628eb45eda4",
+      "bytes": 1585
+    },
+    "smol": {
+      "sha256": "b30dd8dbd6c2e9b00f5763a337a0c7abf4a3c3527003dec4fe4f191840daaf91",
+      "bytes": 1027
+    }
+  },
+  "comparisons": [
+    {
+      "repeat": 1,
+      "baseline_input_tokens": 14469,
+      "go_input_tokens": 14924,
+      "smol_input_tokens": 14771,
+      "go_source_tokens": 455,
+      "smol_source_tokens": 302,
+      "tokens_saved": 153,
+      "source_savings_percent": 33.626,
+      "request_savings_percent": 1.025
+    },
+    {
+      "repeat": 2,
+      "baseline_input_tokens": 14469,
+      "go_input_tokens": 14924,
+      "smol_input_tokens": 14771,
+      "go_source_tokens": 455,
+      "smol_source_tokens": 302,
+      "tokens_saved": 153,
+      "source_savings_percent": 33.626,
+      "request_savings_percent": 1.025
+    },
+    {
+      "repeat": 3,
+      "baseline_input_tokens": 14469,
+      "go_input_tokens": 14924,
+      "smol_input_tokens": 14771,
+      "go_source_tokens": 455,
+      "smol_source_tokens": 302,
+      "tokens_saved": 153,
+      "source_savings_percent": 33.626,
+      "request_savings_percent": 1.025
+    }
+  ],
+  "records": [
+    {
+      "repeat": 1,
+      "kind": "baseline",
+      "usage": {
+        "input_tokens": 14469,
+        "cached_input_tokens": 12288,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 5,
+        "reasoning_output_tokens": 0
+      },
+      "prompt_sha256": "2e8ebc0bab6069c7e3e1650b6657c4db89b4fb449d5df7c7b4654f38007bc547",
+      "elapsed_seconds": 6.07
+    },
+    {
+      "repeat": 1,
+      "kind": "go",
+      "usage": {
+        "input_tokens": 14924,
+        "cached_input_tokens": 12288,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 5,
+        "reasoning_output_tokens": 0
+      },
+      "prompt_sha256": "45a761e3ad4ba9a50ad949bdf0ae7541aea32b68ff920ebac77cbac990d41ab7",
+      "elapsed_seconds": 4.849
+    },
+    {
+      "repeat": 1,
+      "kind": "smol",
+      "usage": {
+        "input_tokens": 14771,
+        "cached_input_tokens": 12288,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 5,
+        "reasoning_output_tokens": 0
+      },
+      "prompt_sha256": "ed2556ee514e629fb080f44c083bf91a4469850795657d1849913d616fc7b20c",
+      "elapsed_seconds": 4.587
+    },
+    {
+      "repeat": 2,
+      "kind": "smol",
+      "usage": {
+        "input_tokens": 14771,
+        "cached_input_tokens": 14592,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 5,
+        "reasoning_output_tokens": 0
+      },
+      "prompt_sha256": "ed2556ee514e629fb080f44c083bf91a4469850795657d1849913d616fc7b20c",
+      "elapsed_seconds": 4.09
+    },
+    {
+      "repeat": 2,
+      "kind": "go",
+      "usage": {
+        "input_tokens": 14924,
+        "cached_input_tokens": 14720,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 5,
+        "reasoning_output_tokens": 0
+      },
+      "prompt_sha256": "45a761e3ad4ba9a50ad949bdf0ae7541aea32b68ff920ebac77cbac990d41ab7",
+      "elapsed_seconds": 4.854
+    },
+    {
+      "repeat": 2,
+      "kind": "baseline",
+      "usage": {
+        "input_tokens": 14469,
+        "cached_input_tokens": 12288,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 5,
+        "reasoning_output_tokens": 0
+      },
+      "prompt_sha256": "2e8ebc0bab6069c7e3e1650b6657c4db89b4fb449d5df7c7b4654f38007bc547",
+      "elapsed_seconds": 4.815
+    },
+    {
+      "repeat": 3,
+      "kind": "baseline",
+      "usage": {
+        "input_tokens": 14469,
+        "cached_input_tokens": 12288,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 5,
+        "reasoning_output_tokens": 0
+      },
+      "prompt_sha256": "2e8ebc0bab6069c7e3e1650b6657c4db89b4fb449d5df7c7b4654f38007bc547",
+      "elapsed_seconds": 5.878
+    },
+    {
+      "repeat": 3,
+      "kind": "go",
+      "usage": {
+        "input_tokens": 14924,
+        "cached_input_tokens": 12288,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 5,
+        "reasoning_output_tokens": 0
+      },
+      "prompt_sha256": "45a761e3ad4ba9a50ad949bdf0ae7541aea32b68ff920ebac77cbac990d41ab7",
+      "elapsed_seconds": 4.605
+    },
+    {
+      "repeat": 3,
+      "kind": "smol",
+      "usage": {
+        "input_tokens": 14771,
+        "cached_input_tokens": 12288,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 5,
+        "reasoning_output_tokens": 0
+      },
+      "prompt_sha256": "ed2556ee514e629fb080f44c083bf91a4469850795657d1849913d616fc7b20c",
+      "elapsed_seconds": 4.379
+    }
+  ],
+  "limitations": [
+    "Input usage only; no generation-accuracy or dollar-cost claim.",
+    "Source counts subtract an identical empty-input baseline.",
+    "Cached tokens are included in input_tokens and reported separately.",
+    "One example does not establish corpus-wide savings."
+  ]
+}

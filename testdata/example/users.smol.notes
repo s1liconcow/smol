@@ -1,0 +1,19 @@
+smol-notes 1
+@9 var ErrNotFound=errors.New("user not found")
+0 c20 "// ErrNotFound is returned when a user does not exist."
+0 e1
+@16 type User struct@json
+0 b
+@24 type Store interface
+0 b
+@7 type Server struct
+0 b
+@40 (s*Server)Get(ctx,id
+0 c20 "// Get returns the user with the given id."
+0 e1
+@50 .Emails(ctx)[]string!
+0 b
+@93 .ServeHTTP(w,r)
+0 b
+@15 (u*User)FullName()string=>
+0 b

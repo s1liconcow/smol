@@ -1,0 +1,298 @@
+{"Time":"2026-11-15T17:59:50.770895-08:00","Action":"start","Package":"smolang/cmd/smol"}
+{"Time":"2026-11-15T17:59:50.778107-08:00","Action":"start","Package":"smolang/internal/smol"}
+{"Time":"2026-11-15T17:59:50.778161-08:00","Action":"start","Package":"smolang/scripts"}
+{"Time":"2026-11-15T17:59:50.778189-08:00","Action":"output","Package":"smolang/scripts","Output":"?   \tsmolang/scripts\t[no test files]\n"}
+{"Time":"2026-11-15T17:59:50.7782-08:00","Action":"skip","Package":"smolang/scripts","Elapsed":0}
+{"Time":"2026-11-15T17:59:51.033144-08:00","Action":"run","Package":"smolang/cmd/smol","Test":"TestCLIWorkflow"}
+{"Time":"2026-11-15T17:59:51.033228-08:00","Action":"output","Package":"smolang/cmd/smol","Test":"TestCLIWorkflow","Output":"=== RUN   TestCLIWorkflow\n"}
+{"Time":"2026-11-15T17:59:51.191785-08:00","Action":"output","Package":"smolang/cmd/smol","Test":"TestCLIWorkflow","Output":"lift: 1 files passed\n"}
+{"Time":"2026-11-15T17:59:51.192376-08:00","Action":"output","Package":"smolang/cmd/smol","Test":"TestCLIWorkflow","Output":"fmt: 1 files passed\n"}
+{"Time":"2026-11-15T17:59:51.192778-08:00","Action":"output","Package":"smolang/cmd/smol","Test":"TestCLIWorkflow","Output":"lower: 1 files passed\n"}
+{"Time":"2026-11-15T17:59:51.194415-08:00","Action":"output","Package":"smolang/cmd/smol","Test":"TestCLIWorkflow","Output":"check: 1 files passed\n"}
+{"Time":"2026-11-15T17:59:51.215956-08:00","Action":"run","Package":"smolang/internal/smol","Test":"TestSpecExample"}
+{"Time":"2026-11-15T17:59:51.215998-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestSpecExample","Output":"=== RUN   TestSpecExample\n"}
+{"Time":"2026-11-15T17:59:51.536826-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestSpecExample","Output":"--- PASS: TestSpecExample (0.32s)\n"}
+{"Time":"2026-11-15T17:59:51.536883-08:00","Action":"pass","Package":"smolang/internal/smol","Test":"TestSpecExample","Elapsed":0.32}
+{"Time":"2026-11-15T17:59:51.53692-08:00","Action":"run","Package":"smolang/internal/smol","Test":"TestRoundTrips"}
+{"Time":"2026-11-15T17:59:51.536924-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestRoundTrips","Output":"=== RUN   TestRoundTrips\n"}
+{"Time":"2026-11-15T17:59:51.536929-08:00","Action":"run","Package":"smolang/internal/smol","Test":"TestRoundTrips/A"}
+{"Time":"2026-11-15T17:59:51.536932-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestRoundTrips/A","Output":"=== RUN   TestRoundTrips/A\n"}
+{"Time":"2026-11-15T17:59:51.537989-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestRoundTrips/A","Output":"--- PASS: TestRoundTrips/A (0.00s)\n"}
+{"Time":"2026-11-15T17:59:51.538002-08:00","Action":"pass","Package":"smolang/internal/smol","Test":"TestRoundTrips/A","Elapsed":0}
+{"Time":"2026-11-15T17:59:51.538008-08:00","Action":"run","Package":"smolang/internal/smol","Test":"TestRoundTrips/B"}
+{"Time":"2026-11-15T17:59:51.538011-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestRoundTrips/B","Output":"=== RUN   TestRoundTrips/B\n"}
+{"Time":"2026-11-15T17:59:51.539199-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestRoundTrips/B","Output":"--- PASS: TestRoundTrips/B (0.00s)\n"}
+{"Time":"2026-11-15T17:59:51.539206-08:00","Action":"pass","Package":"smolang/internal/smol","Test":"TestRoundTrips/B","Elapsed":0}
+{"Time":"2026-11-15T17:59:51.53921-08:00","Action":"run","Package":"smolang/internal/smol","Test":"TestRoundTrips/C"}
+{"Time":"2026-11-15T17:59:51.539212-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestRoundTrips/C","Output":"=== RUN   TestRoundTrips/C\n"}
+{"Time":"2026-11-15T17:59:51.540498-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestRoundTrips/C","Output":"--- PASS: TestRoundTrips/C (0.00s)\n"}
+{"Time":"2026-11-15T17:59:51.54054-08:00","Action":"pass","Package":"smolang/internal/smol","Test":"TestRoundTrips/C","Elapsed":0}
+{"Time":"2026-11-15T17:59:51.54055-08:00","Action":"run","Package":"smolang/internal/smol","Test":"TestRoundTrips/D"}
+{"Time":"2026-11-15T17:59:51.540572-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestRoundTrips/D","Output":"=== RUN   TestRoundTrips/D\n"}
+{"Time":"2026-11-15T17:59:51.541728-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestRoundTrips/D","Output":"--- PASS: TestRoundTrips/D (0.00s)\n"}
+{"Time":"2026-11-15T17:59:51.541734-08:00","Action":"pass","Package":"smolang/internal/smol","Test":"TestRoundTrips/D","Elapsed":0}
+{"Time":"2026-11-15T17:59:51.541738-08:00","Action":"run","Package":"smolang/internal/smol","Test":"TestRoundTrips/E"}
+{"Time":"2026-11-15T17:59:51.541741-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestRoundTrips/E","Output":"=== RUN   TestRoundTrips/E\n"}
+{"Time":"2026-11-15T17:59:51.542866-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestRoundTrips/E","Output":"--- PASS: TestRoundTrips/E (0.00s)\n"}
+{"Time":"2026-11-15T17:59:51.542878-08:00","Action":"pass","Package":"smolang/internal/smol","Test":"TestRoundTrips/E","Elapsed":0}
+{"Time":"2026-11-15T17:59:51.542885-08:00","Action":"run","Package":"smolang/internal/smol","Test":"TestRoundTrips/F"}
+{"Time":"2026-11-15T17:59:51.542888-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestRoundTrips/F","Output":"=== RUN   TestRoundTrips/F\n"}
+{"Time":"2026-11-15T17:59:51.544231-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestRoundTrips/F","Output":"--- PASS: TestRoundTrips/F (0.00s)\n"}
+{"Time":"2026-11-15T17:59:51.544239-08:00","Action":"pass","Package":"smolang/internal/smol","Test":"TestRoundTrips/F","Elapsed":0}
+{"Time":"2026-11-15T17:59:51.544242-08:00","Action":"run","Package":"smolang/internal/smol","Test":"TestRoundTrips/G"}
+{"Time":"2026-11-15T17:59:51.544247-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestRoundTrips/G","Output":"=== RUN   TestRoundTrips/G\n"}
+{"Time":"2026-11-15T17:59:51.545284-08:00","Action":"output","Package":"smolang/cmd/smol","Test":"TestCLIWorkflow","Output":"lower: 1 files passed\n"}
+{"Time":"2026-11-15T17:59:51.545582-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestRoundTrips/G","Output":"--- PASS: TestRoundTrips/G (0.00s)\n"}
+{"Time":"2026-11-15T17:59:51.545626-08:00","Action":"pass","Package":"smolang/internal/smol","Test":"TestRoundTrips/G","Elapsed":0}
+{"Time":"2026-11-15T17:59:51.545633-08:00","Action":"run","Package":"smolang/internal/smol","Test":"TestRoundTrips/H"}
+{"Time":"2026-11-15T17:59:51.545638-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestRoundTrips/H","Output":"=== RUN   TestRoundTrips/H\n"}
+{"Time":"2026-11-15T17:59:51.546857-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestRoundTrips/H","Output":"--- PASS: TestRoundTrips/H (0.00s)\n"}
+{"Time":"2026-11-15T17:59:51.546877-08:00","Action":"pass","Package":"smolang/internal/smol","Test":"TestRoundTrips/H","Elapsed":0}
+{"Time":"2026-11-15T17:59:51.546884-08:00","Action":"run","Package":"smolang/internal/smol","Test":"TestRoundTrips/I"}
+{"Time":"2026-11-15T17:59:51.546888-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestRoundTrips/I","Output":"=== RUN   TestRoundTrips/I\n"}
+{"Time":"2026-11-15T17:59:51.548705-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestRoundTrips/I","Output":"--- PASS: TestRoundTrips/I (0.00s)\n"}
+{"Time":"2026-11-15T17:59:51.548721-08:00","Action":"pass","Package":"smolang/internal/smol","Test":"TestRoundTrips/I","Elapsed":0}
+{"Time":"2026-11-15T17:59:51.548731-08:00","Action":"run","Package":"smolang/internal/smol","Test":"TestRoundTrips/J"}
+{"Time":"2026-11-15T17:59:51.548735-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestRoundTrips/J","Output":"=== RUN   TestRoundTrips/J\n"}
+{"Time":"2026-11-15T17:59:51.551026-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestRoundTrips/J","Output":"--- PASS: TestRoundTrips/J (0.00s)\n"}
+{"Time":"2026-11-15T17:59:51.551044-08:00","Action":"pass","Package":"smolang/internal/smol","Test":"TestRoundTrips/J","Elapsed":0}
+{"Time":"2026-11-15T17:59:51.551055-08:00","Action":"run","Package":"smolang/internal/smol","Test":"TestRoundTrips/K"}
+{"Time":"2026-11-15T17:59:51.551058-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestRoundTrips/K","Output":"=== RUN   TestRoundTrips/K\n"}
+{"Time":"2026-11-15T17:59:51.551853-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestRoundTrips/K","Output":"--- PASS: TestRoundTrips/K (0.00s)\n"}
+{"Time":"2026-11-15T17:59:51.551876-08:00","Action":"pass","Package":"smolang/internal/smol","Test":"TestRoundTrips/K","Elapsed":0}
+{"Time":"2026-11-15T17:59:51.551883-08:00","Action":"run","Package":"smolang/internal/smol","Test":"TestRoundTrips/L"}
+{"Time":"2026-11-15T17:59:51.551888-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestRoundTrips/L","Output":"=== RUN   TestRoundTrips/L\n"}
+{"Time":"2026-11-15T17:59:51.55431-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestRoundTrips/L","Output":"--- PASS: TestRoundTrips/L (0.00s)\n"}
+{"Time":"2026-11-15T17:59:51.554332-08:00","Action":"pass","Package":"smolang/internal/smol","Test":"TestRoundTrips/L","Elapsed":0}
+{"Time":"2026-11-15T17:59:51.55434-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestRoundTrips","Output":"--- PASS: TestRoundTrips (0.02s)\n"}
+{"Time":"2026-11-15T17:59:51.554345-08:00","Action":"pass","Package":"smolang/internal/smol","Test":"TestRoundTrips","Elapsed":0.02}
+{"Time":"2026-11-15T17:59:51.55435-08:00","Action":"run","Package":"smolang/internal/smol","Test":"TestInvalid"}
+{"Time":"2026-11-15T17:59:51.554359-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestInvalid","Output":"=== RUN   TestInvalid\n"}
+{"Time":"2026-11-15T17:59:51.554832-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestInvalid","Output":"--- PASS: TestInvalid (0.00s)\n"}
+{"Time":"2026-11-15T17:59:51.554859-08:00","Action":"pass","Package":"smolang/internal/smol","Test":"TestInvalid","Elapsed":0}
+{"Time":"2026-11-15T17:59:51.554865-08:00","Action":"run","Package":"smolang/internal/smol","Test":"TestMod"}
+{"Time":"2026-11-15T17:59:51.554868-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestMod","Output":"=== RUN   TestMod\n"}
+{"Time":"2026-11-15T17:59:51.554873-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestMod","Output":"--- PASS: TestMod (0.00s)\n"}
+{"Time":"2026-11-15T17:59:51.554877-08:00","Action":"pass","Package":"smolang/internal/smol","Test":"TestMod","Elapsed":0}
+{"Time":"2026-11-15T17:59:51.554881-08:00","Action":"run","Package":"smolang/internal/smol","Test":"TestForms"}
+{"Time":"2026-11-15T17:59:51.554884-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestForms","Output":"=== RUN   TestForms\n"}
+{"Time":"2026-11-15T17:59:51.554887-08:00","Action":"run","Package":"smolang/internal/smol","Test":"TestForms/6.1_std_import"}
+{"Time":"2026-11-15T17:59:51.55489-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestForms/6.1_std_import","Output":"=== RUN   TestForms/6.1_std_import\n"}
+{"Time":"2026-11-15T17:59:51.556108-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestForms/6.1_std_import","Output":"--- PASS: TestForms/6.1_std_import (0.00s)\n"}
+{"Time":"2026-11-15T17:59:51.556151-08:00","Action":"pass","Package":"smolang/internal/smol","Test":"TestForms/6.1_std_import","Elapsed":0}
+{"Time":"2026-11-15T17:59:51.556157-08:00","Action":"run","Package":"smolang/internal/smol","Test":"TestForms/6.1_ambiguous_import"}
+{"Time":"2026-11-15T17:59:51.55616-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestForms/6.1_ambiguous_import","Output":"=== RUN   TestForms/6.1_ambiguous_import\n"}
+{"Time":"2026-11-15T17:59:51.598331-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestForms/6.1_ambiguous_import","Output":"--- PASS: TestForms/6.1_ambiguous_import (0.04s)\n"}
+{"Time":"2026-11-15T17:59:51.5984-08:00","Action":"pass","Package":"smolang/internal/smol","Test":"TestForms/6.1_ambiguous_import","Elapsed":0.04}
+{"Time":"2026-11-15T17:59:51.598424-08:00","Action":"run","Package":"smolang/internal/smol","Test":"TestForms/6.1_dot_import"}
+{"Time":"2026-11-15T17:59:51.59843-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestForms/6.1_dot_import","Output":"=== RUN   TestForms/6.1_dot_import\n"}
+{"Time":"2026-11-15T17:59:51.650153-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestForms/6.1_dot_import","Output":"--- PASS: TestForms/6.1_dot_import (0.05s)\n"}
+{"Time":"2026-11-15T17:59:51.650175-08:00","Action":"pass","Package":"smolang/internal/smol","Test":"TestForms/6.1_dot_import","Elapsed":0.05}
+{"Time":"2026-11-15T17:59:51.65018-08:00","Action":"run","Package":"smolang/internal/smol","Test":"TestForms/6.1_blank_import"}
+{"Time":"2026-11-15T17:59:51.650183-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestForms/6.1_blank_import","Output":"=== RUN   TestForms/6.1_blank_import\n"}
+{"Time":"2026-11-15T17:59:51.72744-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestForms/6.1_blank_import","Output":"--- PASS: TestForms/6.1_blank_import (0.08s)\n"}
+{"Time":"2026-11-15T17:59:51.727463-08:00","Action":"pass","Package":"smolang/internal/smol","Test":"TestForms/6.1_blank_import","Elapsed":0.08}
+{"Time":"2026-11-15T17:59:51.727468-08:00","Action":"run","Package":"smolang/internal/smol","Test":"TestForms/6.1_comment_import"}
+{"Time":"2026-11-15T17:59:51.727471-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestForms/6.1_comment_import","Output":"=== RUN   TestForms/6.1_comment_import\n"}
+{"Time":"2026-11-15T17:59:51.728791-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestForms/6.1_comment_import","Output":"--- PASS: TestForms/6.1_comment_import (0.00s)\n"}
+{"Time":"2026-11-15T17:59:51.728814-08:00","Action":"pass","Package":"smolang/internal/smol","Test":"TestForms/6.1_comment_import","Elapsed":0}
+{"Time":"2026-11-15T17:59:51.728819-08:00","Action":"run","Package":"smolang/internal/smol","Test":"TestForms/6.2_receiver"}
+{"Time":"2026-11-15T17:59:51.728823-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestForms/6.2_receiver","Output":"=== RUN   TestForms/6.2_receiver\n"}
+{"Time":"2026-11-15T17:59:51.730101-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestForms/6.2_receiver","Output":"--- PASS: TestForms/6.2_receiver (0.00s)\n"}
+{"Time":"2026-11-15T17:59:51.730108-08:00","Action":"pass","Package":"smolang/internal/smol","Test":"TestForms/6.2_receiver","Elapsed":0}
+{"Time":"2026-11-15T17:59:51.730121-08:00","Action":"run","Package":"smolang/internal/smol","Test":"TestForms/6.2_receiver_miss"}
+{"Time":"2026-11-15T17:59:51.730124-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestForms/6.2_receiver_miss","Output":"=== RUN   TestForms/6.2_receiver_miss\n"}
+{"Time":"2026-11-15T17:59:51.731238-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestForms/6.2_receiver_miss","Output":"--- PASS: TestForms/6.2_receiver_miss (0.00s)\n"}
+{"Time":"2026-11-15T17:59:51.731244-08:00","Action":"pass","Package":"smolang/internal/smol","Test":"TestForms/6.2_receiver_miss","Elapsed":0}
+{"Time":"2026-11-15T17:59:51.731246-08:00","Action":"run","Package":"smolang/internal/smol","Test":"TestForms/6.2_func_literal"}
+{"Time":"2026-11-15T17:59:51.731249-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestForms/6.2_func_literal","Output":"=== RUN   TestForms/6.2_func_literal\n"}
+{"Time":"2026-11-15T17:59:51.732006-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestForms/6.2_func_literal","Output":"--- PASS: TestForms/6.2_func_literal (0.00s)\n"}
+{"Time":"2026-11-15T17:59:51.732011-08:00","Action":"pass","Package":"smolang/internal/smol","Test":"TestForms/6.2_func_literal","Elapsed":0}
+{"Time":"2026-11-15T17:59:51.732014-08:00","Action":"run","Package":"smolang/internal/smol","Test":"TestForms/6.3_error"}
+{"Time":"2026-11-15T17:59:51.732016-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestForms/6.3_error","Output":"=== RUN   TestForms/6.3_error\n"}
+{"Time":"2026-11-15T17:59:51.733138-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestForms/6.3_error","Output":"--- PASS: TestForms/6.3_error (0.00s)\n"}
+{"Time":"2026-11-15T17:59:51.733165-08:00","Action":"pass","Package":"smolang/internal/smol","Test":"TestForms/6.3_error","Elapsed":0}
+{"Time":"2026-11-15T17:59:51.733173-08:00","Action":"run","Package":"smolang/internal/smol","Test":"TestForms/6.3_named"}
+{"Time":"2026-11-15T17:59:51.733179-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestForms/6.3_named","Output":"=== RUN   TestForms/6.3_named\n"}
+{"Time":"2026-11-15T17:59:51.734149-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestForms/6.3_named","Output":"--- PASS: TestForms/6.3_named (0.00s)\n"}
+{"Time":"2026-11-15T17:59:51.734156-08:00","Action":"pass","Package":"smolang/internal/smol","Test":"TestForms/6.3_named","Elapsed":0}
+{"Time":"2026-11-15T17:59:51.734159-08:00","Action":"run","Package":"smolang/internal/smol","Test":"TestForms/6.3_func_type"}
+{"Time":"2026-11-15T17:59:51.734162-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestForms/6.3_func_type","Output":"=== RUN   TestForms/6.3_func_type\n"}
+{"Time":"2026-11-15T17:59:51.734856-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestForms/6.3_func_type","Output":"--- PASS: TestForms/6.3_func_type (0.00s)\n"}
+{"Time":"2026-11-15T17:59:51.734866-08:00","Action":"pass","Package":"smolang/internal/smol","Test":"TestForms/6.3_func_type","Elapsed":0}
+{"Time":"2026-11-15T17:59:51.734869-08:00","Action":"run","Package":"smolang/internal/smol","Test":"TestForms/6.4_conventional"}
+{"Time":"2026-11-15T17:59:51.734872-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestForms/6.4_conventional","Output":"=== RUN   TestForms/6.4_conventional\n"}
+{"Time":"2026-11-15T17:59:51.735994-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestForms/6.4_conventional","Output":"--- PASS: TestForms/6.4_conventional (0.00s)\n"}
+{"Time":"2026-11-15T17:59:51.736007-08:00","Action":"pass","Package":"smolang/internal/smol","Test":"TestForms/6.4_conventional","Elapsed":0}
+{"Time":"2026-11-15T17:59:51.73601-08:00","Action":"run","Package":"smolang/internal/smol","Test":"TestForms/6.4_typed"}
+{"Time":"2026-11-15T17:59:51.736012-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestForms/6.4_typed","Output":"=== RUN   TestForms/6.4_typed\n"}
+{"Time":"2026-11-15T17:59:51.737227-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestForms/6.4_typed","Output":"--- PASS: TestForms/6.4_typed (0.00s)\n"}
+{"Time":"2026-11-15T17:59:51.737235-08:00","Action":"pass","Package":"smolang/internal/smol","Test":"TestForms/6.4_typed","Elapsed":0}
+{"Time":"2026-11-15T17:59:51.737238-08:00","Action":"run","Package":"smolang/internal/smol","Test":"TestForms/6.4_grouped"}
+{"Time":"2026-11-15T17:59:51.73724-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestForms/6.4_grouped","Output":"=== RUN   TestForms/6.4_grouped\n"}
+{"Time":"2026-11-15T17:59:51.737768-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestForms/6.4_grouped","Output":"--- PASS: TestForms/6.4_grouped (0.00s)\n"}
+{"Time":"2026-11-15T17:59:51.737774-08:00","Action":"pass","Package":"smolang/internal/smol","Test":"TestForms/6.4_grouped","Elapsed":0}
+{"Time":"2026-11-15T17:59:51.737776-08:00","Action":"run","Package":"smolang/internal/smol","Test":"TestForms/6.4_comment"}
+{"Time":"2026-11-15T17:59:51.737779-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestForms/6.4_comment","Output":"=== RUN   TestForms/6.4_comment\n"}
+{"Time":"2026-11-15T17:59:51.739099-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestForms/6.4_comment","Output":"--- PASS: TestForms/6.4_comment (0.00s)\n"}
+{"Time":"2026-11-15T17:59:51.739107-08:00","Action":"pass","Package":"smolang/internal/smol","Test":"TestForms/6.4_comment","Elapsed":0}
+{"Time":"2026-11-15T17:59:51.73911-08:00","Action":"run","Package":"smolang/internal/smol","Test":"TestForms/6.5_bare"}
+{"Time":"2026-11-15T17:59:51.739119-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestForms/6.5_bare","Output":"=== RUN   TestForms/6.5_bare\n"}
+{"Time":"2026-11-15T17:59:51.740439-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestForms/6.5_bare","Output":"--- PASS: TestForms/6.5_bare (0.00s)\n"}
+{"Time":"2026-11-15T17:59:51.740462-08:00","Action":"pass","Package":"smolang/internal/smol","Test":"TestForms/6.5_bare","Elapsed":0}
+{"Time":"2026-11-15T17:59:51.740468-08:00","Action":"run","Package":"smolang/internal/smol","Test":"TestForms/6.5_assignment"}
+{"Time":"2026-11-15T17:59:51.740471-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestForms/6.5_assignment","Output":"=== RUN   TestForms/6.5_assignment\n"}
+{"Time":"2026-11-15T17:59:51.74251-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestForms/6.5_assignment","Output":"--- PASS: TestForms/6.5_assignment (0.00s)\n"}
+{"Time":"2026-11-15T17:59:51.742531-08:00","Action":"pass","Package":"smolang/internal/smol","Test":"TestForms/6.5_assignment","Elapsed":0}
+{"Time":"2026-11-15T17:59:51.742537-08:00","Action":"run","Package":"smolang/internal/smol","Test":"TestForms/6.5_err_only"}
+{"Time":"2026-11-15T17:59:51.742541-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestForms/6.5_err_only","Output":"=== RUN   TestForms/6.5_err_only\n"}
+{"Time":"2026-11-15T17:59:51.743773-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestForms/6.5_err_only","Output":"--- PASS: TestForms/6.5_err_only (0.00s)\n"}
+{"Time":"2026-11-15T17:59:51.743843-08:00","Action":"pass","Package":"smolang/internal/smol","Test":"TestForms/6.5_err_only","Elapsed":0}
+{"Time":"2026-11-15T17:59:51.743879-08:00","Action":"run","Package":"smolang/internal/smol","Test":"TestForms/6.5_custom"}
+{"Time":"2026-11-15T17:59:51.743907-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestForms/6.5_custom","Output":"=== RUN   TestForms/6.5_custom\n"}
+{"Time":"2026-11-15T17:59:51.744607-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestForms/6.5_custom","Output":"--- PASS: TestForms/6.5_custom (0.00s)\n"}
+{"Time":"2026-11-15T17:59:51.74463-08:00","Action":"pass","Package":"smolang/internal/smol","Test":"TestForms/6.5_custom","Elapsed":0}
+{"Time":"2026-11-15T17:59:51.744639-08:00","Action":"run","Package":"smolang/internal/smol","Test":"TestForms/6.5_comment"}
+{"Time":"2026-11-15T17:59:51.744645-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestForms/6.5_comment","Output":"=== RUN   TestForms/6.5_comment\n"}
+{"Time":"2026-11-15T17:59:51.746748-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestForms/6.5_comment","Output":"--- PASS: TestForms/6.5_comment (0.00s)\n"}
+{"Time":"2026-11-15T17:59:51.746774-08:00","Action":"pass","Package":"smolang/internal/smol","Test":"TestForms/6.5_comment","Elapsed":0}
+{"Time":"2026-11-15T17:59:51.746782-08:00","Action":"run","Package":"smolang/internal/smol","Test":"TestForms/6.5_blank"}
+{"Time":"2026-11-15T17:59:51.746786-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestForms/6.5_blank","Output":"=== RUN   TestForms/6.5_blank\n"}
+{"Time":"2026-11-15T17:59:51.747988-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestForms/6.5_blank","Output":"--- PASS: TestForms/6.5_blank (0.00s)\n"}
+{"Time":"2026-11-15T17:59:51.748009-08:00","Action":"pass","Package":"smolang/internal/smol","Test":"TestForms/6.5_blank","Elapsed":0}
+{"Time":"2026-11-15T17:59:51.748015-08:00","Action":"run","Package":"smolang/internal/smol","Test":"TestForms/6.5_else"}
+{"Time":"2026-11-15T17:59:51.74802-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestForms/6.5_else","Output":"=== RUN   TestForms/6.5_else\n"}
+{"Time":"2026-11-15T17:59:51.749234-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestForms/6.5_else","Output":"--- PASS: TestForms/6.5_else (0.00s)\n"}
+{"Time":"2026-11-15T17:59:51.749254-08:00","Action":"pass","Package":"smolang/internal/smol","Test":"TestForms/6.5_else","Elapsed":0}
+{"Time":"2026-11-15T17:59:51.749259-08:00","Action":"run","Package":"smolang/internal/smol","Test":"TestForms/6.6_ok"}
+{"Time":"2026-11-15T17:59:51.749261-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestForms/6.6_ok","Output":"=== RUN   TestForms/6.6_ok\n"}
+{"Time":"2026-11-15T17:59:51.749826-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestForms/6.6_ok","Output":"--- PASS: TestForms/6.6_ok (0.00s)\n"}
+{"Time":"2026-11-15T17:59:51.749845-08:00","Action":"pass","Package":"smolang/internal/smol","Test":"TestForms/6.6_ok","Elapsed":0}
+{"Time":"2026-11-15T17:59:51.749853-08:00","Action":"run","Package":"smolang/internal/smol","Test":"TestForms/6.6_fail"}
+{"Time":"2026-11-15T17:59:51.749858-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestForms/6.6_fail","Output":"=== RUN   TestForms/6.6_fail\n"}
+{"Time":"2026-11-15T17:59:51.751049-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestForms/6.6_fail","Output":"--- PASS: TestForms/6.6_fail (0.00s)\n"}
+{"Time":"2026-11-15T17:59:51.751058-08:00","Action":"pass","Package":"smolang/internal/smol","Test":"TestForms/6.6_fail","Elapsed":0}
+{"Time":"2026-11-15T17:59:51.751061-08:00","Action":"run","Package":"smolang/internal/smol","Test":"TestForms/6.6_noncanonical"}
+{"Time":"2026-11-15T17:59:51.751064-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestForms/6.6_noncanonical","Output":"=== RUN   TestForms/6.6_noncanonical\n"}
+{"Time":"2026-11-15T17:59:51.752311-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestForms/6.6_noncanonical","Output":"--- PASS: TestForms/6.6_noncanonical (0.00s)\n"}
+{"Time":"2026-11-15T17:59:51.752334-08:00","Action":"pass","Package":"smolang/internal/smol","Test":"TestForms/6.6_noncanonical","Elapsed":0}
+{"Time":"2026-11-15T17:59:51.752341-08:00","Action":"run","Package":"smolang/internal/smol","Test":"TestForms/6.6_comment"}
+{"Time":"2026-11-15T17:59:51.752345-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestForms/6.6_comment","Output":"=== RUN   TestForms/6.6_comment\n"}
+{"Time":"2026-11-15T17:59:51.752905-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestForms/6.6_comment","Output":"--- PASS: TestForms/6.6_comment (0.00s)\n"}
+{"Time":"2026-11-15T17:59:51.752926-08:00","Action":"pass","Package":"smolang/internal/smol","Test":"TestForms/6.6_comment","Elapsed":0}
+{"Time":"2026-11-15T17:59:51.752931-08:00","Action":"run","Package":"smolang/internal/smol","Test":"TestForms/6.7_value"}
+{"Time":"2026-11-15T17:59:51.752934-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestForms/6.7_value","Output":"=== RUN   TestForms/6.7_value\n"}
+{"Time":"2026-11-15T17:59:51.754233-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestForms/6.7_value","Output":"--- PASS: TestForms/6.7_value (0.00s)\n"}
+{"Time":"2026-11-15T17:59:51.75425-08:00","Action":"pass","Package":"smolang/internal/smol","Test":"TestForms/6.7_value","Elapsed":0}
+{"Time":"2026-11-15T17:59:51.754255-08:00","Action":"run","Package":"smolang/internal/smol","Test":"TestForms/6.7_index"}
+{"Time":"2026-11-15T17:59:51.754258-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestForms/6.7_index","Output":"=== RUN   TestForms/6.7_index\n"}
+{"Time":"2026-11-15T17:59:51.755657-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestForms/6.7_index","Output":"--- PASS: TestForms/6.7_index (0.00s)\n"}
+{"Time":"2026-11-15T17:59:51.755671-08:00","Action":"pass","Package":"smolang/internal/smol","Test":"TestForms/6.7_index","Elapsed":0}
+{"Time":"2026-11-15T17:59:51.755675-08:00","Action":"run","Package":"smolang/internal/smol","Test":"TestForms/6.7_in_identifier"}
+{"Time":"2026-11-15T17:59:51.755678-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestForms/6.7_in_identifier","Output":"=== RUN   TestForms/6.7_in_identifier\n"}
+{"Time":"2026-11-15T17:59:51.756825-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestForms/6.7_in_identifier","Output":"--- PASS: TestForms/6.7_in_identifier (0.00s)\n"}
+{"Time":"2026-11-15T17:59:51.756841-08:00","Action":"pass","Package":"smolang/internal/smol","Test":"TestForms/6.7_in_identifier","Elapsed":0}
+{"Time":"2026-11-15T17:59:51.756845-08:00","Action":"run","Package":"smolang/internal/smol","Test":"TestForms/6.7_comment"}
+{"Time":"2026-11-15T17:59:51.756848-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestForms/6.7_comment","Output":"=== RUN   TestForms/6.7_comment\n"}
+{"Time":"2026-11-15T17:59:51.757809-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestForms/6.7_comment","Output":"--- PASS: TestForms/6.7_comment (0.00s)\n"}
+{"Time":"2026-11-15T17:59:51.757829-08:00","Action":"pass","Package":"smolang/internal/smol","Test":"TestForms/6.7_comment","Elapsed":0}
+{"Time":"2026-11-15T17:59:51.757836-08:00","Action":"run","Package":"smolang/internal/smol","Test":"TestForms/6.8_decl"}
+{"Time":"2026-11-15T17:59:51.757858-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestForms/6.8_decl","Output":"=== RUN   TestForms/6.8_decl\n"}
+{"Time":"2026-11-15T17:59:51.7587-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestForms/6.8_decl","Output":"--- PASS: TestForms/6.8_decl (0.00s)\n"}
+{"Time":"2026-11-15T17:59:51.758707-08:00","Action":"pass","Package":"smolang/internal/smol","Test":"TestForms/6.8_decl","Elapsed":0}
+{"Time":"2026-11-15T17:59:51.75871-08:00","Action":"run","Package":"smolang/internal/smol","Test":"TestForms/6.8_oneline_decl"}
+{"Time":"2026-11-15T17:59:51.758712-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestForms/6.8_oneline_decl","Output":"=== RUN   TestForms/6.8_oneline_decl\n"}
+{"Time":"2026-11-15T17:59:51.759744-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestForms/6.8_oneline_decl","Output":"--- PASS: TestForms/6.8_oneline_decl (0.00s)\n"}
+{"Time":"2026-11-15T17:59:51.759751-08:00","Action":"pass","Package":"smolang/internal/smol","Test":"TestForms/6.8_oneline_decl","Elapsed":0}
+{"Time":"2026-11-15T17:59:51.759754-08:00","Action":"run","Package":"smolang/internal/smol","Test":"TestForms/6.8_literal"}
+{"Time":"2026-11-15T17:59:51.759757-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestForms/6.8_literal","Output":"=== RUN   TestForms/6.8_literal\n"}
+{"Time":"2026-11-15T17:59:51.760855-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestForms/6.8_literal","Output":"--- PASS: TestForms/6.8_literal (0.00s)\n"}
+{"Time":"2026-11-15T17:59:51.760863-08:00","Action":"pass","Package":"smolang/internal/smol","Test":"TestForms/6.8_literal","Elapsed":0}
+{"Time":"2026-11-15T17:59:51.760867-08:00","Action":"run","Package":"smolang/internal/smol","Test":"TestForms/6.8_comment"}
+{"Time":"2026-11-15T17:59:51.760869-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestForms/6.8_comment","Output":"=== RUN   TestForms/6.8_comment\n"}
+{"Time":"2026-11-15T17:59:51.76153-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestForms/6.8_comment","Output":"--- PASS: TestForms/6.8_comment (0.00s)\n"}
+{"Time":"2026-11-15T17:59:51.761534-08:00","Action":"pass","Package":"smolang/internal/smol","Test":"TestForms/6.8_comment","Elapsed":0}
+{"Time":"2026-11-15T17:59:51.761537-08:00","Action":"run","Package":"smolang/internal/smol","Test":"TestForms/7_type_parameter"}
+{"Time":"2026-11-15T17:59:51.76154-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestForms/7_type_parameter","Output":"=== RUN   TestForms/7_type_parameter\n"}
+{"Time":"2026-11-15T17:59:51.762644-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestForms/7_type_parameter","Output":"--- PASS: TestForms/7_type_parameter (0.00s)\n"}
+{"Time":"2026-11-15T17:59:51.762667-08:00","Action":"pass","Package":"smolang/internal/smol","Test":"TestForms/7_type_parameter","Elapsed":0}
+{"Time":"2026-11-15T17:59:51.762672-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestForms","Output":"--- PASS: TestForms (0.21s)\n"}
+{"Time":"2026-11-15T17:59:51.762689-08:00","Action":"pass","Package":"smolang/internal/smol","Test":"TestForms","Elapsed":0.21}
+{"Time":"2026-11-15T17:59:51.762694-08:00","Action":"run","Package":"smolang/internal/smol","Test":"TestCorpusRegressions"}
+{"Time":"2026-11-15T17:59:51.762698-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestCorpusRegressions","Output":"=== RUN   TestCorpusRegressions\n"}
+{"Time":"2026-11-15T17:59:51.774434-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestCorpusRegressions","Output":"--- PASS: TestCorpusRegressions (0.01s)\n"}
+{"Time":"2026-11-15T17:59:51.774458-08:00","Action":"pass","Package":"smolang/internal/smol","Test":"TestCorpusRegressions","Elapsed":0.01}
+{"Time":"2026-11-15T17:59:51.774464-08:00","Action":"run","Package":"smolang/internal/smol","Test":"TestPackageScopeAndZeros"}
+{"Time":"2026-11-15T17:59:51.774468-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestPackageScopeAndZeros","Output":"=== RUN   TestPackageScopeAndZeros\n"}
+{"Time":"2026-11-15T17:59:51.85499-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestPackageScopeAndZeros","Output":"--- PASS: TestPackageScopeAndZeros (0.08s)\n"}
+{"Time":"2026-11-15T17:59:51.855023-08:00","Action":"pass","Package":"smolang/internal/smol","Test":"TestPackageScopeAndZeros","Elapsed":0.08}
+{"Time":"2026-11-15T17:59:51.85503-08:00","Action":"run","Package":"smolang/internal/smol","Test":"TestStructTags"}
+{"Time":"2026-11-15T17:59:51.855035-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestStructTags","Output":"=== RUN   TestStructTags\n"}
+{"Time":"2026-11-15T17:59:51.857676-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestStructTags","Output":"--- PASS: TestStructTags (0.00s)\n"}
+{"Time":"2026-11-15T17:59:51.857695-08:00","Action":"pass","Package":"smolang/internal/smol","Test":"TestStructTags","Elapsed":0}
+{"Time":"2026-11-15T17:59:51.857699-08:00","Action":"run","Package":"smolang/internal/smol","Test":"TestUnicodeAndLiterals"}
+{"Time":"2026-11-15T17:59:51.857703-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestUnicodeAndLiterals","Output":"=== RUN   TestUnicodeAndLiterals\n"}
+{"Time":"2026-11-15T17:59:51.858178-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestUnicodeAndLiterals","Output":"--- PASS: TestUnicodeAndLiterals (0.00s)\n"}
+{"Time":"2026-11-15T17:59:51.858202-08:00","Action":"pass","Package":"smolang/internal/smol","Test":"TestUnicodeAndLiterals","Elapsed":0}
+{"Time":"2026-11-15T17:59:51.858208-08:00","Action":"run","Package":"smolang/internal/smol","Test":"TestNestedReturnsAndOperators"}
+{"Time":"2026-11-15T17:59:51.858213-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestNestedReturnsAndOperators","Output":"=== RUN   TestNestedReturnsAndOperators\n"}
+{"Time":"2026-11-15T17:59:51.863167-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestNestedReturnsAndOperators","Output":"--- PASS: TestNestedReturnsAndOperators (0.00s)\n"}
+{"Time":"2026-11-15T17:59:51.863184-08:00","Action":"pass","Package":"smolang/internal/smol","Test":"TestNestedReturnsAndOperators","Elapsed":0}
+{"Time":"2026-11-15T17:59:51.863188-08:00","Action":"run","Package":"smolang/internal/smol","Test":"TestLines"}
+{"Time":"2026-11-15T17:59:51.863191-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestLines","Output":"=== RUN   TestLines\n"}
+{"Time":"2026-11-15T17:59:51.863271-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestLines","Output":"--- PASS: TestLines (0.00s)\n"}
+{"Time":"2026-11-15T17:59:51.863276-08:00","Action":"pass","Package":"smolang/internal/smol","Test":"TestLines","Elapsed":0}
+{"Time":"2026-11-15T17:59:51.863278-08:00","Action":"run","Package":"smolang/internal/smol","Test":"TestExternalTestDotImport"}
+{"Time":"2026-11-15T17:59:51.86328-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestExternalTestDotImport","Output":"=== RUN   TestExternalTestDotImport\n"}
+{"Time":"2026-11-15T17:59:51.863666-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestExternalTestDotImport","Output":"--- PASS: TestExternalTestDotImport (0.00s)\n"}
+{"Time":"2026-11-15T17:59:51.863674-08:00","Action":"pass","Package":"smolang/internal/smol","Test":"TestExternalTestDotImport","Elapsed":0}
+{"Time":"2026-11-15T17:59:51.863678-08:00","Action":"run","Package":"smolang/internal/smol","Test":"TestLocalResultTypes"}
+{"Time":"2026-11-15T17:59:51.863681-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestLocalResultTypes","Output":"=== RUN   TestLocalResultTypes\n"}
+{"Time":"2026-11-15T17:59:51.866-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestLocalResultTypes","Output":"--- PASS: TestLocalResultTypes (0.00s)\n"}
+{"Time":"2026-11-15T17:59:51.86601-08:00","Action":"pass","Package":"smolang/internal/smol","Test":"TestLocalResultTypes","Elapsed":0}
+{"Time":"2026-11-15T17:59:51.866014-08:00","Action":"run","Package":"smolang/internal/smol","Test":"TestDotImportDoesNotExportPrivateNames"}
+{"Time":"2026-11-15T17:59:51.866018-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestDotImportDoesNotExportPrivateNames","Output":"=== RUN   TestDotImportDoesNotExportPrivateNames\n"}
+{"Time":"2026-11-15T17:59:51.866276-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestDotImportDoesNotExportPrivateNames","Output":"--- PASS: TestDotImportDoesNotExportPrivateNames (0.00s)\n"}
+{"Time":"2026-11-15T17:59:51.866311-08:00","Action":"pass","Package":"smolang/internal/smol","Test":"TestDotImportDoesNotExportPrivateNames","Elapsed":0}
+{"Time":"2026-11-15T17:59:51.866319-08:00","Action":"run","Package":"smolang/internal/smol","Test":"TestPackStandardPackage"}
+{"Time":"2026-11-15T17:59:51.866462-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestPackStandardPackage","Output":"=== RUN   TestPackStandardPackage\n"}
+{"Time":"2026-11-15T17:59:51.907342-08:00","Action":"output","Package":"smolang/cmd/smol","Test":"TestCLIWorkflow","Output":"--- PASS: TestCLIWorkflow (0.87s)\n"}
+{"Time":"2026-11-15T17:59:51.907372-08:00","Action":"pass","Package":"smolang/cmd/smol","Test":"TestCLIWorkflow","Elapsed":0.87}
+{"Time":"2026-11-15T17:59:51.907378-08:00","Action":"run","Package":"smolang/cmd/smol","Test":"TestUnsupportedGoVersion"}
+{"Time":"2026-11-15T17:59:51.907381-08:00","Action":"output","Package":"smolang/cmd/smol","Test":"TestUnsupportedGoVersion","Output":"=== RUN   TestUnsupportedGoVersion\n"}
+{"Time":"2026-11-15T17:59:51.907908-08:00","Action":"output","Package":"smolang/cmd/smol","Test":"TestUnsupportedGoVersion","Output":"--- PASS: TestUnsupportedGoVersion (0.00s)\n"}
+{"Time":"2026-11-15T17:59:51.907932-08:00","Action":"pass","Package":"smolang/cmd/smol","Test":"TestUnsupportedGoVersion","Elapsed":0}
+{"Time":"2026-11-15T17:59:51.907941-08:00","Action":"run","Package":"smolang/cmd/smol","Test":"TestModuleImportTable"}
+{"Time":"2026-11-15T17:59:51.907945-08:00","Action":"output","Package":"smolang/cmd/smol","Test":"TestModuleImportTable","Output":"=== RUN   TestModuleImportTable\n"}
+{"Time":"2026-11-15T17:59:51.933562-08:00","Action":"output","Package":"smolang/cmd/smol","Test":"TestModuleImportTable","Output":"lift: 1 files passed\n"}
+{"Time":"2026-11-15T17:59:51.934051-08:00","Action":"output","Package":"smolang/cmd/smol","Test":"TestModuleImportTable","Output":"lower: 1 files passed\n"}
+{"Time":"2026-11-15T17:59:51.974278-08:00","Action":"output","Package":"smolang/cmd/smol","Test":"TestModuleImportTable","Output":"--- PASS: TestModuleImportTable (0.07s)\n"}
+{"Time":"2026-11-15T17:59:51.974305-08:00","Action":"pass","Package":"smolang/cmd/smol","Test":"TestModuleImportTable","Elapsed":0.07}
+{"Time":"2026-11-15T17:59:51.974313-08:00","Action":"output","Package":"smolang/cmd/smol","Output":"PASS\n"}
+{"Time":"2026-11-15T17:59:51.975039-08:00","Action":"output","Package":"smolang/cmd/smol","Output":"ok  \tsmolang/cmd/smol\t1.204s\n"}
+{"Time":"2026-11-15T17:59:51.975053-08:00","Action":"pass","Package":"smolang/cmd/smol","Elapsed":1.204}
+{"Time":"2026-11-15T17:59:52.525268-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestPackStandardPackage","Output":"--- PASS: TestPackStandardPackage (0.66s)\n"}
+{"Time":"2026-11-15T17:59:52.525323-08:00","Action":"pass","Package":"smolang/internal/smol","Test":"TestPackStandardPackage","Elapsed":0.66}
+{"Time":"2026-11-15T17:59:52.525335-08:00","Action":"run","Package":"smolang/internal/smol","Test":"TestScopeForms"}
+{"Time":"2026-11-15T17:59:52.525339-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestScopeForms","Output":"=== RUN   TestScopeForms\n"}
+{"Time":"2026-11-15T17:59:52.529953-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestScopeForms","Output":"--- PASS: TestScopeForms (0.00s)\n"}
+{"Time":"2026-11-15T17:59:52.529988-08:00","Action":"pass","Package":"smolang/internal/smol","Test":"TestScopeForms","Elapsed":0}
+{"Time":"2026-11-15T17:59:52.529994-08:00","Action":"run","Package":"smolang/internal/smol","Test":"TestPartialImportBlock"}
+{"Time":"2026-11-15T17:59:52.53-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestPartialImportBlock","Output":"=== RUN   TestPartialImportBlock\n"}
+{"Time":"2026-11-15T17:59:52.577603-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestPartialImportBlock","Output":"--- PASS: TestPartialImportBlock (0.05s)\n"}
+{"Time":"2026-11-15T17:59:52.577626-08:00","Action":"pass","Package":"smolang/internal/smol","Test":"TestPartialImportBlock","Elapsed":0.05}
+{"Time":"2026-11-15T17:59:52.577633-08:00","Action":"run","Package":"smolang/internal/smol","Test":"TestNotes"}
+{"Time":"2026-11-15T17:59:52.577637-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestNotes","Output":"=== RUN   TestNotes\n"}
+{"Time":"2026-11-15T17:59:52.578548-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestNotes","Output":"--- PASS: TestNotes (0.00s)\n"}
+{"Time":"2026-11-15T17:59:52.578581-08:00","Action":"pass","Package":"smolang/internal/smol","Test":"TestNotes","Elapsed":0}
+{"Time":"2026-11-15T17:59:52.578589-08:00","Action":"run","Package":"smolang/internal/smol","Test":"TestImpliedBreaks"}
+{"Time":"2026-11-15T17:59:52.578594-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestImpliedBreaks","Output":"=== RUN   TestImpliedBreaks\n"}
+{"Time":"2026-11-15T17:59:52.580082-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestImpliedBreaks","Output":"--- PASS: TestImpliedBreaks (0.00s)\n"}
+{"Time":"2026-11-15T17:59:52.580121-08:00","Action":"pass","Package":"smolang/internal/smol","Test":"TestImpliedBreaks","Elapsed":0}
+{"Time":"2026-11-15T17:59:52.580132-08:00","Action":"run","Package":"smolang/internal/smol","Test":"TestDirectivesStayInCode"}
+{"Time":"2026-11-15T17:59:52.580136-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestDirectivesStayInCode","Output":"=== RUN   TestDirectivesStayInCode\n"}
+{"Time":"2026-11-15T17:59:52.655576-08:00","Action":"output","Package":"smolang/internal/smol","Test":"TestDirectivesStayInCode","Output":"--- PASS: TestDirectivesStayInCode (0.08s)\n"}
+{"Time":"2026-11-15T17:59:52.655603-08:00","Action":"pass","Package":"smolang/internal/smol","Test":"TestDirectivesStayInCode","Elapsed":0.08}
+{"Time":"2026-11-15T17:59:52.655611-08:00","Action":"output","Package":"smolang/internal/smol","Output":"PASS\n"}
+{"Time":"2026-11-15T17:59:52.656476-08:00","Action":"output","Package":"smolang/internal/smol","Output":"ok  \tsmolang/internal/smol\t1.878s\n"}
+{"Time":"2026-11-15T17:59:52.656488-08:00","Action":"pass","Package":"smolang/internal/smol","Elapsed":1.8780000000000001}

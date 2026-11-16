@@ -1,0 +1,2 @@
+/Users/david/projects/smolang/internal/smol/imports.go: L1 differs at line 3: want "import (\n\t\"fmt\"\n\t\"go/ast\"\n\t\"go/importer\"\n\t\"go/token\"\n\t\"go/types\"\n\t\"io\"\n\t\"os\"\n\t\"os/exec\"\n\t\"path\"\n\t\"sort\"\n\t\"strconv\"\n\t\"str", got "type Import struct {\n\tPath  string\n\tAlias bool\n}\ntype Options struct {\n\tContext      *PackageContext\n\tImports      map[s"
+smol: 1 files failed; 13 passed

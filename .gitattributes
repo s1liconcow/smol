@@ -1,0 +1,2 @@
+# Benchmark bundle separators are hashed measurement inputs; preserve their EOFs.
+measurements/**/*.txt whitespace=-blank-at-eof

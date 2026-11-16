@@ -1,0 +1,195 @@
+{
+  "elapsed_seconds": 0.498307208,
+  "failed": 7,
+  "go_version": "go1.26.3",
+  "passed": 27,
+  "results": [
+    {
+      "id": "open_fold",
+      "section": "6.10",
+      "status": "PASS"
+    },
+    {
+      "id": "open_one_use",
+      "section": "6.10",
+      "status": "PASS"
+    },
+    {
+      "id": "open_local_shadow",
+      "section": "6.10",
+      "status": "PASS"
+    },
+    {
+      "id": "open_comment",
+      "section": "6.10",
+      "status": "FAIL",
+      "error": "L1 differs at line 5: want \" return strings. /*keep*/ ToUpper(s) + strings.TrimSpace(s) }\\n\", got \"\\n\\treturn strings. /*keep*/ ToUpper(s) + strings.TrimSpace(s)\\n}\\n\"",
+      "source": "package p\nimport \"strings\"\nfunc F(s string) string { return strings./*keep*/ToUpper(s)+strings.TrimSpace(s) }\n"
+    },
+    {
+      "id": "open_composite_key",
+      "section": "6.10",
+      "status": "PASS"
+    },
+    {
+      "id": "subject_fold",
+      "section": "6.11",
+      "status": "PASS"
+    },
+    {
+      "id": "subject_shadow",
+      "section": "6.11",
+      "status": "PASS"
+    },
+    {
+      "id": "subject_comment",
+      "section": "6.11",
+      "status": "PASS"
+    },
+    {
+      "id": "subject_nested_closure",
+      "section": "6.11",
+      "status": "PASS"
+    },
+    {
+      "id": "subject_promoted_near_miss",
+      "section": "6.11",
+      "status": "PASS"
+    },
+    {
+      "id": "subject_embedded_pointer",
+      "section": "6.11",
+      "status": "FAIL",
+      "error": "missing \"{return Buffer}\" in:\npackage p\nuse bytes\ntype T struct{*Buffer}\n(t*T)F()*Buffer{return t.Buffer}\n",
+      "source": "package p\nimport \"bytes\"\ntype T struct { *bytes.Buffer }\nfunc (t *T) F() *bytes.Buffer { return t.Buffer }\n"
+    },
+    {
+      "id": "convention_three",
+      "section": "6.12",
+      "status": "PASS"
+    },
+    {
+      "id": "convention_two",
+      "section": "6.12",
+      "status": "PASS"
+    },
+    {
+      "id": "convention_comment",
+      "section": "6.12",
+      "status": "FAIL",
+      "error": "L1 differs at line 4: want \"{}\\nfunc C(x int)          {}\\n\", got \"                               {}\\nfunc C(x int)                                         {}\\n\"",
+      "source": "package p\nfunc A(x /*keep*/ int) {}\nfunc B(x int) {}\nfunc C(x int) {}\n"
+    },
+    {
+      "id": "convention_tie",
+      "section": "6.12",
+      "status": "PASS"
+    },
+    {
+      "id": "convention_inherited_receiver_not_counted",
+      "section": "6.12",
+      "status": "PASS"
+    },
+    {
+      "id": "comma_fold",
+      "section": "6.13",
+      "status": "PASS"
+    },
+    {
+      "id": "comma_operator_near_miss",
+      "section": "6.13",
+      "status": "PASS"
+    },
+    {
+      "id": "comma_comment",
+      "section": "6.13",
+      "status": "PASS"
+    },
+    {
+      "id": "comma_case",
+      "section": "6.13",
+      "status": "PASS"
+    },
+    {
+      "id": "contextual_identifiers",
+      "section": "5",
+      "status": "PASS"
+    },
+    {
+      "id": "partial_import",
+      "section": "6.1",
+      "status": "PASS"
+    },
+    {
+      "id": "partial_import_blank_near_miss",
+      "section": "6.1",
+      "status": "PASS"
+    },
+    {
+      "id": "inline_fold",
+      "section": "5",
+      "status": "PASS"
+    },
+    {
+      "id": "inline_comment",
+      "section": "5",
+      "status": "PASS"
+    },
+    {
+      "id": "implied_break",
+      "section": "5",
+      "status": "PASS"
+    },
+    {
+      "id": "import_marker_literal_roundtrip",
+      "section": "3/L1",
+      "status": "FAIL",
+      "error": "L1 differs at line 3: want \"import \\\"fmt\\\"\\n\\nconst marker = `_ \\\"smol.invalid/inferred-imports\\\"`\\n\\nfunc F() { fmt.Println(marker) }\\n\", got \"const marker = `\\\"fmt\\\"`\\n\\nfunc F() { fmt.Println(marker) }\\n\"",
+      "source": "package p\nimport \"fmt\"\nconst marker = `_ \"smol.invalid/inferred-imports\"`\nfunc F() { fmt.Println(marker) }\n"
+    },
+    {
+      "id": "directives_and_cgo_without_notes",
+      "section": "3/L4",
+      "status": "PASS"
+    },
+    {
+      "id": "trailing_directive_without_notes",
+      "section": "3/L4",
+      "status": "FAIL",
+      "error": "Go tokens/directives differ without notes:\npackage p\n\nconst A = 1\n",
+      "source": "package p\nconst A = 1\n//go:generate echo end\n"
+    },
+    {
+      "id": "code_only_program_tokens",
+      "section": "3/L4",
+      "status": "PASS"
+    },
+    {
+      "id": "outline_removes_literal_bodies",
+      "section": "9",
+      "status": "FAIL",
+      "error": "function literal body remains:\npackage p\nvar F=func()int=\u003e1\nG()int\n",
+      "source": "package p\nvar F = func() int { return 1 }\nfunc G() int { return 2 }\n"
+    },
+    {
+      "id": "outline_docs_dense_layout",
+      "section": "9",
+      "status": "FAIL",
+      "error": "outline is not dense code plus docs:\npackage p\n\n// F doc.\nF(x int)int\n",
+      "source": "package p\n// F doc.\nfunc F(x int) int { return x }\n"
+    },
+    {
+      "id": "notes_unchanged",
+      "section": "4.1",
+      "status": "PASS"
+    },
+    {
+      "id": "notes_after_edit",
+      "section": "4.1",
+      "status": "PASS"
+    }
+  ],
+  "scope": "Targeted spec-derived probes, not an exhaustive requirement count. FAIL means observed divergence, not an accepted exception.",
+  "spec": "SPEC.md v0.2 draft",
+  "total": 34
+}

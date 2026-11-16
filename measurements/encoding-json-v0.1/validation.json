@@ -1,0 +1,43 @@
+[
+  {
+    "command": [
+      "smol",
+      "check",
+      "<package>"
+    ],
+    "stdout": "",
+    "stderr": "check: 8 files passed\n",
+    "exit_code": 0
+  },
+  {
+    "command": [
+      "smol",
+      "lift",
+      "<package>"
+    ],
+    "stdout": "",
+    "stderr": "lift: 8 files passed\n",
+    "exit_code": 0
+  },
+  {
+    "command": [
+      "smol",
+      "fmt",
+      "-check",
+      "<package>"
+    ],
+    "stdout": "",
+    "stderr": "fmt: 8 files passed\n",
+    "exit_code": 0
+  },
+  {
+    "command": [
+      "smol",
+      "lower",
+      "<package>"
+    ],
+    "stdout": "",
+    "stderr": "lower: 8 files passed\n",
+    "exit_code": 0
+  }
+]

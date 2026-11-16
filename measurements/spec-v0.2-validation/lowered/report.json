@@ -1,0 +1,252 @@
+{
+  "go_version": "go version go1.26.3 darwin/arm64",
+  "method": "go test using an overlay of actively selected GoFiles, CgoFiles, TestGoFiles and XTestGoFiles after lift/lower",
+  "GODEBUG": "asynctimerchan=0",
+  "runs": [
+    {
+      "mode": "with-notes",
+      "command": [
+        "go",
+        "test",
+        "-count=1",
+        "-json",
+        "-overlay",
+        "<overlay>",
+        "fmt",
+        "encoding/json",
+        "go/parser"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 3.0,
+      "passed_cases": 857,
+      "failed_cases": [],
+      "skipped_cases": 0,
+      "packages": [
+        {
+          "package": "fmt",
+          "status": "pass"
+        },
+        {
+          "package": "encoding/json",
+          "status": "pass"
+        },
+        {
+          "package": "go/parser",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "mode": "without-notes",
+      "command": [
+        "go",
+        "test",
+        "-count=1",
+        "-json",
+        "-overlay",
+        "<overlay>",
+        "fmt",
+        "encoding/json",
+        "go/parser"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 3.685,
+      "passed_cases": 857,
+      "failed_cases": [],
+      "skipped_cases": 0,
+      "packages": [
+        {
+          "package": "fmt",
+          "status": "pass"
+        },
+        {
+          "package": "encoding/json",
+          "status": "pass"
+        },
+        {
+          "package": "go/parser",
+          "status": "pass"
+        }
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "path": "/opt/homebrew/Cellar/go/1.26.3/libexec/src/fmt/doc.go",
+      "sha256": "400732eb804a960f2c1bdfbd88a5cb183e11e7a46bbb44f2b0784d0b1b171a05"
+    },
+    {
+      "path": "/opt/homebrew/Cellar/go/1.26.3/libexec/src/fmt/errors.go",
+      "sha256": "01fd304868493a3aa1198cc79a56274930f687353e9405211ca063c1b8195ea6"
+    },
+    {
+      "path": "/opt/homebrew/Cellar/go/1.26.3/libexec/src/fmt/errors_test.go",
+      "sha256": "5523f8e2296fc4d577859941acaf62271d330b2de476eb62d4de814144484c22"
+    },
+    {
+      "path": "/opt/homebrew/Cellar/go/1.26.3/libexec/src/fmt/example_test.go",
+      "sha256": "921d06317a3afad832a852e9d28a6a3e89079b05b0a8e8aa3c304ce112eae793"
+    },
+    {
+      "path": "/opt/homebrew/Cellar/go/1.26.3/libexec/src/fmt/export_test.go",
+      "sha256": "e59d92b99635114b279c57c61a5124cb4ef122515109dcad9076f422b3ae58d7"
+    },
+    {
+      "path": "/opt/homebrew/Cellar/go/1.26.3/libexec/src/fmt/fmt_test.go",
+      "sha256": "91ba25e43417e56b9321031bb5d18022b25b10c5e0ed3899254adf03dd5c966d"
+    },
+    {
+      "path": "/opt/homebrew/Cellar/go/1.26.3/libexec/src/fmt/format.go",
+      "sha256": "a668c0d6bb23f6ac929b73ef661a65be2225a9f665052a2ce02c4c58339c3335"
+    },
+    {
+      "path": "/opt/homebrew/Cellar/go/1.26.3/libexec/src/fmt/gostringer_example_test.go",
+      "sha256": "f95ccfa23a6fdb8ed57d5a43a71b6029e45f1fcb75246a5697ccc67fa89a64c2"
+    },
+    {
+      "path": "/opt/homebrew/Cellar/go/1.26.3/libexec/src/fmt/print.go",
+      "sha256": "57250462a0d06d61f124b4530493bcdd150e9de29600bd60347e1c74457ac8a1"
+    },
+    {
+      "path": "/opt/homebrew/Cellar/go/1.26.3/libexec/src/fmt/scan.go",
+      "sha256": "ac416ad4fba7f9901c737a203950d5d57220d1401e4bc7f0a2420389b88a86cd"
+    },
+    {
+      "path": "/opt/homebrew/Cellar/go/1.26.3/libexec/src/fmt/scan_test.go",
+      "sha256": "2587760e05de164118c6dda9c6e631f0489b9e5522c20720cd9885d14a908154"
+    },
+    {
+      "path": "/opt/homebrew/Cellar/go/1.26.3/libexec/src/fmt/state_test.go",
+      "sha256": "c291078bee27767603e943e69362d7d50837b6d2a9e2de115ddf6c5b1d2b6e57"
+    },
+    {
+      "path": "/opt/homebrew/Cellar/go/1.26.3/libexec/src/fmt/stringer_example_test.go",
+      "sha256": "efed7e5907f43271ebbada84e3221cc35f4470f6e14de2d9950a12c71f924180"
+    },
+    {
+      "path": "/opt/homebrew/Cellar/go/1.26.3/libexec/src/fmt/stringer_test.go",
+      "sha256": "a9e670e1da6ca6353539702edb667d088f37677fb8ad0a3555020dedd1e8e8bf"
+    },
+    {
+      "path": "/opt/homebrew/Cellar/go/1.26.3/libexec/src/encoding/json/bench_test.go",
+      "sha256": "96ca082ec32ed58994522371c3672c0ca3ca3e73161ec055f8cdee221241881a"
+    },
+    {
+      "path": "/opt/homebrew/Cellar/go/1.26.3/libexec/src/encoding/json/decode.go",
+      "sha256": "a91535f18f9a2c8380448b1c84c4c2017dbe3d530a10faf8babf03494042da48"
+    },
+    {
+      "path": "/opt/homebrew/Cellar/go/1.26.3/libexec/src/encoding/json/decode_test.go",
+      "sha256": "72458e480fdbeeff97057aa3474fc7d4292744c94720baffb77b5292696d34f6"
+    },
+    {
+      "path": "/opt/homebrew/Cellar/go/1.26.3/libexec/src/encoding/json/encode.go",
+      "sha256": "4012d78aa8236f3067a6330ddf2f719c7e59b262fcf4fff5e51b4abd1ccba235"
+    },
+    {
+      "path": "/opt/homebrew/Cellar/go/1.26.3/libexec/src/encoding/json/encode_test.go",
+      "sha256": "f29e24f20175687c700c09a83a8770472d659445c99454ec903b7791abd64983"
+    },
+    {
+      "path": "/opt/homebrew/Cellar/go/1.26.3/libexec/src/encoding/json/example_marshaling_test.go",
+      "sha256": "33e4682d95d76d9c55a4214187fa89087e4576ee293c958688e773508ac5defd"
+    },
+    {
+      "path": "/opt/homebrew/Cellar/go/1.26.3/libexec/src/encoding/json/example_test.go",
+      "sha256": "2745c3eac5bf5aac2d0913f65cb1535edd6358530d72ce99bd8df206c559e54e"
+    },
+    {
+      "path": "/opt/homebrew/Cellar/go/1.26.3/libexec/src/encoding/json/example_text_marshaling_test.go",
+      "sha256": "529e0912b791e2b2dc4feaebeb306ac64ff68ec63b139e0083e717d60f091953"
+    },
+    {
+      "path": "/opt/homebrew/Cellar/go/1.26.3/libexec/src/encoding/json/fold.go",
+      "sha256": "5b3c91bfbf6943e04d9aeb934031331a3f08a83b10079a0a7f0def3466b2f39e"
+    },
+    {
+      "path": "/opt/homebrew/Cellar/go/1.26.3/libexec/src/encoding/json/fold_test.go",
+      "sha256": "e1129bf04165ea8c664db796cc45f05af53da5142abeccae56b1b6e1fd8c019f"
+    },
+    {
+      "path": "/opt/homebrew/Cellar/go/1.26.3/libexec/src/encoding/json/fuzz_test.go",
+      "sha256": "4cc9a4efd84f83c209e61e239940f86b1d73fa94203b3856a714612b9a700a1b"
+    },
+    {
+      "path": "/opt/homebrew/Cellar/go/1.26.3/libexec/src/encoding/json/indent.go",
+      "sha256": "9ef9eac29fc4cc9d94bf305976891eb5e78a2644acd4f07ed7a0c186991ac908"
+    },
+    {
+      "path": "/opt/homebrew/Cellar/go/1.26.3/libexec/src/encoding/json/number_test.go",
+      "sha256": "1300807d38f66af414edd3d9d9e397abaf394df1e2db6732b39890265f99fe41"
+    },
+    {
+      "path": "/opt/homebrew/Cellar/go/1.26.3/libexec/src/encoding/json/scanner.go",
+      "sha256": "2b16dd215274dfa8e0806b53cca144684d5b9c8a02319cf5ce10120c50e6eef2"
+    },
+    {
+      "path": "/opt/homebrew/Cellar/go/1.26.3/libexec/src/encoding/json/scanner_test.go",
+      "sha256": "98e8f263320ff3faa6ce91b43862531f5720e548b46bf494894e8f72d9806a21"
+    },
+    {
+      "path": "/opt/homebrew/Cellar/go/1.26.3/libexec/src/encoding/json/stream.go",
+      "sha256": "bb26b2442db6a686fc7f823ea9cc89babe26ac988ec7d8caf4a157aeb60d92f2"
+    },
+    {
+      "path": "/opt/homebrew/Cellar/go/1.26.3/libexec/src/encoding/json/stream_test.go",
+      "sha256": "1ead5d8bef90aa0fcc3b62900f0dbaa31af5cf5cf3096dc6c2d868c7d88b9430"
+    },
+    {
+      "path": "/opt/homebrew/Cellar/go/1.26.3/libexec/src/encoding/json/tables.go",
+      "sha256": "74f7f392e1cc22890b72959647b9e5facda591a890c81f8167b532d31adc561e"
+    },
+    {
+      "path": "/opt/homebrew/Cellar/go/1.26.3/libexec/src/encoding/json/tagkey_test.go",
+      "sha256": "24051f99ca5a3c53e9ab84d19b9409dd7ed3cb927f4a746fc3996aadeb3610d0"
+    },
+    {
+      "path": "/opt/homebrew/Cellar/go/1.26.3/libexec/src/encoding/json/tags.go",
+      "sha256": "e7300718fc8862f4dbc8bbdde33e4a0335124bb028e68062b52d3c042c374d6e"
+    },
+    {
+      "path": "/opt/homebrew/Cellar/go/1.26.3/libexec/src/encoding/json/tags_test.go",
+      "sha256": "ea2b2e2013ef2f9b8c83eeec82784236861fc694731630e075fff81a7c3ec2a7"
+    },
+    {
+      "path": "/opt/homebrew/Cellar/go/1.26.3/libexec/src/go/parser/error_test.go",
+      "sha256": "1b417d88fb92d15fcebac19a8741e505c308f7fac40c8faee01e2b83c395af08"
+    },
+    {
+      "path": "/opt/homebrew/Cellar/go/1.26.3/libexec/src/go/parser/example_test.go",
+      "sha256": "3a617c434fbe98cbbfabe9c7095672730eeea03f1836d5404463d64297fbfc3a"
+    },
+    {
+      "path": "/opt/homebrew/Cellar/go/1.26.3/libexec/src/go/parser/interface.go",
+      "sha256": "32cfd5a073a595853bc3246fafd7fa71c850d7109bcfdf1e0d06f6fcc05c77eb"
+    },
+    {
+      "path": "/opt/homebrew/Cellar/go/1.26.3/libexec/src/go/parser/parser.go",
+      "sha256": "fd4e1b8ca182b035e6ef0ce986ef7d3974f73749c15a7607d60df41d826587f0"
+    },
+    {
+      "path": "/opt/homebrew/Cellar/go/1.26.3/libexec/src/go/parser/parser_test.go",
+      "sha256": "7c57f9147c6efe9ac37f8b815d30ea0e30d556ad32a956718ba71770de4930b4"
+    },
+    {
+      "path": "/opt/homebrew/Cellar/go/1.26.3/libexec/src/go/parser/performance_test.go",
+      "sha256": "18a1d342347e1139d552cb64c990e8eaee84556a99e51970108c66aa5227fd3a"
+    },
+    {
+      "path": "/opt/homebrew/Cellar/go/1.26.3/libexec/src/go/parser/resolver.go",
+      "sha256": "88b407100f2a9f396ec897680ffc04ba2be5d6ca661fcf1e1d78bfe44241179e"
+    },
+    {
+      "path": "/opt/homebrew/Cellar/go/1.26.3/libexec/src/go/parser/resolver_test.go",
+      "sha256": "f62e1cbde058dce97c3c5f79e75d3fe6d0d71ce255f456db9c0df4f678c53ccb"
+    },
+    {
+      "path": "/opt/homebrew/Cellar/go/1.26.3/libexec/src/go/parser/short_test.go",
+      "sha256": "deb709fec92be1a1e9f38c9041886e69b671c731e99f369e3217c3295199d853"
+    }
+  ],
+  "limits": "Selected packages only, not the complete standard-library test suite; GOROOT unchanged. Without-notes mode removes production notes only; test notes remain so Example output assertions still run."
+}
