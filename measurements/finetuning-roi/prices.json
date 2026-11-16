@@ -1,0 +1,22 @@
+{
+  "as_of_user_date": "2026-11-15",
+  "currency": "USD",
+  "gpt_6_1_sol_standard_per_million": {"input": 2.0, "cached_input": 0.1, "cache_write": 2.5, "output": 10.0},
+  "qwen_3_5_9b_base_serverless_per_million": {"input": 0.17, "output": 0.25},
+  "qwen_3_5_9b_lora_sft_per_million": 0.34,
+  "qwen_3_5_9b_lora_minimum_per_job": 4.0,
+  "together_dedicated_h100_per_gpu_hour": 5.49,
+  "sources": {
+    "gpt": "https://developers.openai.com/api/docs/models/gpt-6.1-sol",
+    "qwen_base_inference": "https://docs.together.ai/docs/serverless/models",
+    "qwen_lora_and_dedicated": "https://www.together.ai/pricing",
+    "fine_tuned_deployment": "https://docs.together.ai/docs/fine-tuning/deployment"
+  },
+  "notes": [
+    "GPT repricing is API list-price equivalent, not the user's Codex subscription invoice. Standard, short context, no regional premium.",
+    "Together's opened pricing page superseded stale search snippets: Qwen3.5 9B LoRA is $0.34/M, not $0.48/M.",
+    "Qwen base serverless prices are an economic reference, NOT a quote for serving a custom fine-tune.",
+    "Together documents dedicated or downloaded deployment for fine-tunes; dedicated replicas bill while idle.",
+    "GPT-6.1-sol is not fine-tunable. Its token savings cannot be claimed as an available fine-tuning deployment."
+  ]
+}

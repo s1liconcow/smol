@@ -1,0 +1,49 @@
+{
+  "task": "gin-gonic__gin-4003",
+  "arm": "smol-none",
+  "repeat": 1,
+  "model": "gpt-6.1-sol",
+  "effort": "medium",
+  "counts": {
+    "prompt_tokens": 4193,
+    "instruction_tokens": 0,
+    "source_tokens": 3539,
+    "import_table_tokens": 157,
+    "original_go_source_tokens": 6550,
+    "guide_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "prompt_sha256": "8641c893040097cdf1a6dc1cf8e99935dab325ccd26a5bd6133d0d7e35b9eecd"
+  },
+  "attempts": [
+    {
+      "attempt": 0,
+      "usage": {
+        "input_tokens": 18643,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 119,
+        "reasoning_output_tokens": 46
+      },
+      "elapsed_seconds": 32.463,
+      "prompt_tokens": 4193,
+      "response_tokens": 61,
+      "prompt_sha256": "8641c893040097cdf1a6dc1cf8e99935dab325ccd26a5bd6133d0d7e35b9eecd",
+      "response_sha256": "3a658e954865957495d0ce6a77447f1721cd33c21525946daca4aae179e89691",
+      "stage": "tests",
+      "resolved": true,
+      "passed": [
+        "TestMethodNotAllowedNoRoute"
+      ],
+      "failed": [],
+      "missing_expected_tests": [],
+      "canonical_before_format": false,
+      "feedback": ""
+    }
+  ],
+  "resolved": true,
+  "first_pass_resolved": true,
+  "usage": {
+    "input_tokens": 18643,
+    "cached_input_tokens": 0,
+    "output_tokens": 119
+  }
+}

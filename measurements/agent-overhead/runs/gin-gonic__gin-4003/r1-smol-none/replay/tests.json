@@ -1,0 +1,20 @@
+{
+  "command": [
+    "go",
+    "test",
+    "-count=1",
+    "-json",
+    ".",
+    "-run",
+    "TestMethodNotAllowedNoRoute"
+  ],
+  "exit_code": 0,
+  "stdout": "{\"Time\":\"2026-11-15T19:10:02.619436-08:00\",\"Action\":\"start\",\"Package\":\"github.com/gin-gonic/gin\"}\n{\"Time\":\"2026-11-15T19:10:02.896806-08:00\",\"Action\":\"run\",\"Package\":\"github.com/gin-gonic/gin\",\"Test\":\"TestMethodNotAllowedNoRoute\"}\n{\"Time\":\"2026-11-15T19:10:02.896852-08:00\",\"Action\":\"output\",\"Package\":\"github.com/gin-gonic/gin\",\"Test\":\"TestMethodNotAllowedNoRoute\",\"Output\":\"=== RUN   TestMethodNotAllowedNoRoute\\n\"}\n{\"Time\":\"2026-11-15T19:10:02.896927-08:00\",\"Action\":\"output\",\"Package\":\"github.com/gin-gonic/gin\",\"Test\":\"TestMethodNotAllowedNoRoute\",\"Output\":\"--- PASS: TestMethodNotAllowedNoRoute (0.00s)\\n\"}\n{\"Time\":\"2026-11-15T19:10:02.896936-08:00\",\"Action\":\"pass\",\"Package\":\"github.com/gin-gonic/gin\",\"Test\":\"TestMethodNotAllowedNoRoute\",\"Elapsed\":0}\n{\"Time\":\"2026-11-15T19:10:02.896947-08:00\",\"Action\":\"output\",\"Package\":\"github.com/gin-gonic/gin\",\"Output\":\"PASS\\n\"}\n{\"Time\":\"2026-11-15T19:10:02.89741-08:00\",\"Action\":\"output\",\"Package\":\"github.com/gin-gonic/gin\",\"Output\":\"ok  \\tgithub.com/gin-gonic/gin\\t0.278s\\n\"}\n{\"Time\":\"2026-11-15T19:10:02.897417-08:00\",\"Action\":\"pass\",\"Package\":\"github.com/gin-gonic/gin\",\"Elapsed\":0.278}\n",
+  "stderr": "",
+  "elapsed_seconds": 0.899,
+  "passed": [
+    "TestMethodNotAllowedNoRoute"
+  ],
+  "failed": [],
+  "skipped": []
+}

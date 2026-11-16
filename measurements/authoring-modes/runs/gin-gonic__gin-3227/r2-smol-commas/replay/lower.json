@@ -1,0 +1,11 @@
+{
+  "command": [
+    "/private/tmp/smol-overhead/smol",
+    "lower",
+    "gin.smol"
+  ],
+  "exit_code": 0,
+  "stdout": "",
+  "stderr": "lower: 1 files passed\n",
+  "elapsed_seconds": 0.981
+}

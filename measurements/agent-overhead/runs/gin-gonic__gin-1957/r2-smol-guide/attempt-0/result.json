@@ -1,0 +1,18 @@
+{
+  "attempt": 0,
+  "usage": {
+    "input_tokens": 21416,
+    "cached_input_tokens": 0,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 429,
+    "reasoning_output_tokens": 104
+  },
+  "elapsed_seconds": 15.594,
+  "prompt_tokens": 6969,
+  "response_tokens": 313,
+  "prompt_sha256": "2afb8a8dac5d9cc04e6da5bf1f4fcfd493dd2d17ca3bcd98cb1cddb0fee2085d",
+  "response_sha256": "7854d80a5fbca46db36c5c314d51b2232b1922edcb47e8077ea7d2118868f3f6",
+  "stage": "lower",
+  "feedback": "smol: /private/tmp/smol-overhead/candidate-90nkmmg3/repo/binding/header.smol: lower: source.go:17:47: missing ',' in argument list (and 1 more errors)\n",
+  "resolved": false
+}

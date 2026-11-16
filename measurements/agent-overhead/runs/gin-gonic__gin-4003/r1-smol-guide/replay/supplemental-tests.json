@@ -1,0 +1,23 @@
+{
+  "command": [
+    "go",
+    "test",
+    "-count=1",
+    "-json",
+    ".",
+    "-run",
+    "Test(NoRoute|MiddlewareNoRoute|EngineHandleMethodNotAllowed)"
+  ],
+  "exit_code": 0,
+  "stdout": "{\"Time\":\"2026-11-15T19:09:56.863646-08:00\",\"Action\":\"start\",\"Package\":\"github.com/gin-gonic/gin\"}\n{\"Time\":\"2026-11-15T19:09:57.075992-08:00\",\"Action\":\"run\",\"Package\":\"github.com/gin-gonic/gin\",\"Test\":\"TestNoRouteWithoutGlobalHandlers\"}\n{\"Time\":\"2026-11-15T19:09:57.076038-08:00\",\"Action\":\"output\",\"Package\":\"github.com/gin-gonic/gin\",\"Test\":\"TestNoRouteWithoutGlobalHandlers\",\"Output\":\"=== RUN   TestNoRouteWithoutGlobalHandlers\\n\"}\n{\"Time\":\"2026-11-15T19:09:57.076055-08:00\",\"Action\":\"output\",\"Package\":\"github.com/gin-gonic/gin\",\"Test\":\"TestNoRouteWithoutGlobalHandlers\",\"Output\":\"--- PASS: TestNoRouteWithoutGlobalHandlers (0.00s)\\n\"}\n{\"Time\":\"2026-11-15T19:09:57.076057-08:00\",\"Action\":\"pass\",\"Package\":\"github.com/gin-gonic/gin\",\"Test\":\"TestNoRouteWithoutGlobalHandlers\",\"Elapsed\":0}\n{\"Time\":\"2026-11-15T19:09:57.076061-08:00\",\"Action\":\"run\",\"Package\":\"github.com/gin-gonic/gin\",\"Test\":\"TestNoRouteWithGlobalHandlers\"}\n{\"Time\":\"2026-11-15T19:09:57.076062-08:00\",\"Action\":\"output\",\"Package\":\"github.com/gin-gonic/gin\",\"Test\":\"TestNoRouteWithGlobalHandlers\",\"Output\":\"=== RUN   TestNoRouteWithGlobalHandlers\\n\"}\n{\"Time\":\"2026-11-15T19:09:57.076066-08:00\",\"Action\":\"output\",\"Package\":\"github.com/gin-gonic/gin\",\"Test\":\"TestNoRouteWithGlobalHandlers\",\"Output\":\"--- PASS: TestNoRouteWithGlobalHandlers (0.00s)\\n\"}\n{\"Time\":\"2026-11-15T19:09:57.076067-08:00\",\"Action\":\"pass\",\"Package\":\"github.com/gin-gonic/gin\",\"Test\":\"TestNoRouteWithGlobalHandlers\",\"Elapsed\":0}\n{\"Time\":\"2026-11-15T19:09:57.076084-08:00\",\"Action\":\"run\",\"Package\":\"github.com/gin-gonic/gin\",\"Test\":\"TestMiddlewareNoRoute\"}\n{\"Time\":\"2026-11-15T19:09:57.076086-08:00\",\"Action\":\"output\",\"Package\":\"github.com/gin-gonic/gin\",\"Test\":\"TestMiddlewareNoRoute\",\"Output\":\"=== RUN   TestMiddlewareNoRoute\\n\"}\n{\"Time\":\"2026-11-15T19:09:57.076173-08:00\",\"Action\":\"output\",\"Package\":\"github.com/gin-gonic/gin\",\"Test\":\"TestMiddlewareNoRoute\",\"Output\":\"--- PASS: TestMiddlewareNoRoute (0.00s)\\n\"}\n{\"Time\":\"2026-11-15T19:09:57.076177-08:00\",\"Action\":\"pass\",\"Package\":\"github.com/gin-gonic/gin\",\"Test\":\"TestMiddlewareNoRoute\",\"Elapsed\":0}\n{\"Time\":\"2026-11-15T19:09:57.07618-08:00\",\"Action\":\"run\",\"Package\":\"github.com/gin-gonic/gin\",\"Test\":\"TestEngineHandleMethodNotAllowedCornerCase\"}\n{\"Time\":\"2026-11-15T19:09:57.076181-08:00\",\"Action\":\"output\",\"Package\":\"github.com/gin-gonic/gin\",\"Test\":\"TestEngineHandleMethodNotAllowedCornerCase\",\"Output\":\"=== RUN   TestEngineHandleMethodNotAllowedCornerCase\\n\"}\n{\"Time\":\"2026-11-15T19:09:57.076237-08:00\",\"Action\":\"output\",\"Package\":\"github.com/gin-gonic/gin\",\"Test\":\"TestEngineHandleMethodNotAllowedCornerCase\",\"Output\":\"--- PASS: TestEngineHandleMethodNotAllowedCornerCase (0.00s)\\n\"}\n{\"Time\":\"2026-11-15T19:09:57.076243-08:00\",\"Action\":\"pass\",\"Package\":\"github.com/gin-gonic/gin\",\"Test\":\"TestEngineHandleMethodNotAllowedCornerCase\",\"Elapsed\":0}\n{\"Time\":\"2026-11-15T19:09:57.076245-08:00\",\"Action\":\"output\",\"Package\":\"github.com/gin-gonic/gin\",\"Output\":\"PASS\\n\"}\n{\"Time\":\"2026-11-15T19:09:57.076763-08:00\",\"Action\":\"output\",\"Package\":\"github.com/gin-gonic/gin\",\"Output\":\"ok  \\tgithub.com/gin-gonic/gin\\t0.213s\\n\"}\n{\"Time\":\"2026-11-15T19:09:57.076772-08:00\",\"Action\":\"pass\",\"Package\":\"github.com/gin-gonic/gin\",\"Elapsed\":0.213}\n",
+  "stderr": "",
+  "elapsed_seconds": 0.537,
+  "passed": [
+    "TestNoRouteWithoutGlobalHandlers",
+    "TestNoRouteWithGlobalHandlers",
+    "TestMiddlewareNoRoute",
+    "TestEngineHandleMethodNotAllowedCornerCase"
+  ],
+  "failed": [],
+  "skipped": []
+}

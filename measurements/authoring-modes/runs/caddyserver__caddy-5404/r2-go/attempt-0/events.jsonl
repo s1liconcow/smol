@@ -1,0 +1,4 @@
+{"type":"thread.started","thread_id":"01a1e269-9ec4-7952-a196-8c8af7b94c8d"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"{\"edits\":[{\"path\":\"caddyconfig/caddyfile/lexer.go\",\"old\":\"\\tlastNewline := strings.LastIndex(string(val), \\\"\\\\n\\\")\\n\\tlines := strings.Split(string(val[:lastNewline+1]), \\\"\\\\n\\\")\\n\\tpaddingToStrip := string(val[lastNewline+1 : len(val)-len(marker)])\",\"new\":\"\\ttext := string(val)\\n\\tlastNewline := strings.LastIndex(text, \\\"\\\\n\\\")\\n\\tlines := strings.Split(text[:lastNewline+1], \\\"\\\\n\\\")\\n\\tpaddingToStrip := text[lastNewline+1 : len(text)-len(marker)]\"}]}"}}
+{"type":"turn.completed","usage":{"input_tokens":17410,"cached_input_tokens":0,"cache_write_input_tokens":0,"output_tokens":237,"reasoning_output_tokens":83}}

@@ -69,6 +69,30 @@ markers appear in each bundle.
 [Preserved v0.2 API usage](measurements/encoding-json/usage/report.json) ·
 [Preserved v0.1 baseline](measurements/encoding-json-v0.1/usage/report.json)
 
+A separate [agent-authoring overhead pilot](measurements/agent-overhead/README.md)
+tests three SWE-bench Multilingual Go issues, with two runs per condition.
+Against comment-free Go, Smol saves 27.2% of source tokens. With no syntax guide,
+it passes 6/6 localized patch-writing episodes and saves 5.6% of total API tokens.
+The 314- and 976-token guides pass 6/6 and 5/6 after repairs, using 32.3% and 36.9%
+more total tokens than Go. Repair requests erase their initial input savings.
+This small, localized pilot does not establish full repository-agent accuracy
+or a universal minimum instruction budget; raw prompts, usage, tests and replay
+checks are preserved in the report.
+
+A [short-policy follow-up](measurements/authoring-modes/README.md) tests keeping
+commas/returns explicit (34 instruction tokens) or reading Smol while authoring
+ordinary Go (78 tokens). These save 5.7% and 3.8% of total API tokens and compile
+on all eight first attempts per condition, with no repairs. All three conditions
+resolve only 2/8 episodes; all new tasks fail in every condition. This supports
+reducing authoring overhead but does not establish preserved coding accuracy
+or faster generation. Exact policies, separate development/new-task results,
+and all failures are recorded.
+
+The [fine-tuning ROI estimate](measurements/finetuning-roi/README.md) reprices
+those recorded runs, recounts prompts with Qwen3.5-9B's tokenizer, and separates
+existing compression savings from the incremental value of training. It includes
+dated prices, conditional break-even volumes and a reproducible calculator.
+
 ## Validation and reproduction
 
 ```sh

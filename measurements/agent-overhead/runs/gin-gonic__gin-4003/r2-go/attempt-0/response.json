@@ -1,0 +1,1 @@
+{"edits":[{"path":"gin.go","old":"if engine.HandleMethodNotAllowed {\n\t\tallowed := make([]string, 0, len(t)-1)","new":"if engine.HandleMethodNotAllowed && len(t) > 0 {\n\t\tallowed := make([]string, 0, len(t)-1)"}]}

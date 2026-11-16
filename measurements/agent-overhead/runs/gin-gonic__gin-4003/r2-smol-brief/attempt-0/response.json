@@ -1,0 +1,1 @@
+{"edits":[{"path":"gin.smol","old":"if HandleMethodNotAllowed{\nallowed:=make([]string 0len(t)-1)","new":"if HandleMethodNotAllowed&&len(t)>0{\nallowed:=make([]string 0len(t)-1)"}]}

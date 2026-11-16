@@ -23,7 +23,7 @@ func main() {
 }
 func run(args []string) error {
 	if len(args) == 0 || args[0] == "-h" || args[0] == "--help" {
-		fmt.Println(`Usage: smol <lift|lower|fmt|check|outline> [flags] [files or packages]
+		fmt.Println(`Usage: smol <lift|lower|fmt|check|outline|enc|dec> [flags] [files or packages]
 
 Defaults to the current package. Package patterns (./..., std) are supported.
 
@@ -32,6 +32,8 @@ lower    name.smol [+ name.smol.notes] -> Go
 fmt      rewrite .smol files in canonical form
 check    verify the round-trip laws without writing
 outline  print declarations without function bodies (read-only view)
+enc      encode Go changes as an exact anchored patch
+dec      decode an anchored patch into ordinary Go (use -n for a dry run)
 
 -lines  lower only; emit Smol source positions.
 -check  fmt only; fail if formatting would change files.
@@ -39,6 +41,9 @@ outline  print declarations without function bodies (read-only view)
 		return nil
 	}
 	command := args[0]
+	if command == "enc" || command == "dec" {
+		return runEncoding(command, args[1:])
+	}
 	if command != "lift" && command != "lower" && command != "fmt" && command != "check" && command != "outline" {
 		return fmt.Errorf("unknown command %q", command)
 	}

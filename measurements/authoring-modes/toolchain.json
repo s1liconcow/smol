@@ -1,0 +1,11 @@
+{
+  "filename": "go1.20.14.darwin-arm64.tar.gz",
+  "os": "darwin",
+  "arch": "arm64",
+  "version": "go1.20.14",
+  "sha256": "6da3f76164b215053daf730a9b8f1d673dbbaa4c61031374a6744b75cb728641",
+  "size": 96842753,
+  "kind": "archive",
+  "url": "https://go.dev/dl/go1.20.14.darwin-arm64.tar.gz",
+  "reason": "Caddy 5404 quic-go v0.33.0 rejects Go 1.21 and newer; same pinned compiler for all three conditions."
+}

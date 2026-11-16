@@ -1,0 +1,20 @@
+{
+  "command": [
+    "go",
+    "test",
+    "-count=1",
+    "-json",
+    ".",
+    "-run",
+    "^TestRedirect"
+  ],
+  "exit_code": 1,
+  "stdout": "{\"Time\":\"2026-11-15T19:22:39.617482-08:00\",\"Action\":\"start\",\"Package\":\"github.com/gin-gonic/gin\"}\n{\"Time\":\"2026-11-15T19:22:39.883711-08:00\",\"Action\":\"run\",\"Package\":\"github.com/gin-gonic/gin\",\"Test\":\"TestRedirectTrailingSlash\"}\n{\"Time\":\"2026-11-15T19:22:39.883752-08:00\",\"Action\":\"output\",\"Package\":\"github.com/gin-gonic/gin\",\"Test\":\"TestRedirectTrailingSlash\",\"Output\":\"=== RUN   TestRedirectTrailingSlash\\n\"}\n{\"Time\":\"2026-11-15T19:22:39.883782-08:00\",\"Action\":\"output\",\"Package\":\"github.com/gin-gonic/gin\",\"Test\":\"TestRedirectTrailingSlash\",\"Output\":\"    tree_test.go:703: want true, is false\\n\"}\n{\"Time\":\"2026-11-15T19:22:39.883801-08:00\",\"Action\":\"output\",\"Package\":\"github.com/gin-gonic/gin\",\"Test\":\"TestRedirectTrailingSlash\",\"Output\":\"--- FAIL: TestRedirectTrailingSlash (0.00s)\\n\"}\n{\"Time\":\"2026-11-15T19:22:39.883805-08:00\",\"Action\":\"fail\",\"Package\":\"github.com/gin-gonic/gin\",\"Test\":\"TestRedirectTrailingSlash\",\"Elapsed\":0}\n{\"Time\":\"2026-11-15T19:22:39.883807-08:00\",\"Action\":\"output\",\"Package\":\"github.com/gin-gonic/gin\",\"Output\":\"FAIL\\n\"}\n{\"Time\":\"2026-11-15T19:22:39.884337-08:00\",\"Action\":\"output\",\"Package\":\"github.com/gin-gonic/gin\",\"Output\":\"FAIL\\tgithub.com/gin-gonic/gin\\t0.267s\\n\"}\n{\"Time\":\"2026-11-15T19:22:39.884347-08:00\",\"Action\":\"fail\",\"Package\":\"github.com/gin-gonic/gin\",\"Elapsed\":0.267}\n",
+  "stderr": "",
+  "elapsed_seconds": 1.656,
+  "passed": [],
+  "failed": [
+    "TestRedirectTrailingSlash"
+  ],
+  "skipped": []
+}

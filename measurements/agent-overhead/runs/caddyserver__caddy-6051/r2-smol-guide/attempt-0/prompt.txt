@@ -1,0 +1,260 @@
+Fix the repository issue below. This is a localized patch-writing evaluation. Do not use tools; all editable context is provided. Return only JSON matching the schema: {"edits":[{"path":"relative path","old":"exact unique substring","new":"replacement"}]}. Edits apply in order. Each old string must occur exactly once. For an allowed new file, old must be empty and new must contain its complete contents. Do not edit tests or unrelated behavior. Only provided files and the allowed new files may change.
+Source representation: Smol v0.2. Write all edits in Smol.
+
+<language-guide>
+Smol v0.2 is Go surface syntax. Everything not listed below keeps Go semantics.
+Write code directly in the supplied representation. Explicit Go expressions,
+types, returns, imports and control flow are accepted; follow existing compact
+forms when editing. Do not invent shorthand. Formatting is handled afterwards.
+
+Declarations: omit `func` only on top-level functions/methods; function literals
+and function types keep `func`. `(s *Server) Get(x int) int { ... }` is a method.
+A subsequent `.Close()! { ... }` inherits the nearest preceding method receiver.
+When adding a method, an explicit receiver is safest. `F()!` returns error;
+`F() T!` returns (T,error); `F()(T,U)!` returns (T,U,error). Named results keep
+Go syntax. The receiver and parameters may use conventional bare names:
+`ctx` = context.Context, `w` = http.ResponseWriter, `r` = *http.Request,
+`t` = *testing.T. A `let c *Context, v reflect.Value` line after `package`/`use`
+adds file-local parameter conventions. `(c)` then means `(c *Context)`.
+Conventional names never inherit a following parameter's type. Write explicit
+types to avoid ambiguity, or `\name` to suppress a convention on a bare name.
+
+Imports: standard-library qualifiers such as `fmt.Errorf` infer imports.
+Third-party qualifiers resolve through the supplied smol.mod import table.
+You can always use explicit Go import declarations. `import (...; ...)` uses
+`...` as a placeholder for inferred imports, not as a real package.
+`use fmt reflect` directly after the package clause opens those packages:
+free exported names such as `Errorf` or `Value` expand to the uniquely matching
+package member. Scope declarations and built-ins take precedence.
+
+Subject elision: in a method, bare fields/methods can refer to the receiver.
+In a function whose first parameter has a local package type, they can refer to
+that parameter. This includes direct fields, embedded field names and declared
+methods, but not promoted fields. A local variable shadows the bare member.
+Explicit `receiver.Field` is always available. Preserve explicit qualifiers
+when a name is shadowed; do not introduce a local that accidentally captures
+existing bare member uses. Qualified composite literal keys stay qualified.
+
+Error handling: `x := f()?` expands to `x,err := f(); if err != nil {
+return ZERO,err }`. `f()?` expands to `if err := f(); err != nil {
+return ZERO,err }`. Here ZERO supplies every earlier result's zero value.
+`x := f()? "read %s", path` wraps with fmt.Errorf("read %s: %w",path,err).
+`x := f()? { ... }` uses an explicit handler with err in scope. If the left
+side is already `err :=` or `err =`, no extra err is appended. `?` attaches
+to a statement; it is never an expression operator. In a fallible function,
+`^x` means `return x,nil`; bare `^` means `return nil` for an error-only result.
+`!e` means `return ZERO,e` only when there are at least two results. With just
+an error result use `return e`. Keep normal Go returns if zero types are unclear.
+
+Loops: `for v in xs` means `for _,v := range xs`; `for k,v in xs` means
+`for k,v := range xs`. For indices only keep `for k := range xs`.
+`F(x int) int => x+1` is a function with one return statement. The arrow is
+optional for authoring: braces and explicit `return` work. Keep braces around
+a function literal before a call, selector, index or binary operator.
+
+Tags: `type T struct @json { UserID int; Cache int ~ }` gives UserID the tag
+`json:"user_id"`; `~` suppresses the implicit tag. Explicit tags override it.
+Multiple directives add multiple keys. Unexported fields get no implicit tags.
+
+Layout: braces and Go semicolon rules remain. Whitespace and indentation are
+accepted. Adjacent simple identifier/literal arguments imply commas inside
+calls and case lists: `append(dst b)` means `append(dst,b)`. Keep normal commas
+in signatures, assignments, returns and composite literals. Existing dense
+lines can contain an implied newline before a statement keyword (`x:=1 if ...`).
+Prefer actual newlines in new code. Comments live in a separate notes channel;
+compiler directives remain in code. Do not edit notes for this experiment.
+</language-guide>
+Allowed new files: []
+
+<issue>
+Allow blank lines in Heredoc
+I want to send some blank lines in the respond.
+
+```caddyfile
+example.com {
+	handle {
+		respond <<EOF
+			The next line is a blank line
+
+			The previous line is a blank line
+			EOF 200
+	}
+}
+```
+
+But I got Error: adapting config using caddyfile: mismatched leading whitespace in heredoc <<EOF on line #5 [], expected whitespace [			] to match the closing marker.
+I can add a whitespace before a blank line but `caddy fmt` will removes it.
+Maybe we should skip the whitespace stripping on a blank line.
+</issue>
+
+<smol.mod>
+use caddy github.com/caddyserver/caddy/v2
+use caddyconfig github.com/caddyserver/caddy/v2/caddyconfig
+use zap go.uber.org/zap
+</smol.mod>
+
+<file path="caddyconfig/caddyfile/lexer.smol">
+package caddyfile
+use fmt io strings
+type(
+lexer struct{
+reader*bufio.Reader
+token Token
+line int
+skippedLines int
+}
+Token struct{
+File string
+imports[]string
+Line int
+Text string
+wasQuoted rune
+heredocMarker string
+snippetName string
+}
+)
+Tokenize(input[]byte,filename string)[]Token!{
+l:=lexer{}
+l.load(bytes.NewReader(input))?
+var tokens[]Token for{
+found:=l.next()?
+if!found{break}
+l.token.File=filename
+tokens=append(tokens l.token)
+}
+^tokens
+}
+(l*lexer)load(input io.Reader)!{
+reader=bufio.NewReader(input)
+line=1
+firstCh,_:=reader.ReadRune()?
+if firstCh!=0xFEFF{
+err:=reader.UnreadRune()?
+}
+^
+}
+.next()bool!{
+var val[]rune var comment,quoted,btQuoted,inHeredoc,heredocEscaped,escaped bool var heredocMarker string
+makeToken:=func(quoted rune)bool{
+l.token.Text=string(val)
+l.token.wasQuoted=quoted
+l.token.heredocMarker=heredocMarker return true
+}
+for{
+ch,_,err:=reader.ReadRune()
+if err!=nil{
+if len(val)>0{
+if inHeredoc{!Errorf("incomplete heredoc <<%s on line #%d, expected ending marker %s" heredocMarker line+skippedLines heredocMarker)}
+^makeToken(0)
+}
+if err==EOF{^false}
+!err
+}
+if!(quoted||btQuoted)&&!(inHeredoc||heredocEscaped)&&
+len(val)>1&&string(val[:2])=="<<"{
+if ch==' '{^makeToken(0)}
+if ch=='\r'{continue}
+if ch=='\n'{
+if len(val)==2{!Errorf("missing opening heredoc marker on line #%d; must contain only alpha-numeric characters, dashes and underscores; got empty string" line)}
+if string(val[:3])=="<<<"{!Errorf("too many '<' for heredoc on line #%d; only use two, for example <<END" line)}
+heredocMarker=string(val[2:])
+if!heredocMarkerRegexp.Match([]byte(heredocMarker)){!Errorf("heredoc marker on line #%d must contain only alpha-numeric characters, dashes and underscores; got '%s'" line heredocMarker)}
+inHeredoc=true
+skippedLines++
+val=nil continue
+}
+val=append(val ch)
+continue
+}
+if inHeredoc{
+val=append(val ch)
+if ch=='\n'{skippedLines++}
+if len(val)>len(heredocMarker)&&heredocMarker==string(val[len(val)-len(heredocMarker):]){
+val=finalizeHeredoc(val heredocMarker)?
+line+=skippedLines
+skippedLines=0
+^makeToken('<')
+}
+continue
+}
+if!escaped&&!btQuoted&&ch=='\\'{
+escaped=true continue
+}
+if quoted||btQuoted{
+if quoted&&escaped{
+if ch!='"'{val=append(val '\\')}
+escaped=false
+}else{
+if(quoted&&ch=='"')||(btQuoted&&ch=='`'){^makeToken(ch)}
+}
+if ch=='\n'{
+line+=1+skippedLines
+skippedLines=0
+}
+val=append(val ch)
+continue
+}
+if unicode.IsSpace(ch){
+if ch=='\r'{continue}
+if ch=='\n'{
+if escaped{
+skippedLines++
+escaped=false
+}else{
+line+=1+skippedLines
+skippedLines=0
+}
+comment=false
+}
+if len(val)>0{^makeToken(0)}
+continue
+}
+if ch=='#'&&len(val)==0{comment=true}
+if comment{continue}
+if len(val)==0{
+l.token=Token{Line:line}
+if ch=='"'{
+quoted=true continue
+}
+if ch=='`'{
+btQuoted=true continue
+}
+}
+if escaped{
+if ch=='<'{heredocEscaped=true}else{val=append(val '\\')}
+escaped=false
+}
+val=append(val ch)
+}
+}
+.finalizeHeredoc(val[]rune,marker string)[]rune!{
+stringVal:=string(val)
+lastNewline:=LastIndex(stringVal "\n")
+lines:=Split(stringVal[:lastNewline+1],"\n")
+paddingToStrip:=stringVal[lastNewline+1:len(stringVal)-len(marker)]
+var out string for lineNum,lineText in lines[:len(lines)-1]{
+index:=Index(lineText paddingToStrip)
+if index!=0{!Errorf("mismatched leading whitespace in heredoc <<%s on line #%d [%s], expected whitespace [%s] to match the closing marker" marker line+lineNum+1lineText paddingToStrip)}
+out+=ReplaceAll(lineText[len(paddingToStrip):]+"\n" "\r" "")
+}
+if len(out)>0&&out[len(out)-1]=='\n'{out=out[:len(out)-1]}
+^[]rune(out)
+}
+(t Token)Quoted()bool=>wasQuoted>0
+.NumLineBreaks()int{
+lineBreaks:=Count(Text "\n")
+if wasQuoted=='<'{
+lineBreaks+=2
+}
+return lineBreaks
+}
+var heredocMarkerRegexp=regexp.MustCompile("^[A-Za-z0-9_-]+$")
+isNextOnNewLine(t1,t2 Token)bool{
+if File!=t2.File{return true}
+if len(imports)!=len(t2.imports){return true}
+for i,im in imports{
+if im!=t2.imports[i]{return true}
+}
+return Line+NumLineBreaks()<t2.Line
+}
+</file>

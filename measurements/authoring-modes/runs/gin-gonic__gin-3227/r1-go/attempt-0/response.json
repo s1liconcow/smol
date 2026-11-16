@@ -1,0 +1,1 @@
+{"edits":[{"path":"gin.go","old":"if engine.RedirectFixedPath && redirectFixedPath(c, root, engine.RedirectFixedPath) {","new":"if engine.RedirectFixedPath && redirectFixedPath(c, root, engine.RedirectTrailingSlash) {"}]}

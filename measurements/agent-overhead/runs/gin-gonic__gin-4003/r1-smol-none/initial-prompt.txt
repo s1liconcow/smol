@@ -1,0 +1,515 @@
+Fix the repository issue below. This is a localized patch-writing evaluation. Do not use tools; all editable context is provided. Return only JSON matching the schema: {"edits":[{"path":"relative path","old":"exact unique substring","new":"replacement"}]}. Edits apply in order. Each old string must occur exactly once. For an allowed new file, old must be empty and new must contain its complete contents. Do not edit tests or unrelated behavior. Only provided files and the allowed new files may change.
+Source representation: Smol v0.2. Write all edits in Smol.
+Allowed new files: []
+
+<issue>
+runtime error: makeslice: cap out of range when HandleMethodNotAllowed=true and no request handler registered
+## Description
+Gin server panics with `runtime error: makeslice: cap out of range` when `HandleMethodNotAllowed` is set to `true` and no handler are registered.
+
+## How to reproduce
+```go
+package main
+
+import (
+	"net/http/httptest"
+
+	"github.com/gin-gonic/gin"
+)
+
+func main() {
+	g := gin.New()
+	g.HandleMethodNotAllowed = true
+
+	req := httptest.NewRequest("GET", "/", nil)
+	resp := httptest.NewRecorder()
+	g.ServeHTTP(resp, req) // <-- Will panic
+}
+```
+
+## Expectations
+
+No crash. I would have instead expected an HTTP error response like a 404
+
+## Actual result
+
+```
+panic: runtime error: makeslice: cap out of range
+
+goroutine 1 [running]:
+github.com/gin-gonic/gin.(*Engine).handleHTTPRequest(0xc00009bba0, 0xc0001ab900)
+	/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/gin.go:652 +0x43f
+github.com/gin-gonic/gin.(*Engine).ServeHTTP(0xc00009bba0, {0x10de2878, 0xc000406780}, 0xc0003fa5a0)
+	/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/gin.go:589 +0x1b2
+main.main()
+	main.go:15 +0xc9
+```
+
+## Environment
+
+- go version: 1.22.4
+- gin version (or commit ref): 1.10.0
+- operating system: MacOS
+
+</issue>
+
+<smol.mod>
+use assert github.com/stretchr/testify/assert
+use binding github.com/gin-gonic/gin/binding
+use bytesconv github.com/gin-gonic/gin/internal/bytesconv
+use h2c golang.org/x/net/http2/h2c
+use http2 golang.org/x/net/http2
+use http3 github.com/quic-go/quic-go/http3
+use isatty github.com/mattn/go-isatty
+use json github.com/gin-gonic/gin/internal/json
+use proto google.golang.org/protobuf/proto
+use render github.com/gin-gonic/gin/render
+use sse github.com/gin-contrib/sse
+use testdata = github.com/gin-gonic/gin/testdata/protoexample
+</smol.mod>
+
+<file path="gin.smol">
+package gin
+use http net os regexp render strings template
+let c*Context
+import(
+"fmt"
+"html/template"
+"net"
+"net/http"
+"os"
+"path"
+"regexp"
+"strings"
+"sync"
+"github.com/gin-gonic/gin/internal/bytesconv"
+"github.com/gin-gonic/gin/render"
+"github.com/quic-go/quic-go/http3"
+"golang.org/x/net/http2"
+"golang.org/x/net/http2/h2c"
+)
+const defaultMultipartMemory=32<<20
+const escapedColon="\\:"
+const colon=":"
+const backslash="\\"
+var(
+default404Body=[]byte("404 page not found")
+default405Body=[]byte("405 method not allowed")
+)
+var defaultPlatform string
+var defaultTrustedCIDRs=[]*IPNet{
+{
+IP:IP{0x0,0x0,0x0,0x0},
+Mask:IPMask{0x0,0x0,0x0,0x0},
+},
+{
+IP:IP{0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0},
+Mask:IPMask{0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0},
+},
+}
+var regSafePrefix=MustCompile("[^a-zA-Z0-9/-]+")
+var regRemoveRepeatedChar=MustCompile("/{2,}")
+type HandlerFunc func(*Context)
+type OptionFunc func(*Engine)
+type HandlersChain[]HandlerFunc
+(c HandlersChain)Last()HandlerFunc{
+if length:=len(c);length>0{return c[length-1]}
+return nil
+}
+type RouteInfo struct{
+Method string
+Path string
+Handler string
+HandlerFunc HandlerFunc
+}
+type RoutesInfo[]RouteInfo
+const(
+PlatformGoogleAppEngine="X-Appengine-Remote-Addr"
+PlatformCloudflare="CF-Connecting-IP"
+PlatformFlyIO="Fly-Client-IP"
+)
+type Engine struct{
+RouterGroup
+RedirectTrailingSlash bool
+RedirectFixedPath bool
+HandleMethodNotAllowed bool
+ForwardedByClientIP bool
+AppEngine bool
+UseRawPath bool
+UnescapePathValues bool
+RemoveExtraSlash bool
+RemoteIPHeaders[]string
+TrustedPlatform string
+MaxMultipartMemory int64
+UseH2C bool
+ContextWithFallback bool
+delims Delims
+secureJSONPrefix string
+HTMLRender HTMLRender
+FuncMap FuncMap
+allNoRoute HandlersChain
+allNoMethod HandlersChain
+noRoute HandlersChain
+noMethod HandlersChain
+pool sync.Pool
+trees methodTrees
+maxParams uint16
+maxSections uint16
+trustedProxies[]string
+trustedCIDRs[]*IPNet
+}
+var _ IRouter=(*Engine)(nil)
+New(opts...OptionFunc)*Engine{
+debugPrintWARNINGNew()
+engine:=&Engine{
+RouterGroup:RouterGroup{
+Handlers:nil,
+basePath:"/",
+root:true,
+},
+FuncMap:FuncMap{},
+RedirectTrailingSlash:true,
+RedirectFixedPath:false,
+HandleMethodNotAllowed:false,
+ForwardedByClientIP:true,
+RemoteIPHeaders:[]string{"X-Forwarded-For","X-Real-IP"},
+TrustedPlatform:defaultPlatform,
+UseRawPath:false,
+RemoveExtraSlash:false,
+UnescapePathValues:true,
+MaxMultipartMemory:defaultMultipartMemory,
+trees:make(methodTrees 0 9),
+delims:Delims{Left:"{{",Right:"}}"},
+secureJSONPrefix:"while(1);",
+trustedProxies:[]string{"0.0.0.0/0","::/0"},
+trustedCIDRs:defaultTrustedCIDRs,
+}
+engine.RouterGroup.engine=engine
+engine.pool.New=func()any{
+return engine.allocateContext(engine.maxParams)
+}
+return engine.With(opts...)
+}
+Default(opts...OptionFunc)*Engine{
+debugPrintWARNINGDefault()
+engine:=New()
+engine.Use(Logger(),Recovery())
+return engine.With(opts...)
+}
+(engine*Engine)Handler()Handler{
+if!UseH2C{return engine}
+h2s:=&http2.Server{}
+return h2c.NewHandler(engine h2s)
+}
+.allocateContext(maxParams uint16)*Context{
+v:=make(Params 0maxParams)
+skippedNodes:=make([]skippedNode 0maxSections)
+return&Context{engine:engine,params:&v,skippedNodes:&skippedNodes}
+}
+.Delims(left,right string)*Engine{
+delims=render.Delims{Left:left,Right:right}
+return engine
+}
+.SecureJsonPrefix(prefix string)*Engine{
+secureJSONPrefix=prefix return engine
+}
+.LoadHTMLGlob(pattern string){
+left:=delims.Left
+right:=delims.Right
+templ:=Must(template.New("").Delims(left right).Funcs(FuncMap).ParseGlob(pattern))
+if IsDebugging(){
+debugPrintLoadTemplate(templ)
+HTMLRender=HTMLDebug{Glob:pattern,FuncMap:FuncMap,Delims:delims}
+return
+}
+SetHTMLTemplate(templ)
+}
+.LoadHTMLFiles(files...string){
+if IsDebugging(){
+HTMLRender=HTMLDebug{Files:files,FuncMap:FuncMap,Delims:delims}
+return
+}
+templ:=Must(template.New("").Delims(delims.Left delims.Right).Funcs(FuncMap).ParseFiles(files...))
+SetHTMLTemplate(templ)
+}
+.SetHTMLTemplate(templ*Template){
+if len(trees)>0{debugPrintWARNINGSetHTMLTemplate()}
+HTMLRender=HTMLProduction{Template:templ.Funcs(FuncMap)}
+}
+.SetFuncMap(funcMap FuncMap){
+FuncMap=funcMap
+}
+.NoRoute(handlers...HandlerFunc){
+noRoute=handlers
+rebuild404Handlers()
+}
+.NoMethod(handlers...HandlerFunc){
+noMethod=handlers
+rebuild405Handlers()
+}
+.Use(middleware...HandlerFunc)IRoutes{
+engine.RouterGroup.Use(middleware...)
+rebuild404Handlers()
+rebuild405Handlers()
+return engine
+}
+.With(opts...OptionFunc)*Engine{
+for opt in opts{opt(engine)}
+return engine
+}
+.rebuild404Handlers(){
+allNoRoute=engine.combineHandlers(noRoute)
+}
+.rebuild405Handlers(){
+allNoMethod=engine.combineHandlers(noMethod)
+}
+.addRoute(method,path string,handlers HandlersChain){
+assert1(path[0]=='/' "path must begin with '/'")
+assert1(method!="" "HTTP method can not be empty")
+assert1(len(handlers)>0 "there must be at least one handler")
+debugPrintRoute(method path handlers)
+root:=trees.get(method)
+if root==nil{
+root=new(node)
+root.fullPath="/"
+trees=append(trees methodTree{method:method,root:root})
+}
+root.addRoute(path handlers)
+if paramsCount:=countParams(path);paramsCount>maxParams{maxParams=paramsCount}
+if sectionsCount:=countSections(path);sectionsCount>maxSections{maxSections=sectionsCount}
+}
+.Routes()(routes RoutesInfo){
+for tree in trees{routes=iterate("" tree.method routes tree.root)}
+return routes
+}
+iterate(path,method string,routes RoutesInfo,root*node)RoutesInfo{
+path+=root.path if len(root.handlers)>0{
+handlerFunc:=root.handlers.Last()
+routes=append(routes RouteInfo{
+Method:method,
+Path:path,
+Handler:nameOfFunction(handlerFunc),
+HandlerFunc:handlerFunc,
+})
+}
+for child in root.children{routes=iterate(path method routes child)}
+return routes
+}
+.prepareTrustedCIDRs()[]*IPNet!{
+if trustedProxies==nil{^nil}
+cidr:=make([]*IPNet 0len(trustedProxies))
+for trustedProxy in trustedProxies{
+if!Contains(trustedProxy "/"){
+ip:=parseIP(trustedProxy)
+if ip==nil{return cidr,&ParseError{Type:"IP address",Text:trustedProxy}}
+switch len(ip){
+case IPv4len:
+trustedProxy+="/32"
+case IPv6len:
+trustedProxy+="/128"
+}
+}
+_,cidrNet:=ParseCIDR(trustedProxy)?{return cidr,err}
+cidr=append(cidr cidrNet)
+}
+^cidr
+}
+.SetTrustedProxies(trustedProxies[]string)!{
+engine.trustedProxies=trustedProxies return parseTrustedProxies()
+}
+.isUnsafeTrustedProxies()bool=>isTrustedProxy(ParseIP("0.0.0.0"))||isTrustedProxy(ParseIP("::"))
+.parseTrustedProxies()!{
+trustedCIDRs,err:=prepareTrustedCIDRs()
+engine.trustedCIDRs=trustedCIDRs return err
+}
+.isTrustedProxy(ip IP)bool{
+if trustedCIDRs==nil{return false}
+for cidr in trustedCIDRs{
+if cidr.Contains(ip){return true}
+}
+return false
+}
+.validateHeader(header string)(clientIP string,valid bool){
+if header==""{return "",false}
+items:=Split(header ",")
+for i:=len(items)-1;i>=0;i--{
+ipStr:=TrimSpace(items[i])
+ip:=ParseIP(ipStr)
+if ip==nil{break}
+if(i==0)||(!isTrustedProxy(ip)){return ipStr,true}
+}
+return "",false
+}
+updateRouteTree(n*node){
+n.path=ReplaceAll(n.path escapedColon colon)
+fullPath=ReplaceAll(fullPath escapedColon colon)
+indices=ReplaceAll(indices backslash colon)
+if children==nil{return}
+for child in children{updateRouteTree(child)}
+}
+.updateRouteTrees(){
+for tree in trees{updateRouteTree(tree.root)}
+}
+parseIP(ip string)IP{
+parsedIP:=ParseIP(ip)
+if ipv4:=parsedIP.To4();ipv4!=nil{
+return ipv4
+}
+return parsedIP
+}
+.Run(addr...string)(err error){
+defer func(){debugPrintError(err)}()
+if isUnsafeTrustedProxies(){debugPrint("[WARNING] You trusted all proxies, this is NOT safe. We recommend you to set a value.\n"+
+"Please check https://github.com/gin-gonic/gin/blob/master/docs/doc.md#dont-trust-all-proxies for details.")}
+updateRouteTrees()
+address:=resolveAddress(addr)
+debugPrint("Listening and serving HTTP on %s\n" address)
+err=ListenAndServe(address Handler())
+return
+}
+.RunTLS(addr,certFile,keyFile string)(err error){
+debugPrint("Listening and serving HTTPS on %s\n" addr)
+defer func(){debugPrintError(err)}()
+if isUnsafeTrustedProxies(){debugPrint("[WARNING] You trusted all proxies, this is NOT safe. We recommend you to set a value.\n"+
+"Please check https://github.com/gin-gonic/gin/blob/master/docs/doc.md#dont-trust-all-proxies for details.")}
+err=ListenAndServeTLS(addr certFile keyFile Handler())
+return
+}
+.RunUnix(file string)(err error){
+debugPrint("Listening and serving HTTP on unix:/%s" file)
+defer func(){debugPrintError(err)}()
+if isUnsafeTrustedProxies(){debugPrint("[WARNING] You trusted all proxies, this is NOT safe. We recommend you to set a value.\n"+
+"Please check https://github.com/gin-gonic/gin/blob/master/docs/doc.md#dont-trust-all-proxies for details.")}
+listener:=Listen("unix" file)?{return}
+defer listener.Close()
+defer Remove(file)
+err=Serve(listener Handler())
+return
+}
+.RunFd(fd int)(err error){
+debugPrint("Listening and serving HTTP on fd@%d" fd)
+defer func(){debugPrintError(err)}()
+if isUnsafeTrustedProxies(){debugPrint("[WARNING] You trusted all proxies, this is NOT safe. We recommend you to set a value.\n"+
+"Please check https://github.com/gin-gonic/gin/blob/master/docs/doc.md#dont-trust-all-proxies for details.")}
+f:=NewFile(uintptr(fd),fmt.Sprintf("fd@%d" fd))
+listener:=FileListener(f)?{return}
+defer listener.Close()
+err=RunListener(listener)
+return
+}
+.RunQUIC(addr,certFile,keyFile string)(err error){
+debugPrint("Listening and serving QUIC on %s\n" addr)
+defer func(){debugPrintError(err)}()
+if isUnsafeTrustedProxies(){debugPrint("[WARNING] You trusted all proxies, this is NOT safe. We recommend you to set a value.\n"+
+"Please check https://pkg.go.dev/github.com/gin-gonic/gin#readme-don-t-trust-all-proxies for details.")}
+err=http3.ListenAndServeQUIC(addr certFile keyFile Handler())
+return
+}
+.RunListener(listener Listener)(err error){
+debugPrint("Listening and serving HTTP on listener what's bind with address@%s" listener.Addr())
+defer func(){debugPrintError(err)}()
+if isUnsafeTrustedProxies(){debugPrint("[WARNING] You trusted all proxies, this is NOT safe. We recommend you to set a value.\n"+
+"Please check https://github.com/gin-gonic/gin/blob/master/docs/doc.md#dont-trust-all-proxies for details.")}
+err=Serve(listener Handler())
+return
+}
+.ServeHTTP(w,req*Request){
+c:=pool.Get().(*Context)
+c.writermem.reset(w)
+c.Request=req
+c.reset()
+handleHTTPRequest(c)
+pool.Put(c)
+}
+.HandleContext(c){
+oldIndexValue:=c.index
+c.reset()
+handleHTTPRequest(c)
+c.index=oldIndexValue
+}
+.handleHTTPRequest(c){
+httpMethod:=c.Request.Method
+rPath:=c.Request.URL.Path
+unescape:=false if UseRawPath&&len(c.Request.URL.RawPath)>0{
+rPath=c.Request.URL.RawPath
+unescape=UnescapePathValues
+}
+if RemoveExtraSlash{rPath=cleanPath(rPath)}
+t:=trees for i,tl:=0,len(t);i<tl;i++{
+if t[i].method!=httpMethod{continue}
+root:=t[i].root
+value:=root.getValue(rPath c.params c.skippedNodes unescape)
+if value.params!=nil{c.Params=*value.params}
+if value.handlers!=nil{
+c.handlers=value.handlers
+c.fullPath=value.fullPath
+c.Next()
+c.writermem.WriteHeaderNow()
+return
+}
+if httpMethod!=MethodConnect&&rPath!="/"{
+if value.tsr&&RedirectTrailingSlash{
+redirectTrailingSlash(c)
+return
+}
+if RedirectFixedPath&&redirectFixedPath(c root RedirectFixedPath){return}
+}
+break
+}
+if HandleMethodNotAllowed{
+allowed:=make([]string 0len(t)-1)
+for tree in trees{
+if tree.method==httpMethod{continue}
+if value:=tree.root.getValue(rPath nil c.skippedNodes unescape);value.handlers!=nil{allowed=append(allowed tree.method)}
+}
+if len(allowed)>0{
+c.handlers=allNoMethod
+c.writermem.Header().Set("Allow" Join(allowed ", "))
+serveError(c StatusMethodNotAllowed default405Body)
+return
+}
+}
+c.handlers=allNoRoute
+serveError(c StatusNotFound default404Body)
+}
+var mimePlain=[]string{MIMEPlain}
+serveError(c,code int,defaultMessage[]byte){
+writermem.status=code
+Next()
+if writermem.Written(){return}
+if writermem.Status()==code{
+writermem.Header()["Content-Type"]=mimePlain
+_:=Writer.Write(defaultMessage)?{debugPrint("cannot write message to writer during serve error: %v" err)}
+return
+}
+writermem.WriteHeaderNow()
+}
+redirectTrailingSlash(c){
+req:=Request
+p:=req.URL.Path if prefix:=path.Clean(Request.Header.Get("X-Forwarded-Prefix"));prefix!="."{
+prefix=regSafePrefix.ReplaceAllString(prefix "")
+prefix=regRemoveRepeatedChar.ReplaceAllString(prefix "/")
+p=prefix+"/"+req.URL.Path
+}
+req.URL.Path=p+"/" if length:=len(p);length>1&&p[length-1]=='/'{req.URL.Path=p[:length-1]}
+redirectRequest(c)
+}
+redirectFixedPath(c,root*node,trailingSlash bool)bool{
+req:=Request
+rPath:=req.URL.Path if fixedPath,ok:=root.findCaseInsensitivePath(cleanPath(rPath),trailingSlash);ok{
+req.URL.Path=bytesconv.BytesToString(fixedPath)
+redirectRequest(c)
+return true
+}
+return false
+}
+redirectRequest(c){
+req:=Request
+rPath:=req.URL.Path
+rURL:=req.URL.String()
+code:=StatusMovedPermanently if req.Method!=MethodGet{code=StatusTemporaryRedirect}
+debugPrint("redirecting request %d: %s --> %s" code rPath rURL)
+http.Redirect(Writer req rURL code)
+writermem.WriteHeaderNow()
+}
+</file>

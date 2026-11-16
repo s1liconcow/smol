@@ -1,0 +1,217 @@
+Fix the repository issue below. This is a localized patch-writing evaluation. Do not use tools; all editable context is provided. Return only JSON matching the schema: {"edits":[{"path":"relative path","old":"exact unique substring","new":"replacement"}]}. Edits apply in order. Each old string must occur exactly once. For an allowed new file, old must be empty and new must contain its complete contents. Do not edit tests or unrelated behavior. Only provided files and the allowed new files may change.
+Source representation: Smol v0.2. Write all edits in Smol.
+
+<language-guide>
+Smol is Go with these changes. Top-level functions and methods omit `func`;
+function literals/types keep it. A method starting `.` inherits the preceding
+receiver. A result suffix `!` appends error: `F() T!` means (T,error).
+In fallible functions `^x` means `return x,nil`; `!e` returns zero values plus e
+(only with at least two results). `x:=f()?` appends err to the assignment and
+returns zero values plus err on error; `? {body}` supplies a custom handler.
+`for v in xs` iterates values; `for k,v in xs` iterates keys and values.
+`=> expr` is a body containing `return expr`.
+`use fmt reflect` opens package names; free exports infer their qualifier.
+Bare fields/methods refer to the receiver or first local-type parameter unless
+shadowed. `let c *Context` gives bare parameter/receiver c that type.
+Built-in parameter conventions are ctx=context.Context, w=http.ResponseWriter,
+r=*http.Request, t=*testing.T. Standard imports and smol.mod imports are inferred.
+`struct @json` supplies snake_case field tags; `~` suppresses one.
+Adjacent identifier/literal call arguments imply commas. Other lists keep commas.
+Everything else is Go. Explicit imports, types, selectors, returns, braces and
+commas work. Use explicit receivers for new methods and normal Go statements
+when unsure. Whitespace is accepted; do not invent shorthand.
+</language-guide>
+Allowed new files: []
+
+<issue>
+Allow blank lines in Heredoc
+I want to send some blank lines in the respond.
+
+```caddyfile
+example.com {
+	handle {
+		respond <<EOF
+			The next line is a blank line
+
+			The previous line is a blank line
+			EOF 200
+	}
+}
+```
+
+But I got Error: adapting config using caddyfile: mismatched leading whitespace in heredoc <<EOF on line #5 [], expected whitespace [			] to match the closing marker.
+I can add a whitespace before a blank line but `caddy fmt` will removes it.
+Maybe we should skip the whitespace stripping on a blank line.
+</issue>
+
+<smol.mod>
+use caddy github.com/caddyserver/caddy/v2
+use caddyconfig github.com/caddyserver/caddy/v2/caddyconfig
+use zap go.uber.org/zap
+</smol.mod>
+
+<file path="caddyconfig/caddyfile/lexer.smol">
+package caddyfile
+use fmt io strings
+type(
+lexer struct{
+reader*bufio.Reader
+token Token
+line int
+skippedLines int
+}
+Token struct{
+File string
+imports[]string
+Line int
+Text string
+wasQuoted rune
+heredocMarker string
+snippetName string
+}
+)
+Tokenize(input[]byte,filename string)[]Token!{
+l:=lexer{}
+l.load(bytes.NewReader(input))?
+var tokens[]Token for{
+found:=l.next()?
+if!found{break}
+l.token.File=filename
+tokens=append(tokens l.token)
+}
+^tokens
+}
+(l*lexer)load(input io.Reader)!{
+reader=bufio.NewReader(input)
+line=1
+firstCh,_:=reader.ReadRune()?
+if firstCh!=0xFEFF{
+err:=reader.UnreadRune()?
+}
+^
+}
+.next()bool!{
+var val[]rune var comment,quoted,btQuoted,inHeredoc,heredocEscaped,escaped bool var heredocMarker string
+makeToken:=func(quoted rune)bool{
+l.token.Text=string(val)
+l.token.wasQuoted=quoted
+l.token.heredocMarker=heredocMarker return true
+}
+for{
+ch,_,err:=reader.ReadRune()
+if err!=nil{
+if len(val)>0{
+if inHeredoc{!Errorf("incomplete heredoc <<%s on line #%d, expected ending marker %s" heredocMarker line+skippedLines heredocMarker)}
+^makeToken(0)
+}
+if err==EOF{^false}
+!err
+}
+if!(quoted||btQuoted)&&!(inHeredoc||heredocEscaped)&&
+len(val)>1&&string(val[:2])=="<<"{
+if ch==' '{^makeToken(0)}
+if ch=='\r'{continue}
+if ch=='\n'{
+if len(val)==2{!Errorf("missing opening heredoc marker on line #%d; must contain only alpha-numeric characters, dashes and underscores; got empty string" line)}
+if string(val[:3])=="<<<"{!Errorf("too many '<' for heredoc on line #%d; only use two, for example <<END" line)}
+heredocMarker=string(val[2:])
+if!heredocMarkerRegexp.Match([]byte(heredocMarker)){!Errorf("heredoc marker on line #%d must contain only alpha-numeric characters, dashes and underscores; got '%s'" line heredocMarker)}
+inHeredoc=true
+skippedLines++
+val=nil continue
+}
+val=append(val ch)
+continue
+}
+if inHeredoc{
+val=append(val ch)
+if ch=='\n'{skippedLines++}
+if len(val)>len(heredocMarker)&&heredocMarker==string(val[len(val)-len(heredocMarker):]){
+val=finalizeHeredoc(val heredocMarker)?
+line+=skippedLines
+skippedLines=0
+^makeToken('<')
+}
+continue
+}
+if!escaped&&!btQuoted&&ch=='\\'{
+escaped=true continue
+}
+if quoted||btQuoted{
+if quoted&&escaped{
+if ch!='"'{val=append(val '\\')}
+escaped=false
+}else{
+if(quoted&&ch=='"')||(btQuoted&&ch=='`'){^makeToken(ch)}
+}
+if ch=='\n'{
+line+=1+skippedLines
+skippedLines=0
+}
+val=append(val ch)
+continue
+}
+if unicode.IsSpace(ch){
+if ch=='\r'{continue}
+if ch=='\n'{
+if escaped{
+skippedLines++
+escaped=false
+}else{
+line+=1+skippedLines
+skippedLines=0
+}
+comment=false
+}
+if len(val)>0{^makeToken(0)}
+continue
+}
+if ch=='#'&&len(val)==0{comment=true}
+if comment{continue}
+if len(val)==0{
+l.token=Token{Line:line}
+if ch=='"'{
+quoted=true continue
+}
+if ch=='`'{
+btQuoted=true continue
+}
+}
+if escaped{
+if ch=='<'{heredocEscaped=true}else{val=append(val '\\')}
+escaped=false
+}
+val=append(val ch)
+}
+}
+.finalizeHeredoc(val[]rune,marker string)[]rune!{
+stringVal:=string(val)
+lastNewline:=LastIndex(stringVal "\n")
+lines:=Split(stringVal[:lastNewline+1],"\n")
+paddingToStrip:=stringVal[lastNewline+1:len(stringVal)-len(marker)]
+var out string for lineNum,lineText in lines[:len(lines)-1]{
+index:=Index(lineText paddingToStrip)
+if index!=0{!Errorf("mismatched leading whitespace in heredoc <<%s on line #%d [%s], expected whitespace [%s] to match the closing marker" marker line+lineNum+1lineText paddingToStrip)}
+out+=ReplaceAll(lineText[len(paddingToStrip):]+"\n" "\r" "")
+}
+if len(out)>0&&out[len(out)-1]=='\n'{out=out[:len(out)-1]}
+^[]rune(out)
+}
+(t Token)Quoted()bool=>wasQuoted>0
+.NumLineBreaks()int{
+lineBreaks:=Count(Text "\n")
+if wasQuoted=='<'{
+lineBreaks+=2
+}
+return lineBreaks
+}
+var heredocMarkerRegexp=regexp.MustCompile("^[A-Za-z0-9_-]+$")
+isNextOnNewLine(t1,t2 Token)bool{
+if File!=t2.File{return true}
+if len(imports)!=len(t2.imports){return true}
+for i,im in imports{
+if im!=t2.imports[i]{return true}
+}
+return Line+NumLineBreaks()<t2.Line
+}
+</file>

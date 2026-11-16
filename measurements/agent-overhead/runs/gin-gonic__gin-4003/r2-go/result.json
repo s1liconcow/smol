@@ -1,0 +1,49 @@
+{
+  "task": "gin-gonic__gin-4003",
+  "arm": "go",
+  "repeat": 2,
+  "model": "gpt-6.1-sol",
+  "effort": "medium",
+  "counts": {
+    "prompt_tokens": 5075,
+    "instruction_tokens": 0,
+    "source_tokens": 4583,
+    "import_table_tokens": 0,
+    "original_go_source_tokens": 6550,
+    "guide_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "prompt_sha256": "72a651a9906f22dd05af321bb307d2489f0cb77bb727327219534ca196ad0178"
+  },
+  "attempts": [
+    {
+      "attempt": 0,
+      "usage": {
+        "input_tokens": 19525,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 127,
+        "reasoning_output_tokens": 43
+      },
+      "elapsed_seconds": 16.88,
+      "prompt_tokens": 5075,
+      "response_tokens": 72,
+      "prompt_sha256": "72a651a9906f22dd05af321bb307d2489f0cb77bb727327219534ca196ad0178",
+      "response_sha256": "447101bc8ae89664e39c57e42fc38827af2e78622138e4a478d9e6ee85d7380f",
+      "stage": "tests",
+      "resolved": true,
+      "passed": [
+        "TestMethodNotAllowedNoRoute"
+      ],
+      "failed": [],
+      "missing_expected_tests": [],
+      "canonical_before_format": null,
+      "feedback": ""
+    }
+  ],
+  "resolved": true,
+  "first_pass_resolved": true,
+  "usage": {
+    "input_tokens": 19525,
+    "cached_input_tokens": 0,
+    "output_tokens": 127
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "command": [
+    "go",
+    "test",
+    "-count=1",
+    "-json",
+    ".",
+    "-run",
+    "^$"
+  ],
+  "exit_code": 0,
+  "stdout": "{\"Time\":\"2026-11-15T19:05:32.584861-08:00\",\"Action\":\"start\",\"Package\":\"github.com/gin-gonic/gin\"}\n{\"Time\":\"2026-11-15T19:05:32.934408-08:00\",\"Action\":\"output\",\"Package\":\"github.com/gin-gonic/gin\",\"Output\":\"testing: warning: no tests to run\\n\"}\n{\"Time\":\"2026-11-15T19:05:32.934453-08:00\",\"Action\":\"output\",\"Package\":\"github.com/gin-gonic/gin\",\"Output\":\"PASS\\n\"}\n{\"Time\":\"2026-11-15T19:05:32.934872-08:00\",\"Action\":\"output\",\"Package\":\"github.com/gin-gonic/gin\",\"Output\":\"ok  \\tgithub.com/gin-gonic/gin\\t0.350s [no tests to run]\\n\"}\n{\"Time\":\"2026-11-15T19:05:32.934883-08:00\",\"Action\":\"pass\",\"Package\":\"github.com/gin-gonic/gin\",\"Elapsed\":0.35}\n",
+  "stderr": "",
+  "elapsed_seconds": 0.974,
+  "passed": [],
+  "failed": [],
+  "skipped": []
+}

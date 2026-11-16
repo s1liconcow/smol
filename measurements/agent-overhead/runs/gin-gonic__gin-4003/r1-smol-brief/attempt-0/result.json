@@ -1,0 +1,24 @@
+{
+  "attempt": 0,
+  "usage": {
+    "input_tokens": 18965,
+    "cached_input_tokens": 0,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 124,
+    "reasoning_output_tokens": 51
+  },
+  "elapsed_seconds": 20.533,
+  "prompt_tokens": 4515,
+  "response_tokens": 61,
+  "prompt_sha256": "2624cd4f4e27fe48c4fce4cf93b389747f8d8fd1d07231601efb64b9ef3578a0",
+  "response_sha256": "3a658e954865957495d0ce6a77447f1721cd33c21525946daca4aae179e89691",
+  "stage": "tests",
+  "resolved": true,
+  "passed": [
+    "TestMethodNotAllowedNoRoute"
+  ],
+  "failed": [],
+  "missing_expected_tests": [],
+  "canonical_before_format": false,
+  "feedback": ""
+}

@@ -1,0 +1,346 @@
+{
+  "prices": {
+    "as_of_user_date": "2026-11-15",
+    "currency": "USD",
+    "gpt_6_1_sol_standard_per_million": {
+      "input": 2.0,
+      "cached_input": 0.1,
+      "cache_write": 2.5,
+      "output": 10.0
+    },
+    "qwen_3_5_9b_base_serverless_per_million": {
+      "input": 0.17,
+      "output": 0.25
+    },
+    "qwen_3_5_9b_lora_sft_per_million": 0.34,
+    "qwen_3_5_9b_lora_minimum_per_job": 4.0,
+    "together_dedicated_h100_per_gpu_hour": 5.49,
+    "sources": {
+      "gpt": "https://developers.openai.com/api/docs/models/gpt-6.1-sol",
+      "qwen_base_inference": "https://docs.together.ai/docs/serverless/models",
+      "qwen_lora_and_dedicated": "https://www.together.ai/pricing",
+      "fine_tuned_deployment": "https://docs.together.ai/docs/fine-tuning/deployment"
+    },
+    "notes": [
+      "GPT repricing is API list-price equivalent, not the user's Codex subscription invoice. Standard, short context, no regional premium.",
+      "Together's opened pricing page superseded stale search snippets: Qwen3.5 9B LoRA is $0.34/M, not $0.48/M.",
+      "Qwen base serverless prices are an economic reference, NOT a quote for serving a custom fine-tune.",
+      "Together documents dedicated or downloaded deployment for fine-tunes; dedicated replicas bill while idle.",
+      "GPT-6.1-sol is not fine-tunable. Its token savings cannot be claimed as an available fine-tuning deployment."
+    ]
+  },
+  "tokenizer": {
+    "model": "Qwen/Qwen3.5-9B",
+    "revision": "c202236235762e1c871ad0ccb60c8ee5ba337b9a",
+    "url": "https://huggingface.co/Qwen/Qwen3.5-9B/resolve/c202236235762e1c871ad0ccb60c8ee5ba337b9a/tokenizer.json",
+    "sha256": "5f9e4d4901a92b997e463c1f46055088b6cca5ca61a6522d1b9f64c4bb81cb42",
+    "size": 12807982,
+    "library_version": "0.23.3"
+  },
+  "source_hashes": {
+    "measurements/agent-overhead/report.json": "7deef80a49fb4dbd138f3bbf58a3792b4cc25e9f0ef5e9b4a243e01bacc16237",
+    "measurements/authoring-modes/report.json": "cd9bdb769db8d11e43c9142ec0e77e3c43219fb61d4079228184dbc5d5db1ab2",
+    "measurements/authoring-modes/runs/gin-gonic__gin-1957/r1-go/initial-prompt.txt": "14facd2e4e5e2b86b7862d0e036b978c036eef9004b9ae4d926d873df5b367ec",
+    "measurements/authoring-modes/runs/gin-gonic__gin-1957/r1-smol-commas/initial-prompt.txt": "0e069b255ccf9b9e1e0d065f6d0910cbaa2c566c3b7c976334dea390c5c79559",
+    "measurements/authoring-modes/runs/gin-gonic__gin-1957/r1-smol-go/initial-prompt.txt": "312b8d758c195078304501885c5f12002cec945a7282e04cb1725599d92d5de9",
+    "measurements/authoring-modes/tasks/gin-gonic__gin-1957/sources.json": "bcef88b05d42d37fe8ef245d5496799ca29a9391438d4a4860136c1f28088d57",
+    "measurements/authoring-modes/runs/gin-gonic__gin-1957/r1-go/attempt-0/response.json": "37fd60034dcebd8db0fc0136bf855f854f505e65249e135101c21522e7405d2b",
+    "measurements/authoring-modes/runs/gin-gonic__gin-1957/r2-go/attempt-0/response.json": "07b37dd2153ff65fabf6e95df0bb37a0312b45e32973c6630801d94b45d66c5f",
+    "measurements/authoring-modes/runs/gin-gonic__gin-1957/r1-smol-go/attempt-0/response.json": "dd372273b0fb0a9bc115d49dc1261195263e4f813ae684d381751fe4ad68a0e1",
+    "measurements/authoring-modes/runs/gin-gonic__gin-1957/r2-smol-go/attempt-0/response.json": "c18daafce66d6e0021e3b7e33da2fb57e682a951488eaa4837d6f52336cb527c",
+    "measurements/authoring-modes/runs/gin-gonic__gin-3820/r1-go/initial-prompt.txt": "fccedb4ea6a3686be84ada0b79c47120be325ce9c6ce6f50b54d46c8958ec687",
+    "measurements/authoring-modes/runs/gin-gonic__gin-3820/r1-smol-commas/initial-prompt.txt": "2b09067fdbffdd087f54901d89ed3632e65c7307769a3a388024557255eee794",
+    "measurements/authoring-modes/runs/gin-gonic__gin-3820/r1-smol-go/initial-prompt.txt": "0b443faca4a87e318b3a9d6b67c515c9b03795c4f8331f58c3cc291d4bbd67c2",
+    "measurements/authoring-modes/tasks/gin-gonic__gin-3820/sources.json": "7f5d3a3ec8016a3200e1a57cdba83b744791275e3ba7b193685cb533f70a1594",
+    "measurements/authoring-modes/runs/gin-gonic__gin-3820/r1-go/attempt-0/response.json": "8a4c3703f59a437249b95380b61ea6ad90996a12681651615981b0feda4876a6",
+    "measurements/authoring-modes/runs/gin-gonic__gin-3820/r2-go/attempt-0/response.json": "f0a1e0837961fcc03bc10d14289392cdb1eb21a38af8254c04a39048a835817b",
+    "measurements/authoring-modes/runs/gin-gonic__gin-3820/r1-smol-go/attempt-0/response.json": "175506547a0d1a544997bd7d0740dd11bd2c3f6bb210fc9d61e6a3074c0ba171",
+    "measurements/authoring-modes/runs/gin-gonic__gin-3820/r2-smol-go/attempt-0/response.json": "b9085f6bca9b3d286f94ba58a7b1547324a0ae27ce669bc54e611f21c765e5f4",
+    "measurements/authoring-modes/runs/gin-gonic__gin-3227/r1-go/initial-prompt.txt": "3d777eabbab69f6f678ac28768e12056e3b923c179a7d63c4c9c8dd511b6bae6",
+    "measurements/authoring-modes/runs/gin-gonic__gin-3227/r1-smol-commas/initial-prompt.txt": "5b2a237942e3a494dc5f569b0ed56de4ea75c9ba392966cc2833b041355cdbe5",
+    "measurements/authoring-modes/runs/gin-gonic__gin-3227/r1-smol-go/initial-prompt.txt": "c404ae2cb018512189ce367abee2c8cda4ec58ca407f8bc7f0875c363921c469",
+    "measurements/authoring-modes/tasks/gin-gonic__gin-3227/sources.json": "56c1ff1694b22669b9446c9b939cf68503beeed496b8abec6595fc7a2e7509ca",
+    "measurements/authoring-modes/runs/gin-gonic__gin-3227/r1-go/attempt-0/response.json": "330b3393bbf69f5ded487840aef3b92090844182b0fff0fcfb19731bdb9f05c3",
+    "measurements/authoring-modes/runs/gin-gonic__gin-3227/r2-go/attempt-0/response.json": "330b3393bbf69f5ded487840aef3b92090844182b0fff0fcfb19731bdb9f05c3",
+    "measurements/authoring-modes/runs/gin-gonic__gin-3227/r1-smol-go/attempt-0/response.json": "52a27471accbb020ef5e79ef25b5922ffb2f6dd75ab2255cfab700d8b29573e4",
+    "measurements/authoring-modes/runs/gin-gonic__gin-3227/r2-smol-go/attempt-0/response.json": "52a27471accbb020ef5e79ef25b5922ffb2f6dd75ab2255cfab700d8b29573e4",
+    "measurements/authoring-modes/runs/caddyserver__caddy-5404/r1-go/initial-prompt.txt": "ce584be4f2844d9796e0c4c31df44e141be2f253722a89c9e272795244e03c94",
+    "measurements/authoring-modes/runs/caddyserver__caddy-5404/r1-smol-commas/initial-prompt.txt": "c748a911352bae3cab29e3d23ad0c99b097859b1b3026e9a73d3c94dad1a4115",
+    "measurements/authoring-modes/runs/caddyserver__caddy-5404/r1-smol-go/initial-prompt.txt": "f2c833f09c18ee2593a18f72854f8d2a22994d7c0b3f7e5a8048467bd70ec5b6",
+    "measurements/authoring-modes/tasks/caddyserver__caddy-5404/sources.json": "1cb1014998a090f9d1f0fd16f4b0a5719102401a402eaee37b6464e723f05248",
+    "measurements/authoring-modes/runs/caddyserver__caddy-5404/r1-go/attempt-0/response.json": "bbd00af2ac1879dabdf4f43f73e00d8ebc11efcf658e4edcea8420b33e0b6d70",
+    "measurements/authoring-modes/runs/caddyserver__caddy-5404/r2-go/attempt-0/response.json": "bbd00af2ac1879dabdf4f43f73e00d8ebc11efcf658e4edcea8420b33e0b6d70",
+    "measurements/authoring-modes/runs/caddyserver__caddy-5404/r1-smol-go/attempt-0/response.json": "b2148c850d4818fa8f3a29fe2d3a53dca10400ae5c611a987d10cefe0c20a4a7",
+    "measurements/authoring-modes/runs/caddyserver__caddy-5404/r2-smol-go/attempt-0/response.json": "e237afb8bbf25036227e423796959290bce90a1be83560c7ae999cd13fdf92f5"
+  },
+  "repriced_observed_trials": {
+    "agent-overhead": {
+      "go": {
+        "episodes": 6,
+        "resolved": 6,
+        "uncached_usd_per_1000": 42.00233333333333,
+        "recorded_cache_usd_per_1000": 42.00233333333333,
+        "mean_input_tokens": 19440.333333333332,
+        "mean_output_tokens": 312.1666666666667,
+        "uncached_saving_usd_per_1000": 0.0
+      },
+      "smol-none": {
+        "episodes": 6,
+        "resolved": 6,
+        "uncached_usd_per_1000": 39.597,
+        "recorded_cache_usd_per_1000": 35.705799999999996,
+        "mean_input_tokens": 18361.0,
+        "mean_output_tokens": 287.5,
+        "uncached_saving_usd_per_1000": 2.4053333333333313
+      },
+      "smol-brief": {
+        "episodes": 6,
+        "resolved": 6,
+        "uncached_usd_per_1000": 55.39033333333334,
+        "recorded_cache_usd_per_1000": 43.71673333333334,
+        "mean_input_tokens": 25733.5,
+        "mean_output_tokens": 392.3333333333333,
+        "uncached_saving_usd_per_1000": -13.388000000000005
+      },
+      "smol-guide": {
+        "episodes": 6,
+        "resolved": 5,
+        "uncached_usd_per_1000": 57.407666666666664,
+        "recorded_cache_usd_per_1000": 57.407666666666664,
+        "mean_input_tokens": 26617.166666666668,
+        "mean_output_tokens": 417.3333333333333,
+        "uncached_saving_usd_per_1000": -15.405333333333331
+      }
+    },
+    "authoring-modes": {
+      "go": {
+        "episodes": 8,
+        "resolved": 2,
+        "uncached_usd_per_1000": 44.686249999999994,
+        "recorded_cache_usd_per_1000": 35.931050000000006,
+        "mean_input_tokens": 20428.125,
+        "mean_output_tokens": 383.0,
+        "uncached_saving_usd_per_1000": 0.0
+      },
+      "smol-commas": {
+        "episodes": 8,
+        "resolved": 2,
+        "uncached_usd_per_1000": 42.278000000000006,
+        "recorded_cache_usd_per_1000": 27.686,
+        "mean_input_tokens": 19234.625,
+        "mean_output_tokens": 380.875,
+        "uncached_saving_usd_per_1000": 2.4082499999999882
+      },
+      "smol-go": {
+        "episodes": 8,
+        "resolved": 2,
+        "uncached_usd_per_1000": 43.4185,
+        "recorded_cache_usd_per_1000": 31.7449,
+        "mean_input_tokens": 19608.625,
+        "mean_output_tokens": 420.125,
+        "uncached_saving_usd_per_1000": 1.2677499999999924
+      }
+    }
+  },
+  "qwen_measured_text_counts": [
+    {
+      "task": "gin-gonic__gin-1957",
+      "prompt_tokens": {
+        "go": 8716,
+        "smol-commas": 6690,
+        "smol-go": 6733
+      },
+      "removable_policy_tokens": {
+        "go": 0,
+        "smol-commas": 49,
+        "smol-go": 90
+      },
+      "length_proxies": {
+        "translation": 14680,
+        "go": 9167,
+        "smol-go": 7118
+      }
+    },
+    {
+      "task": "gin-gonic__gin-3820",
+      "prompt_tokens": {
+        "go": 4317,
+        "smol-commas": 3609,
+        "smol-go": 3652
+      },
+      "removable_policy_tokens": {
+        "go": 0,
+        "smol-commas": 49,
+        "smol-go": 90
+      },
+      "length_proxies": {
+        "translation": 5919,
+        "go": 4461,
+        "smol-go": 3889
+      }
+    },
+    {
+      "task": "gin-gonic__gin-3227",
+      "prompt_tokens": {
+        "go": 10086,
+        "smol-commas": 8047,
+        "smol-go": 8090
+      },
+      "removable_policy_tokens": {
+        "go": 0,
+        "smol-commas": 49,
+        "smol-go": 90
+      },
+      "length_proxies": {
+        "translation": 17008,
+        "go": 10141,
+        "smol-go": 8147
+      }
+    },
+    {
+      "task": "caddyserver__caddy-5404",
+      "prompt_tokens": {
+        "go": 3398,
+        "smol-commas": 2952,
+        "smol-go": 2995
+      },
+      "removable_policy_tokens": {
+        "go": 0,
+        "smol-commas": 49,
+        "smol-go": 90
+      },
+      "length_proxies": {
+        "translation": 3081,
+        "go": 3541,
+        "smol-go": 3094.5
+      }
+    }
+  ],
+  "qwen_mean_prompt_tokens": {
+    "go": 6629.25,
+    "smol-commas": 5324.5,
+    "smol-go": 5367.5
+  },
+  "qwen_mean_prompt_tokens_saved": 1304.75,
+  "qwen_removable_policy_tokens": 49,
+  "pilot_budgets_assumed": [
+    {
+      "examples": 5000,
+      "assumed_mean_tokens_per_example": 7062.9375,
+      "billed_training_tokens_per_job": 77692312.5,
+      "jobs": 3,
+      "training_usd": 79.24615875,
+      "teacher_lean_api_usd": 157.98,
+      "teacher_cli_usd": 446.86249999999995,
+      "validation_and_storage_allowance_usd": 100,
+      "cash_budget_lean_api_usd": 337.22615874999997,
+      "cash_budget_cli_usd": 626.1086587499999
+    },
+    {
+      "examples": 10000,
+      "assumed_mean_tokens_per_example": 7062.9375,
+      "billed_training_tokens_per_job": 155384625.0,
+      "jobs": 3,
+      "training_usd": 158.4923175,
+      "teacher_lean_api_usd": 315.96,
+      "teacher_cli_usd": 893.7249999999999,
+      "validation_and_storage_allowance_usd": 100,
+      "cash_budget_lean_api_usd": 574.4523174999999,
+      "cash_budget_cli_usd": 1152.2173174999998
+    }
+  ],
+  "roi_conditional_equal_marginal_serving_price": {
+    "observed_gpt_compression_without_finetuning": {
+      "saving_usd_per_1000_requests": 2.4082499999999882,
+      "breakeven_requests": {
+        "100": 41523.92816360448,
+        "500": 207619.64081802242,
+        "1000": 415239.28163604485,
+        "5000": 2076196.408180224
+      },
+      "gross_saving_usd": {
+        "10000": 24.082499999999882,
+        "100000": 240.8249999999988,
+        "1000000": 2408.249999999988,
+        "10000000": 24082.49999999988
+      },
+      "roi_percent_1000_upfront": {
+        "100000": -75.91750000000012,
+        "1000000": 140.8249999999988,
+        "10000000": 2308.2499999999877
+      }
+    },
+    "qwen_all_compression_input_only_at_base_rate": {
+      "saving_usd_per_1000_requests": 0.22180750000000002,
+      "breakeven_requests": {
+        "100": 450841.3827305208,
+        "500": 2254206.913652604,
+        "1000": 4508413.827305208,
+        "5000": 22542069.13652604
+      },
+      "gross_saving_usd": {
+        "10000": 2.2180750000000002,
+        "100000": 22.18075,
+        "1000000": 221.8075,
+        "10000000": 2218.0750000000003
+      },
+      "roi_percent_1000_upfront": {
+        "100000": -97.781925,
+        "1000000": -77.81925,
+        "10000000": 121.80750000000003
+      }
+    },
+    "qwen_remove_policy_only_at_base_rate": {
+      "saving_usd_per_1000_requests": 0.00833,
+      "breakeven_requests": {
+        "100": 12004801.920768308,
+        "500": 60024009.603841536,
+        "1000": 120048019.20768307,
+        "5000": 600240096.0384154
+      },
+      "gross_saving_usd": {
+        "10000": 0.0833,
+        "100000": 0.833,
+        "1000000": 8.33,
+        "10000000": 83.3
+      },
+      "roi_percent_1000_upfront": {
+        "100000": -99.91669999999999,
+        "1000000": -99.167,
+        "10000000": -91.67
+      }
+    }
+  },
+  "cache_sensitivity": [
+    {
+      "fraction_of_saved_input_tokens_cached": 0,
+      "saving_usd_per_1000": 2.40825
+    },
+    {
+      "fraction_of_saved_input_tokens_cached": 0.5,
+      "saving_usd_per_1000": 1.2744250000000001
+    },
+    {
+      "fraction_of_saved_input_tokens_cached": 0.9,
+      "saving_usd_per_1000": 0.367365
+    },
+    {
+      "fraction_of_saved_input_tokens_cached": 1,
+      "saving_usd_per_1000": 0.14060000000000003
+    }
+  ],
+  "dedicated_one_h100_month_730_hours_usd": 4007.7000000000003,
+  "assumed_labor_example": {
+    "hours": 40,
+    "usd_per_hour": 100,
+    "total_usd": 4000
+  },
+  "limitations": [
+    "No fine-tuned model was trained or evaluated.",
+    "Qwen tokenization is measured, Qwen task accuracy/output/reasoning length is unmeasured.",
+    "Qwen ROI rows assume equal marginal serving rates and zero extra recurring hosting cost; Together does not quote custom fine-tunes at the base serverless rate.",
+    "All training budgets are scale estimates; examples were not generated. Four known benchmark issues are length proxies only and should remain excluded from a fresh held-out evaluation.",
+    "The observed savings already work without fine-tuning; training cannot automatically be credited with them.",
+    "All-request economics are not cost per successful task; accuracy parity remains unproven."
+  ]
+}

@@ -1,0 +1,81 @@
+{
+  "task": "gin-gonic__gin-1957",
+  "arm": "smol-guide",
+  "repeat": 2,
+  "model": "gpt-6.1-sol",
+  "effort": "medium",
+  "counts": {
+    "prompt_tokens": 6969,
+    "instruction_tokens": 976,
+    "source_tokens": 5343,
+    "import_table_tokens": 330,
+    "original_go_source_tokens": 11422,
+    "guide_sha256": "3d60c13db1222325773d137fc33357ac3627b8222a9899ce9d19a775c44af8fb",
+    "prompt_sha256": "2afb8a8dac5d9cc04e6da5bf1f4fcfd493dd2d17ca3bcd98cb1cddb0fee2085d"
+  },
+  "attempts": [
+    {
+      "attempt": 0,
+      "usage": {
+        "input_tokens": 21416,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 429,
+        "reasoning_output_tokens": 104
+      },
+      "elapsed_seconds": 15.594,
+      "prompt_tokens": 6969,
+      "response_tokens": 313,
+      "prompt_sha256": "2afb8a8dac5d9cc04e6da5bf1f4fcfd493dd2d17ca3bcd98cb1cddb0fee2085d",
+      "response_sha256": "7854d80a5fbca46db36c5c314d51b2232b1922edcb47e8077ea7d2118868f3f6",
+      "stage": "lower",
+      "feedback": "smol: /private/tmp/smol-overhead/candidate-90nkmmg3/repo/binding/header.smol: lower: source.go:17:47: missing ',' in argument list (and 1 more errors)\n",
+      "resolved": false
+    },
+    {
+      "attempt": 1,
+      "usage": {
+        "input_tokens": 21818,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 399,
+        "reasoning_output_tokens": 70
+      },
+      "elapsed_seconds": 17.561,
+      "prompt_tokens": 7371,
+      "response_tokens": 317,
+      "prompt_sha256": "0568e39e56347492c212e8321a338884c1c2fd2da5361e5c2814332966189023",
+      "response_sha256": "08b318f58f11819ac5cc9d0a6882e5b77bc08fcb7762ecb28fae3b6166e6a07b",
+      "stage": "tests",
+      "resolved": true,
+      "passed": [
+        "TestContextAutoBindJSON",
+        "TestContextBindWithJSON",
+        "TestContextBindWithXML",
+        "TestContextBindHeader",
+        "TestContextBindWithQuery",
+        "TestContextBindWithYAML",
+        "TestContextBadAutoBind",
+        "TestContextAutoShouldBindJSON",
+        "TestContextShouldBindWithJSON",
+        "TestContextShouldBindWithXML",
+        "TestContextShouldBindHeader",
+        "TestContextShouldBindWithQuery",
+        "TestContextShouldBindWithYAML",
+        "TestContextBadAutoShouldBind",
+        "TestContextShouldBindBodyWith"
+      ],
+      "failed": [],
+      "missing_expected_tests": [],
+      "canonical_before_format": false,
+      "feedback": ""
+    }
+  ],
+  "resolved": true,
+  "first_pass_resolved": false,
+  "usage": {
+    "input_tokens": 43234,
+    "cached_input_tokens": 0,
+    "output_tokens": 828
+  }
+}

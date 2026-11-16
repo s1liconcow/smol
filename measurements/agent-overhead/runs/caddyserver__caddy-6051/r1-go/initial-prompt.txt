@@ -1,0 +1,272 @@
+Fix the repository issue below. This is a localized patch-writing evaluation. Do not use tools; all editable context is provided. Return only JSON matching the schema: {"edits":[{"path":"relative path","old":"exact unique substring","new":"replacement"}]}. Edits apply in order. Each old string must occur exactly once. For an allowed new file, old must be empty and new must contain its complete contents. Do not edit tests or unrelated behavior. Only provided files and the allowed new files may change.
+Source representation: Go. Write all edits in Go.
+Allowed new files: []
+
+<issue>
+Allow blank lines in Heredoc
+I want to send some blank lines in the respond.
+
+```caddyfile
+example.com {
+	handle {
+		respond <<EOF
+			The next line is a blank line
+
+			The previous line is a blank line
+			EOF 200
+	}
+}
+```
+
+But I got Error: adapting config using caddyfile: mismatched leading whitespace in heredoc <<EOF on line #5 [], expected whitespace [			] to match the closing marker.
+I can add a whitespace before a blank line but `caddy fmt` will removes it.
+Maybe we should skip the whitespace stripping on a blank line.
+</issue>
+
+<file path="caddyconfig/caddyfile/lexer.go">
+package caddyfile
+
+import (
+	"bufio"
+	"bytes"
+	"fmt"
+	"io"
+	"regexp"
+	"strings"
+	"unicode"
+)
+
+type (
+	lexer struct {
+		reader       *bufio.Reader
+		token        Token
+		line         int
+		skippedLines int
+	}
+	Token struct {
+		File          string
+		imports       []string
+		Line          int
+		Text          string
+		wasQuoted     rune
+		heredocMarker string
+		snippetName   string
+	}
+)
+
+func Tokenize(input []byte, filename string) ([]Token, error) {
+	l := lexer{}
+	if err := l.load(bytes.NewReader(input)); err != nil {
+		return nil, err
+	}
+	var tokens []Token
+	for {
+		found, err := l.next()
+		if err != nil {
+			return nil, err
+		}
+		if !found {
+			break
+		}
+		l.token.File = filename
+		tokens = append(tokens, l.token)
+	}
+	return tokens, nil
+}
+func (l *lexer) load(input io.Reader) error {
+	l.reader = bufio.NewReader(input)
+	l.line = 1
+	firstCh, _, err := l.reader.ReadRune()
+	if err != nil {
+		return err
+	}
+	if firstCh != 0xFEFF {
+		err := l.reader.UnreadRune()
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+func (l *lexer) next() (bool, error) {
+	var val []rune
+	var comment, quoted, btQuoted, inHeredoc, heredocEscaped, escaped bool
+	var heredocMarker string
+	makeToken := func(quoted rune) bool {
+		l.token.Text = string(val)
+		l.token.wasQuoted = quoted
+		l.token.heredocMarker = heredocMarker
+		return true
+	}
+	for {
+		ch, _, err := l.reader.ReadRune()
+		if err != nil {
+			if len(val) > 0 {
+				if inHeredoc {
+					return false, fmt.Errorf("incomplete heredoc <<%s on line #%d, expected ending marker %s", heredocMarker, l.line+l.skippedLines, heredocMarker)
+				}
+				return makeToken(0), nil
+			}
+			if err == io.EOF {
+				return false, nil
+			}
+			return false, err
+		}
+		if !(quoted || btQuoted) && !(inHeredoc || heredocEscaped) &&
+			len(val) > 1 && string(val[:2]) == "<<" {
+			if ch == ' ' {
+				return makeToken(0), nil
+			}
+			if ch == '\r' {
+				continue
+			}
+			if ch == '\n' {
+				if len(val) == 2 {
+					return false, fmt.Errorf("missing opening heredoc marker on line #%d; must contain only alpha-numeric characters, dashes and underscores; got empty string", l.line)
+				}
+				if string(val[:3]) == "<<<" {
+					return false, fmt.Errorf("too many '<' for heredoc on line #%d; only use two, for example <<END", l.line)
+				}
+				heredocMarker = string(val[2:])
+				if !heredocMarkerRegexp.Match([]byte(heredocMarker)) {
+					return false, fmt.Errorf("heredoc marker on line #%d must contain only alpha-numeric characters, dashes and underscores; got '%s'", l.line, heredocMarker)
+				}
+				inHeredoc = true
+				l.skippedLines++
+				val = nil
+				continue
+			}
+			val = append(val, ch)
+			continue
+		}
+		if inHeredoc {
+			val = append(val, ch)
+			if ch == '\n' {
+				l.skippedLines++
+			}
+			if len(val) > len(heredocMarker) && heredocMarker == string(val[len(val)-len(heredocMarker):]) {
+				val, err = l.finalizeHeredoc(val, heredocMarker)
+				if err != nil {
+					return false, err
+				}
+				l.line += l.skippedLines
+				l.skippedLines = 0
+				return makeToken('<'), nil
+			}
+			continue
+		}
+		if !escaped && !btQuoted && ch == '\\' {
+			escaped = true
+			continue
+		}
+		if quoted || btQuoted {
+			if quoted && escaped {
+				if ch != '"' {
+					val = append(val, '\\')
+				}
+				escaped = false
+			} else {
+				if (quoted && ch == '"') || (btQuoted && ch == '`') {
+					return makeToken(ch), nil
+				}
+			}
+			if ch == '\n' {
+				l.line += 1 + l.skippedLines
+				l.skippedLines = 0
+			}
+			val = append(val, ch)
+			continue
+		}
+		if unicode.IsSpace(ch) {
+			if ch == '\r' {
+				continue
+			}
+			if ch == '\n' {
+				if escaped {
+					l.skippedLines++
+					escaped = false
+				} else {
+					l.line += 1 + l.skippedLines
+					l.skippedLines = 0
+				}
+				comment = false
+			}
+			if len(val) > 0 {
+				return makeToken(0), nil
+			}
+			continue
+		}
+		if ch == '#' && len(val) == 0 {
+			comment = true
+		}
+		if comment {
+			continue
+		}
+		if len(val) == 0 {
+			l.token = Token{Line: l.line}
+			if ch == '"' {
+				quoted = true
+				continue
+			}
+			if ch == '`' {
+				btQuoted = true
+				continue
+			}
+		}
+		if escaped {
+			if ch == '<' {
+				heredocEscaped = true
+			} else {
+				val = append(val, '\\')
+			}
+			escaped = false
+		}
+		val = append(val, ch)
+	}
+}
+func (l *lexer) finalizeHeredoc(val []rune, marker string) ([]rune, error) {
+	stringVal := string(val)
+	lastNewline := strings.LastIndex(stringVal, "\n")
+	lines := strings.Split(stringVal[:lastNewline+1], "\n")
+	paddingToStrip := stringVal[lastNewline+1 : len(stringVal)-len(marker)]
+	var out string
+	for lineNum, lineText := range lines[:len(lines)-1] {
+		index := strings.Index(lineText, paddingToStrip)
+		if index != 0 {
+			return nil, fmt.Errorf("mismatched leading whitespace in heredoc <<%s on line #%d [%s], expected whitespace [%s] to match the closing marker", marker, l.line+lineNum+1, lineText, paddingToStrip)
+		}
+		out += strings.ReplaceAll(lineText[len(paddingToStrip):]+"\n", "\r", "")
+	}
+	if len(out) > 0 && out[len(out)-1] == '\n' {
+		out = out[:len(out)-1]
+	}
+	return []rune(out), nil
+}
+func (t Token) Quoted() bool {
+	return t.wasQuoted > 0
+}
+func (t Token) NumLineBreaks() int {
+	lineBreaks := strings.Count(t.Text, "\n")
+	if t.wasQuoted == '<' {
+		lineBreaks += 2
+	}
+	return lineBreaks
+}
+
+var heredocMarkerRegexp = regexp.MustCompile("^[A-Za-z0-9_-]+$")
+
+func isNextOnNewLine(t1, t2 Token) bool {
+	if t1.File != t2.File {
+		return true
+	}
+	if len(t1.imports) != len(t2.imports) {
+		return true
+	}
+	for i, im := range t1.imports {
+		if im != t2.imports[i] {
+			return true
+		}
+	}
+	return t1.Line+t1.NumLineBreaks() < t2.Line
+}
+</file>

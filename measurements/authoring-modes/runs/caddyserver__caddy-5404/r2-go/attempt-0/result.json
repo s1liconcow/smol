@@ -1,0 +1,46 @@
+{
+  "attempt": 0,
+  "usage": {
+    "input_tokens": 17410,
+    "cached_input_tokens": 0,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 237,
+    "reasoning_output_tokens": 83
+  },
+  "elapsed_seconds": 9.48,
+  "generation_seconds": 7.934,
+  "prompt_tokens": 2960,
+  "response_tokens": 142,
+  "prompt_sha256": "ce584be4f2844d9796e0c4c31df44e141be2f253722a89c9e272795244e03c94",
+  "response_sha256": "bbd00af2ac1879dabdf4f43f73e00d8ebc11efcf658e4edcea8420b33e0b6d70",
+  "stage": "tests",
+  "resolved": false,
+  "passed": [
+    "TestDispenser_Val_Next",
+    "TestDispenser_NextArg",
+    "TestDispenser_NextLine",
+    "TestDispenser_NextBlock",
+    "TestDispenser_Args",
+    "TestDispenser_RemainingArgs",
+    "TestDispenser_ArgErr_Err",
+    "TestFormatter",
+    "TestParseVariadic",
+    "TestAllTokens",
+    "TestParseOneAndImport",
+    "TestRecursiveImport",
+    "TestDirectiveImport",
+    "TestParseAll",
+    "TestEnvironmentReplacement",
+    "TestSnippets",
+    "TestImportedFilesIgnoreNonDirectiveImportTokens",
+    "TestSnippetAcrossMultipleFiles"
+  ],
+  "failed": [
+    "TestLexer"
+  ],
+  "missing_expected_tests": [
+    "TestLexer"
+  ],
+  "canonical_before_format": null,
+  "feedback": ""
+}

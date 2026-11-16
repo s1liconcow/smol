@@ -1,0 +1,423 @@
+Fix the repository issue below. This is a localized patch-writing evaluation. Do not use tools; all editable context is provided. Return only JSON matching the schema: {"edits":[{"path":"relative path","old":"exact unique substring","new":"replacement"}]}. Edits apply in order. Each old string must occur exactly once. For an allowed new file, old must be empty and new must contain its complete contents. Do not edit tests or unrelated behavior. Only provided files and the allowed new files may change.
+Source representation: Smol v0.2. Write newly authored code in ordinary Go syntax.
+
+<authoring-policy>
+Match old strings exactly as supplied. Write newly authored code in ordinary Go
+syntax; the lowerer accepts it inside Smol files. Keep all commas, explicit func
+declarations, parameter types, receiver/package qualifiers, braces and return
+statements. Existing Smol copied from the original can stay unchanged. Keep the
+provided .smol file paths. The formatter handles compression afterwards.
+</authoring-policy>
+Allowed new files: []
+
+<issue>
+Binding a non mandatory file parameter will directly result in an error message
+- With issues:
+  - Use the search tool before opening a new issue.
+  - Please provide source code and commit sha if you found a bug.
+  - Review existing issues and provide feedback or react to them.
+
+## Description
+
+Bind a a non mandatory file parameter will report an error. 
+
+## How to reproduce
+ 
+```
+
+package main
+
+import (
+	"fmt"
+	"github.com/gin-gonic/gin"
+	"mime/multipart"
+	"net/http"
+)
+
+var html = `<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>File binding</title>
+</head>
+<body>
+<h1>Bind file with fields</h1>
+<form action="/upload" method="post" enctype="multipart/form-data">
+    Name: <input type="text" name="name"><br>
+    Email: <input type="email" name="email"><br>
+    File: <input type="file" name="file"><br><br>
+    <input type="submit" value="Submit">
+</form>
+</body>`
+
+type BindFile struct {
+	Name  string                `form:"name" binding:"required"`
+	Email string                `form:"email" binding:"required"`
+	File  *multipart.FileHeader `form:"file" `
+}
+
+func main() {
+	router := gin.Default()
+	// Set a lower memory limit for multipart forms (default is 32 MiB)
+	router.GET("/", func(ctx *gin.Context) {
+		ctx.Header("Content-Type", "text/html")
+		ctx.String(200, html)
+	})
+	router.POST("/upload", func(c *gin.Context) {
+		var bindFile BindFile
+		if err := c.ShouldBind(&bindFile); err != nil {
+			// will report an error when file is not uploaded.
+			// Can we set it a nil pointer by default ?
+			c.String(http.StatusBadRequest, fmt.Sprintf("err: %s", err.Error()))
+			return
+		}
+		// TODO::...
+		c.String(http.StatusOK, fmt.Sprintf("File %s uploaded successfully with fields name=%s and email=%s.", file.Filename, bindFile.Name, bindFile.Email))
+	})
+	router.Run(":8080")
+}
+
+
+```
+
+## Expectations
+
+```
+$ curl 'http://localhost:8080/upload' \
+  -H 'Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryK7Skf1qO5bW9JEX0' \
+  --data-raw $'------WebKitFormBoundaryK7Skf1qO5bW9JEX0\r\nContent-Disposition: form-data; name="name"\r\n\r\n\r\n------WebKitFormBoundaryK7Skf1qO5bW9JEX0\r\nContent-Disposition: form-data; name="email"\r\n\r\n\r\n------WebKitFormBoundaryK7Skf1qO5bW9JEX0\r\nContent-Disposition: form-data; name="file"; filename=""\r\nContent-Type: application/octet-stream\r\n\r\n\r\n------WebKitFormBoundaryK7Skf1qO5bW9JEX0--\r\n' 
+```
+
+## Actual result
+
+```
+err: unexpected end of JSON input
+```
+
+## Environment
+
+- go version:  go version go1.20.4 darwin/arm64
+- gin version (or commit ref):  [53fbf4d](https://github.com/gin-gonic/gin/commit/53fbf4dbfbf465b552057e6f8d199a275151b7a1)
+- operating system: macOS
+
+</issue>
+
+<smol.mod>
+use assert github.com/stretchr/testify/assert
+use bytesconv github.com/gin-gonic/gin/internal/bytesconv
+use codec github.com/ugorji/go/codec
+use json github.com/gin-gonic/gin/internal/json
+use proto google.golang.org/protobuf/proto
+use protoexample github.com/gin-gonic/gin/testdata/protoexample
+use require github.com/stretchr/testify/require
+use toml github.com/pelletier/go-toml/v2
+use validator github.com/go-playground/validator/v10
+use yaml gopkg.in/yaml.v3
+</smol.mod>
+
+<file path="binding/form_mapping.smol">
+package binding
+use bytesconv json reflect strconv strings time
+let bitSize int,field reflect.StructField,form map[string][]string,opt setOptions,ptr any,setter setter,tag string,val string,value reflect.Value
+import(
+"errors"
+"fmt"
+"reflect"
+"strconv"
+"strings"
+"time"
+"github.com/gin-gonic/gin/internal/bytesconv"
+"github.com/gin-gonic/gin/internal/json"
+)
+var(
+errUnknownType=errors.New("unknown type")
+ErrConvertMapStringSlice=errors.New("can not convert to map slices of strings")
+ErrConvertToMapString=errors.New("can not convert to map of strings")
+)
+mapURI(ptr,m map[string][]string)! =>mapFormByTag(ptr m "uri")
+mapForm(ptr,form)! =>mapFormByTag(ptr form "form")
+MapFormWithTag(ptr,form,tag)! =>mapFormByTag(ptr form tag)
+var emptyField=StructField{}
+mapFormByTag(ptr,form,tag)!{
+ptrVal:=ValueOf(ptr)
+var pointed any if ptrVal.Kind()==Ptr{
+ptrVal=ptrVal.Elem()
+pointed=ptrVal.Interface()
+}
+if ptrVal.Kind()==reflect.Map&&
+ptrVal.Type().Key().Kind()==String{
+if pointed!=nil{ptr=pointed}
+return setFormMap(ptr form)
+}
+return mappingByPtr(ptr formSource(form),tag)
+}
+type setter interface{
+TrySet(value,field,key string,opt)(isSet bool,err error)
+}
+type formSource map[string][]string
+var _ setter=formSource(nil)
+(form formSource)TrySet(value,field,tagValue string,opt)(isSet bool,err error)=>setByForm(value field form tagValue opt)
+mappingByPtr(ptr,setter,tag)!{
+_,err:=mapping(ValueOf(ptr),emptyField setter tag)
+return err
+}
+mapping(value,field,setter,tag)bool!{
+if field.Tag.Get(tag)=="-"{
+^false
+}
+vKind:=value.Kind()
+if vKind==Ptr{
+var isNew bool
+vPtr:=value if value.IsNil(){
+isNew=true
+vPtr=reflect.New(value.Type().Elem())
+}
+isSet:=mapping(vPtr.Elem(),field setter tag)?
+if isNew&&isSet{value.Set(vPtr)}
+^isSet
+}
+if vKind!=Struct||!field.Anonymous{
+ok:=tryToSetValue(value field setter tag)?
+if ok{^true}
+}
+if vKind==Struct{
+tValue:=value.Type()
+var isSet bool for i:=0;i<value.NumField();i++{
+sf:=tValue.Field(i)
+if sf.PkgPath!=""&&!sf.Anonymous{
+continue
+}
+ok:=mapping(value.Field(i),sf setter tag)?
+isSet=isSet||ok
+}
+^isSet
+}
+^false
+}
+type setOptions struct{
+isDefaultExists bool
+defaultValue string
+}
+tryToSetValue(value,field,setter,tag)bool!{
+var tagValue string var setOpt setOptions
+tagValue=field.Tag.Get(tag)
+tagValue,opts:=head(tagValue ",")
+if tagValue==""{
+tagValue=field.Name
+}
+if tagValue==""{
+^false
+}
+var opt string for len(opts)>0{
+opt,opts=head(opts ",")
+if k,v:=head(opt "=");k=="default"{
+setOpt.isDefaultExists=true
+setOpt.defaultValue=v
+}
+}
+return setter.TrySet(value field tagValue setOpt)
+}
+setByForm(value,field,form,tagValue string,opt)(isSet bool,err error){
+vs,ok:=form[tagValue]
+if!ok&&!opt.isDefaultExists{^false}
+switch value.Kind(){
+case Slice:
+if!ok{vs=[]string{opt.defaultValue}}
+return true,setSlice(vs value field)
+case Array:
+if!ok{vs=[]string{opt.defaultValue}}
+if len(vs)!=value.Len(){!fmt.Errorf("%q is not valid value for %s" vs value.Type().String())}
+return true,setArray(vs value field)
+default:
+var val string if!ok{val=opt.defaultValue}
+if len(vs)>0{val=vs[0]}
+return true,setWithProperType(val value field)
+}
+}
+setWithProperType(val,value,field)!{
+switch value.Kind(){
+case Int:
+return setIntField(val 0value)
+case Int8:
+return setIntField(val 8value)
+case Int16:
+return setIntField(val 16value)
+case Int32:
+return setIntField(val 32value)
+case Int64:
+switch value.Interface().(type){
+case Duration:
+return setTimeDuration(val value)
+}
+return setIntField(val 64value)
+case Uint:
+return setUintField(val 0value)
+case Uint8:
+return setUintField(val 8value)
+case Uint16:
+return setUintField(val 16value)
+case Uint32:
+return setUintField(val 32value)
+case Uint64:
+return setUintField(val 64value)
+case Bool:
+return setBoolField(val value)
+case Float32:
+return setFloatField(val 32value)
+case Float64:
+return setFloatField(val 64value)
+case String:
+value.SetString(val)
+case Struct:
+switch value.Interface().(type){
+case Time:
+return setTimeField(val field value)
+}
+return Unmarshal(StringToBytes(val),value.Addr().Interface())
+case reflect.Map:
+return Unmarshal(StringToBytes(val),value.Addr().Interface())
+case Ptr:
+if!value.Elem().IsValid(){value.Set(reflect.New(value.Type().Elem()))}
+return setWithProperType(val value.Elem(),field)
+default:
+return errUnknownType
+}
+^
+}
+setIntField(val,bitSize,field Value)!{
+if val==""{val="0"}
+intVal,err:=ParseInt(val 10bitSize)
+if err==nil{field.SetInt(intVal)}
+return err
+}
+setUintField(val,bitSize,field Value)!{
+if val==""{val="0"}
+uintVal,err:=ParseUint(val 10bitSize)
+if err==nil{field.SetUint(uintVal)}
+return err
+}
+setBoolField(val,field Value)!{
+if val==""{val="false"}
+boolVal,err:=ParseBool(val)
+if err==nil{field.SetBool(boolVal)}
+return err
+}
+setFloatField(val,bitSize,field Value)!{
+if val==""{val="0.0"}
+floatVal,err:=ParseFloat(val bitSize)
+if err==nil{field.SetFloat(floatVal)}
+return err
+}
+setTimeField(val,structField StructField,value)!{
+timeFormat:=structField.Tag.Get("time_format")
+if timeFormat==""{timeFormat=RFC3339}
+switch tf:=ToLower(timeFormat);tf{
+case "unix" "unixnano":
+tv,err:=ParseInt(val 10 64)
+if err!=nil{return err}
+d:=Duration(1)
+if tf=="unixnano"{d=Second}
+t:=Unix(tv/int64(d),tv%int64(d))
+value.Set(ValueOf(t))
+^
+}
+if val==""{
+value.Set(ValueOf(Time{}))
+^
+}
+l:=Local if isUTC,_:=ParseBool(structField.Tag.Get("time_utc"));isUTC{l=UTC}
+if locTag:=structField.Tag.Get("time_location");locTag!=""{
+loc:=LoadLocation(locTag)?
+l=loc
+}
+t:=ParseInLocation(timeFormat val l)?
+value.Set(ValueOf(t))
+^
+}
+setArray(vals[]string,value,field)!{
+for i,s in vals{
+err:=setWithProperType(s value.Index(i),field)?
+}
+^
+}
+setSlice(vals[]string,value,field)!{
+slice:=MakeSlice(value.Type(),len(vals),len(vals))
+err:=setArray(vals slice field)?
+value.Set(slice)
+^
+}
+setTimeDuration(val,value)!{
+d:=ParseDuration(val)?
+value.Set(ValueOf(d))
+^
+}
+head(str,sep string)(head string,tail string){
+idx:=Index(str sep)
+if idx<0{return str,""}
+return str[:idx],str[idx+len(sep):]
+}
+setFormMap(ptr,form)!{
+el:=TypeOf(ptr).Elem()
+if el.Kind()==Slice{
+ptrMap,ok:=ptr.(map[string][]string)
+if!ok{return ErrConvertMapStringSlice}
+for k,v in form{ptrMap[k]=v}
+^
+}
+ptrMap,ok:=ptr.(map[string]string)
+if!ok{return ErrConvertToMapString}
+for k,v in form{
+ptrMap[k]=v[len(v)-1]
+}
+^
+}
+</file>
+
+<file path="binding/multipart_form_mapping.smol">
+package binding
+use multipart reflect
+let field reflect.StructField,value reflect.Value
+type multipartRequest http.Request
+var _ setter=(*multipartRequest)(nil)
+var(
+ErrMultiFileHeader=errors.New("unsupported field type for multipart.FileHeader")
+ErrMultiFileHeaderLenInvalid=errors.New("unsupported len of array for []*multipart.FileHeader")
+)
+(r*multipartRequest)TrySet(value,field,key string,opt setOptions)bool!{
+if files:=r.MultipartForm.File[key];len(files)!=0{return setByMultipartFormFile(value field files)}
+return setByForm(value field r.MultipartForm.Value key opt)
+}
+setByMultipartFormFile(value,field,files[]*FileHeader)(isSet bool,err error){
+switch value.Kind(){
+case Ptr:
+switch value.Interface().(type){
+case*FileHeader:
+value.Set(ValueOf(files[0]))
+^true
+}
+case Struct:
+switch value.Interface().(type){
+case FileHeader:
+value.Set(ValueOf(*files[0]))
+^true
+}
+case Slice:
+slice:=MakeSlice(value.Type(),len(files),len(files))
+isSet,err=setArrayOfMultipartFormFiles(slice field files)
+if err!=nil||!isSet{return isSet,err}
+value.Set(slice)
+^true
+case Array:
+return setArrayOfMultipartFormFiles(value field files)
+}
+!ErrMultiFileHeader
+}
+setArrayOfMultipartFormFiles(value,field,files[]*FileHeader)(isSet bool,err error){
+if value.Len()!=len(files){!ErrMultiFileHeaderLenInvalid}
+for i:=range files{
+set,err:=setByMultipartFormFile(value.Index(i),field files[i:i+1])
+if err!=nil||!set{return set,err}
+}
+^true
+}
+</file>

@@ -1,0 +1,18 @@
+{
+  "command": [
+    "go",
+    "test",
+    "-count=1",
+    "-json",
+    "./caddyconfig/caddyfile",
+    "-run",
+    "^$"
+  ],
+  "exit_code": 0,
+  "stdout": "{\"Time\":\"2026-11-15T19:07:43.007767-08:00\",\"Action\":\"start\",\"Package\":\"github.com/caddyserver/caddy/v2/caddyconfig/caddyfile\"}\n{\"Time\":\"2026-11-15T19:07:43.31251-08:00\",\"Action\":\"output\",\"Package\":\"github.com/caddyserver/caddy/v2/caddyconfig/caddyfile\",\"Output\":\"testing: warning: no tests to run\\n\"}\n{\"Time\":\"2026-11-15T19:07:43.312548-08:00\",\"Action\":\"output\",\"Package\":\"github.com/caddyserver/caddy/v2/caddyconfig/caddyfile\",\"Output\":\"PASS\\n\"}\n{\"Time\":\"2026-11-15T19:07:43.31307-08:00\",\"Action\":\"output\",\"Package\":\"github.com/caddyserver/caddy/v2/caddyconfig/caddyfile\",\"Output\":\"ok  \\tgithub.com/caddyserver/caddy/v2/caddyconfig/caddyfile\\t0.305s [no tests to run]\\n\"}\n{\"Time\":\"2026-11-15T19:07:43.313084-08:00\",\"Action\":\"pass\",\"Package\":\"github.com/caddyserver/caddy/v2/caddyconfig/caddyfile\",\"Elapsed\":0.305}\n",
+  "stderr": "",
+  "elapsed_seconds": 0.845,
+  "passed": [],
+  "failed": [],
+  "skipped": []
+}

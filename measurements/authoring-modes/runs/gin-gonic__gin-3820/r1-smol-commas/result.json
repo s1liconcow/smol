@@ -1,0 +1,69 @@
+{
+  "task": "gin-gonic__gin-3820",
+  "arm": "smol-commas",
+  "repeat": 1,
+  "model": "gpt-6.1-sol",
+  "effort": "medium",
+  "counts": {
+    "prompt_tokens": 3284,
+    "instruction_tokens": 34,
+    "source_tokens": 2197,
+    "import_table_tokens": 130,
+    "original_go_source_tokens": 3219,
+    "guide_sha256": "1d62531d98a45196e388bd243be0ea4cb807a1a3b28ca8bbb6465f7cada7fcb8",
+    "prompt_sha256": "2b09067fdbffdd087f54901d89ed3632e65c7307769a3a388024557255eee794"
+  },
+  "attempts": [
+    {
+      "attempt": 0,
+      "usage": {
+        "input_tokens": 17734,
+        "cached_input_tokens": 12288,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 548,
+        "reasoning_output_tokens": 378
+      },
+      "elapsed_seconds": 33.21,
+      "generation_seconds": 31.226,
+      "prompt_tokens": 3284,
+      "response_tokens": 158,
+      "prompt_sha256": "2b09067fdbffdd087f54901d89ed3632e65c7307769a3a388024557255eee794",
+      "response_sha256": "2e92a04b0dad23000269edc3612aec64b9ac58ca9a065336e3a7e54bc2e1eb12",
+      "stage": "tests",
+      "resolved": false,
+      "passed": [
+        "TestMappingDefault",
+        "TestMappingSkipField",
+        "TestMappingIgnoreField",
+        "TestMappingUnexportedField",
+        "TestMappingPrivateField",
+        "TestMappingUnknownFieldType",
+        "TestMappingURI",
+        "TestMappingForm",
+        "TestMappingTime",
+        "TestMappingTimeDuration",
+        "TestMappingSlice",
+        "TestMappingArray",
+        "TestMappingStructField",
+        "TestMappingPtrField",
+        "TestMappingMapField",
+        "TestMappingIgnoredCircularRef"
+      ],
+      "failed": [
+        "TestMappingBaseTypes"
+      ],
+      "missing_expected_tests": [
+        "TestMappingBaseTypes"
+      ],
+      "canonical_before_format": false,
+      "feedback": ""
+    }
+  ],
+  "resolved": false,
+  "first_pass_resolved": false,
+  "usage": {
+    "input_tokens": 17734,
+    "cached_input_tokens": 12288,
+    "output_tokens": 548
+  }
+}

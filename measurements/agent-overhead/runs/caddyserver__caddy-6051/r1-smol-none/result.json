@@ -1,0 +1,68 @@
+{
+  "task": "caddyserver__caddy-6051",
+  "arm": "smol-none",
+  "repeat": 1,
+  "model": "gpt-6.1-sol",
+  "effort": "medium",
+  "counts": {
+    "prompt_tokens": 1558,
+    "instruction_tokens": 0,
+    "source_tokens": 1244,
+    "import_table_tokens": 50,
+    "original_go_source_tokens": 2948,
+    "guide_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "prompt_sha256": "1aafc7b700cc8f3cc1f92adb2ec9f908068c10e25c6b4f4c7025077ac778c7f5"
+  },
+  "attempts": [
+    {
+      "attempt": 0,
+      "usage": {
+        "input_tokens": 16008,
+        "cached_input_tokens": 12288,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 246,
+        "reasoning_output_tokens": 129
+      },
+      "elapsed_seconds": 28.025,
+      "prompt_tokens": 1558,
+      "response_tokens": 105,
+      "prompt_sha256": "1aafc7b700cc8f3cc1f92adb2ec9f908068c10e25c6b4f4c7025077ac778c7f5",
+      "response_sha256": "e279a73a0e160d0c344c9946b7e6eb393067a63b1a9c597b311eeb5f3dcabcb8",
+      "stage": "tests",
+      "resolved": true,
+      "passed": [
+        "TestDispenser_Val_Next",
+        "TestDispenser_NextArg",
+        "TestDispenser_NextLine",
+        "TestDispenser_NextBlock",
+        "TestDispenser_Args",
+        "TestDispenser_RemainingArgs",
+        "TestDispenser_ArgErr_Err",
+        "TestFormatter",
+        "TestLexer",
+        "TestParseVariadic",
+        "TestAllTokens",
+        "TestParseOneAndImport",
+        "TestRecursiveImport",
+        "TestDirectiveImport",
+        "TestParseAll",
+        "TestEnvironmentReplacement",
+        "TestImportReplacementInJSONWithBrace",
+        "TestSnippets",
+        "TestImportedFilesIgnoreNonDirectiveImportTokens",
+        "TestSnippetAcrossMultipleFiles"
+      ],
+      "failed": [],
+      "missing_expected_tests": [],
+      "canonical_before_format": false,
+      "feedback": ""
+    }
+  ],
+  "resolved": true,
+  "first_pass_resolved": true,
+  "usage": {
+    "input_tokens": 16008,
+    "cached_input_tokens": 12288,
+    "output_tokens": 246
+  }
+}

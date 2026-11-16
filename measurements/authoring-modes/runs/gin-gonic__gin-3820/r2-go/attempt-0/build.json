@@ -1,0 +1,18 @@
+{
+  "command": [
+    "go",
+    "test",
+    "-count=1",
+    "-json",
+    "./binding",
+    "-run",
+    "^$"
+  ],
+  "exit_code": 0,
+  "stdout": "{\"Time\":\"2026-11-15T19:28:50.433159-08:00\",\"Action\":\"start\",\"Package\":\"github.com/gin-gonic/gin/binding\"}\n{\"Time\":\"2026-11-15T19:28:50.719002-08:00\",\"Action\":\"output\",\"Package\":\"github.com/gin-gonic/gin/binding\",\"Output\":\"testing: warning: no tests to run\\n\"}\n{\"Time\":\"2026-11-15T19:28:50.719051-08:00\",\"Action\":\"output\",\"Package\":\"github.com/gin-gonic/gin/binding\",\"Output\":\"PASS\\n\"}\n{\"Time\":\"2026-11-15T19:28:50.719436-08:00\",\"Action\":\"output\",\"Package\":\"github.com/gin-gonic/gin/binding\",\"Output\":\"ok  \\tgithub.com/gin-gonic/gin/binding\\t0.286s [no tests to run]\\n\"}\n{\"Time\":\"2026-11-15T19:28:50.719445-08:00\",\"Action\":\"pass\",\"Package\":\"github.com/gin-gonic/gin/binding\",\"Elapsed\":0.286}\n",
+  "stderr": "",
+  "elapsed_seconds": 0.642,
+  "passed": [],
+  "failed": [],
+  "skipped": []
+}

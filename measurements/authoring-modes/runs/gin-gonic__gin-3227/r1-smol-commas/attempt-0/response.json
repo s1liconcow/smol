@@ -1,0 +1,1 @@
+{"edits":[{"path":"gin.smol","old":"if RedirectFixedPath&&redirectFixedPath(c root RedirectFixedPath){return}","new":"if RedirectFixedPath&&redirectFixedPath(c,root,RedirectTrailingSlash,){return}"}]}

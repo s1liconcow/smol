@@ -1,0 +1,69 @@
+{
+  "task": "gin-gonic__gin-3820",
+  "arm": "smol-go",
+  "repeat": 1,
+  "model": "gpt-6.1-sol",
+  "effort": "medium",
+  "counts": {
+    "prompt_tokens": 3330,
+    "instruction_tokens": 78,
+    "source_tokens": 2197,
+    "import_table_tokens": 130,
+    "original_go_source_tokens": 3219,
+    "guide_sha256": "1e138873ec01978d1e31616b40d60d0ec5f4f9e4fae345576275e93a476e34c5",
+    "prompt_sha256": "0b443faca4a87e318b3a9d6b67c515c9b03795c4f8331f58c3cc291d4bbd67c2"
+  },
+  "attempts": [
+    {
+      "attempt": 0,
+      "usage": {
+        "input_tokens": 17780,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 712,
+        "reasoning_output_tokens": 467
+      },
+      "elapsed_seconds": 37.343,
+      "generation_seconds": 35.604,
+      "prompt_tokens": 3330,
+      "response_tokens": 233,
+      "prompt_sha256": "0b443faca4a87e318b3a9d6b67c515c9b03795c4f8331f58c3cc291d4bbd67c2",
+      "response_sha256": "175506547a0d1a544997bd7d0740dd11bd2c3f6bb210fc9d61e6a3074c0ba171",
+      "stage": "tests",
+      "resolved": false,
+      "passed": [
+        "TestMappingDefault",
+        "TestMappingSkipField",
+        "TestMappingIgnoreField",
+        "TestMappingUnexportedField",
+        "TestMappingPrivateField",
+        "TestMappingUnknownFieldType",
+        "TestMappingURI",
+        "TestMappingForm",
+        "TestMappingTime",
+        "TestMappingTimeDuration",
+        "TestMappingSlice",
+        "TestMappingArray",
+        "TestMappingStructField",
+        "TestMappingPtrField",
+        "TestMappingMapField",
+        "TestMappingIgnoredCircularRef"
+      ],
+      "failed": [
+        "TestMappingBaseTypes"
+      ],
+      "missing_expected_tests": [
+        "TestMappingBaseTypes"
+      ],
+      "canonical_before_format": false,
+      "feedback": ""
+    }
+  ],
+  "resolved": false,
+  "first_pass_resolved": false,
+  "usage": {
+    "input_tokens": 17780,
+    "cached_input_tokens": 0,
+    "output_tokens": 712
+  }
+}

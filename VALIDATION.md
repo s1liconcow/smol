@@ -100,8 +100,18 @@ without production notes (22,326 tokens), the syntax reduction is **26.646%**.
 The §11 example remains **455 → 250 tokens (45.055%)**.
 
 No coding-accuracy, task-success, latency, dollar-cost or cross-tokenizer uplift
-was measured. Request percentages use the recorded 14,469-token harness overhead.
+was measured in this encoding/json uplift study. A separate
+[agent instruction-overhead pilot](measurements/agent-overhead/README.md) measures
+localized patch correctness and actual usage on three SWE-bench Multilingual
+issues, including failed attempts and repair costs. Request percentages here
+use the recorded 14,469-token harness overhead.
 [Machine-readable uplift and payload verification](measurements/spec-v0.2-conformance/uplift.json).
+
+The [short-policy follow-up](measurements/authoring-modes/README.md) adds 24
+requests comparing Go with two conservative Smol authoring policies. It saves
+tokens and avoids syntax repairs, but all conditions fail the three new tasks;
+the result cannot establish unchanged task accuracy. The report also records
+request duration, which did not improve in this sample.
 
 ## Reproduce
 

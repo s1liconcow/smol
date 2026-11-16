@@ -854,7 +854,11 @@ func lowerBody(s *source, body *ast.BlockStmt, ft *ast.FuncType, z *zeros, prefi
 				for _, a := range call.Args {
 					args = append(args, s.node(a))
 				}
-				values = append(values, "fmt.Errorf("+strings.Join(args, ", ")+")")
+				qualifier := s.errorQualifier
+				if qualifier == "" {
+					qualifier = "fmt"
+				}
+				values = append(values, qualifier+".Errorf("+strings.Join(args, ", ")+")")
 			}
 		default:
 			return true

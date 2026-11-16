@@ -1,0 +1,1774 @@
+{
+  "method": "Localized patch generation; no tools; upstream held-out tests; compile-only repair feedback.",
+  "tokenizer": "o200k_base",
+  "tiktoken_version": "0.14.0",
+  "codex_version": "codex-cli 0.164.0",
+  "instruction_tokens": {
+    "brief": 314,
+    "guide": 976,
+    "full_spec": 8918
+  },
+  "comparisons": [
+    {
+      "task": "gin-gonic__gin-1957",
+      "counts": {
+        "go": {
+          "prompt_tokens": 7856,
+          "instruction_tokens": 0,
+          "source_tokens": 7550,
+          "import_table_tokens": 0,
+          "original_go_source_tokens": 11422,
+          "guide_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "prompt_sha256": "14facd2e4e5e2b86b7862d0e036b978c036eef9004b9ae4d926d873df5b367ec"
+        },
+        "smol-none": {
+          "prompt_tokens": 5985,
+          "instruction_tokens": 0,
+          "source_tokens": 5343,
+          "import_table_tokens": 330,
+          "original_go_source_tokens": 11422,
+          "guide_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "prompt_sha256": "630ff434056ee0f8cea13769a85d4a76c338e5ec2bb82a91ce596bb6f3df3b5c"
+        },
+        "smol-brief": {
+          "prompt_tokens": 6307,
+          "instruction_tokens": 314,
+          "source_tokens": 5343,
+          "import_table_tokens": 330,
+          "original_go_source_tokens": 11422,
+          "guide_sha256": "7dded3b7f5a5471cc09454797fef8c75a9637ab558d2c31ee5aa2851bb6ce3c9",
+          "prompt_sha256": "bb00048ad58dfdf87aa06a3bce5eb596bd91ec6d773ea5077f2344dbd42d3226"
+        },
+        "smol-guide": {
+          "prompt_tokens": 6969,
+          "instruction_tokens": 976,
+          "source_tokens": 5343,
+          "import_table_tokens": 330,
+          "original_go_source_tokens": 11422,
+          "guide_sha256": "3d60c13db1222325773d137fc33357ac3627b8222a9899ce9d19a775c44af8fb",
+          "prompt_sha256": "2afb8a8dac5d9cc04e6da5bf1f4fcfd493dd2d17ca3bcd98cb1cddb0fee2085d"
+        }
+      },
+      "syntax_tokens_saved": 2207,
+      "syntax_savings_percent": 29.2317880794702,
+      "smol_extra_context_tokens": 330,
+      "net_prompt_savings": {
+        "go": 0,
+        "smol-none": 1871,
+        "smol-brief": 1549,
+        "smol-guide": 887
+      },
+      "break_even_loads": {
+        "brief": 1,
+        "guide": 1,
+        "full_spec": 5
+      }
+    },
+    {
+      "task": "gin-gonic__gin-4003",
+      "counts": {
+        "go": {
+          "prompt_tokens": 5075,
+          "instruction_tokens": 0,
+          "source_tokens": 4583,
+          "import_table_tokens": 0,
+          "original_go_source_tokens": 6550,
+          "guide_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "prompt_sha256": "72a651a9906f22dd05af321bb307d2489f0cb77bb727327219534ca196ad0178"
+        },
+        "smol-none": {
+          "prompt_tokens": 4193,
+          "instruction_tokens": 0,
+          "source_tokens": 3539,
+          "import_table_tokens": 157,
+          "original_go_source_tokens": 6550,
+          "guide_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "prompt_sha256": "8641c893040097cdf1a6dc1cf8e99935dab325ccd26a5bd6133d0d7e35b9eecd"
+        },
+        "smol-brief": {
+          "prompt_tokens": 4515,
+          "instruction_tokens": 314,
+          "source_tokens": 3539,
+          "import_table_tokens": 157,
+          "original_go_source_tokens": 6550,
+          "guide_sha256": "7dded3b7f5a5471cc09454797fef8c75a9637ab558d2c31ee5aa2851bb6ce3c9",
+          "prompt_sha256": "2624cd4f4e27fe48c4fce4cf93b389747f8d8fd1d07231601efb64b9ef3578a0"
+        },
+        "smol-guide": {
+          "prompt_tokens": 5177,
+          "instruction_tokens": 976,
+          "source_tokens": 3539,
+          "import_table_tokens": 157,
+          "original_go_source_tokens": 6550,
+          "guide_sha256": "3d60c13db1222325773d137fc33357ac3627b8222a9899ce9d19a775c44af8fb",
+          "prompt_sha256": "32ec09533f8cde782dce0dbb366a7180dec3a00ccede248fb0e2f1784b90265c"
+        }
+      },
+      "syntax_tokens_saved": 1044,
+      "syntax_savings_percent": 22.779838533711544,
+      "smol_extra_context_tokens": 157,
+      "net_prompt_savings": {
+        "go": 0,
+        "smol-none": 882,
+        "smol-brief": 560,
+        "smol-guide": -102
+      },
+      "break_even_loads": {
+        "brief": 1,
+        "guide": 2,
+        "full_spec": 11
+      }
+    },
+    {
+      "task": "caddyserver__caddy-6051",
+      "counts": {
+        "go": {
+          "prompt_tokens": 2043,
+          "instruction_tokens": 0,
+          "source_tokens": 1784,
+          "import_table_tokens": 0,
+          "original_go_source_tokens": 2948,
+          "guide_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "prompt_sha256": "b9353e3979364517732e3a78f2f5a3412cf74f9ac11fb8f93c5af757dae96c1a"
+        },
+        "smol-none": {
+          "prompt_tokens": 1558,
+          "instruction_tokens": 0,
+          "source_tokens": 1244,
+          "import_table_tokens": 50,
+          "original_go_source_tokens": 2948,
+          "guide_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "prompt_sha256": "1aafc7b700cc8f3cc1f92adb2ec9f908068c10e25c6b4f4c7025077ac778c7f5"
+        },
+        "smol-brief": {
+          "prompt_tokens": 1880,
+          "instruction_tokens": 314,
+          "source_tokens": 1244,
+          "import_table_tokens": 50,
+          "original_go_source_tokens": 2948,
+          "guide_sha256": "7dded3b7f5a5471cc09454797fef8c75a9637ab558d2c31ee5aa2851bb6ce3c9",
+          "prompt_sha256": "ddc448504811f31ce69b91f957e76e23994954b8aedd92cb2b3c3d27da245fa0"
+        },
+        "smol-guide": {
+          "prompt_tokens": 2542,
+          "instruction_tokens": 976,
+          "source_tokens": 1244,
+          "import_table_tokens": 50,
+          "original_go_source_tokens": 2948,
+          "guide_sha256": "3d60c13db1222325773d137fc33357ac3627b8222a9899ce9d19a775c44af8fb",
+          "prompt_sha256": "70f34a965e52f9e00e42663fac1ad0fd5decf9e1326809962946f5e7cb839e8f"
+        }
+      },
+      "syntax_tokens_saved": 540,
+      "syntax_savings_percent": 30.269058295964125,
+      "smol_extra_context_tokens": 50,
+      "net_prompt_savings": {
+        "go": 0,
+        "smol-none": 485,
+        "smol-brief": 163,
+        "smol-guide": -499
+      },
+      "break_even_loads": {
+        "brief": 1,
+        "guide": 2,
+        "full_spec": 19
+      }
+    }
+  ],
+  "arms": {
+    "go": {
+      "runs": 6,
+      "resolved": 6,
+      "first_pass_resolved": 6,
+      "first_pass_builds": 6,
+      "repair_requests": 0,
+      "input_tokens": 116642,
+      "cached_input_tokens": 0,
+      "output_tokens": 1873,
+      "uncached_input_tokens": 116642,
+      "input_plus_output_tokens": 118515,
+      "first_attempt_input_tokens": 116642,
+      "first_attempt_output_tokens": 1873,
+      "repair_input_tokens": 0,
+      "repair_output_tokens": 0,
+      "total_token_change_vs_go_percent": 0.0
+    },
+    "smol-none": {
+      "runs": 6,
+      "resolved": 6,
+      "first_pass_resolved": 6,
+      "first_pass_builds": 6,
+      "repair_requests": 0,
+      "input_tokens": 110166,
+      "cached_input_tokens": 12288,
+      "output_tokens": 1725,
+      "uncached_input_tokens": 97878,
+      "input_plus_output_tokens": 111891,
+      "first_attempt_input_tokens": 110166,
+      "first_attempt_output_tokens": 1725,
+      "repair_input_tokens": 0,
+      "repair_output_tokens": 0,
+      "total_token_change_vs_go_percent": -5.5891659283634985
+    },
+    "smol-brief": {
+      "runs": 6,
+      "resolved": 6,
+      "first_pass_resolved": 4,
+      "first_pass_builds": 4,
+      "repair_requests": 2,
+      "input_tokens": 154401,
+      "cached_input_tokens": 36864,
+      "output_tokens": 2354,
+      "uncached_input_tokens": 117537,
+      "input_plus_output_tokens": 156755,
+      "first_attempt_input_tokens": 112098,
+      "first_attempt_output_tokens": 1541,
+      "repair_input_tokens": 42303,
+      "repair_output_tokens": 813,
+      "total_token_change_vs_go_percent": 32.26595789562503
+    },
+    "smol-guide": {
+      "runs": 6,
+      "resolved": 5,
+      "first_pass_resolved": 3,
+      "first_pass_builds": 4,
+      "repair_requests": 2,
+      "input_tokens": 159703,
+      "cached_input_tokens": 0,
+      "output_tokens": 2504,
+      "uncached_input_tokens": 159703,
+      "input_plus_output_tokens": 162207,
+      "first_attempt_input_tokens": 116070,
+      "first_attempt_output_tokens": 1706,
+      "repair_input_tokens": 43633,
+      "repair_output_tokens": 798,
+      "total_token_change_vs_go_percent": 36.866219465890396
+    }
+  },
+  "source_totals_once_per_task": {
+    "go": 13917,
+    "smol": 10126,
+    "original_go": 20920,
+    "smol_import_table": 537,
+    "syntax_savings_percent": 27.24006610620105
+  },
+  "api_requests": 28,
+  "complete_planned_matrix": true,
+  "records": [
+    {
+      "task": "caddyserver__caddy-6051",
+      "arm": "go",
+      "repeat": 1,
+      "model": "gpt-6.1-sol",
+      "effort": "medium",
+      "counts": {
+        "prompt_tokens": 2043,
+        "instruction_tokens": 0,
+        "source_tokens": 1784,
+        "import_table_tokens": 0,
+        "original_go_source_tokens": 2948,
+        "guide_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "prompt_sha256": "b9353e3979364517732e3a78f2f5a3412cf74f9ac11fb8f93c5af757dae96c1a"
+      },
+      "attempts": [
+        {
+          "attempt": 0,
+          "usage": {
+            "input_tokens": 16493,
+            "cached_input_tokens": 0,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 296,
+            "reasoning_output_tokens": 159
+          },
+          "elapsed_seconds": 14.518,
+          "prompt_tokens": 2043,
+          "response_tokens": 125,
+          "prompt_sha256": "b9353e3979364517732e3a78f2f5a3412cf74f9ac11fb8f93c5af757dae96c1a",
+          "response_sha256": "194dc6e315c746ee6f883ecb6ef07ef6ad4f02624dbd41de7d8b0a8e1c965bf5",
+          "stage": "tests",
+          "resolved": true,
+          "passed": [
+            "TestDispenser_Val_Next",
+            "TestDispenser_NextArg",
+            "TestDispenser_NextLine",
+            "TestDispenser_NextBlock",
+            "TestDispenser_Args",
+            "TestDispenser_RemainingArgs",
+            "TestDispenser_ArgErr_Err",
+            "TestFormatter",
+            "TestLexer",
+            "TestParseVariadic",
+            "TestAllTokens",
+            "TestParseOneAndImport",
+            "TestRecursiveImport",
+            "TestDirectiveImport",
+            "TestParseAll",
+            "TestEnvironmentReplacement",
+            "TestImportReplacementInJSONWithBrace",
+            "TestSnippets",
+            "TestImportedFilesIgnoreNonDirectiveImportTokens",
+            "TestSnippetAcrossMultipleFiles"
+          ],
+          "failed": [],
+          "missing_expected_tests": [],
+          "canonical_before_format": null,
+          "feedback": ""
+        }
+      ],
+      "resolved": true,
+      "first_pass_resolved": true,
+      "usage": {
+        "input_tokens": 16493,
+        "cached_input_tokens": 0,
+        "output_tokens": 296
+      }
+    },
+    {
+      "task": "caddyserver__caddy-6051",
+      "arm": "smol-brief",
+      "repeat": 1,
+      "model": "gpt-6.1-sol",
+      "effort": "medium",
+      "counts": {
+        "prompt_tokens": 1880,
+        "instruction_tokens": 314,
+        "source_tokens": 1244,
+        "import_table_tokens": 50,
+        "original_go_source_tokens": 2948,
+        "guide_sha256": "7dded3b7f5a5471cc09454797fef8c75a9637ab558d2c31ee5aa2851bb6ce3c9",
+        "prompt_sha256": "ddc448504811f31ce69b91f957e76e23994954b8aedd92cb2b3c3d27da245fa0"
+      },
+      "attempts": [
+        {
+          "attempt": 0,
+          "usage": {
+            "input_tokens": 16330,
+            "cached_input_tokens": 12288,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 269,
+            "reasoning_output_tokens": 152
+          },
+          "elapsed_seconds": 26.896,
+          "prompt_tokens": 1880,
+          "response_tokens": 105,
+          "prompt_sha256": "ddc448504811f31ce69b91f957e76e23994954b8aedd92cb2b3c3d27da245fa0",
+          "response_sha256": "e279a73a0e160d0c344c9946b7e6eb393067a63b1a9c597b311eeb5f3dcabcb8",
+          "stage": "tests",
+          "resolved": true,
+          "passed": [
+            "TestDispenser_Val_Next",
+            "TestDispenser_NextArg",
+            "TestDispenser_NextLine",
+            "TestDispenser_NextBlock",
+            "TestDispenser_Args",
+            "TestDispenser_RemainingArgs",
+            "TestDispenser_ArgErr_Err",
+            "TestFormatter",
+            "TestLexer",
+            "TestParseVariadic",
+            "TestAllTokens",
+            "TestParseOneAndImport",
+            "TestRecursiveImport",
+            "TestDirectiveImport",
+            "TestParseAll",
+            "TestEnvironmentReplacement",
+            "TestImportReplacementInJSONWithBrace",
+            "TestSnippets",
+            "TestImportedFilesIgnoreNonDirectiveImportTokens",
+            "TestSnippetAcrossMultipleFiles"
+          ],
+          "failed": [],
+          "missing_expected_tests": [],
+          "canonical_before_format": false,
+          "feedback": ""
+        }
+      ],
+      "resolved": true,
+      "first_pass_resolved": true,
+      "usage": {
+        "input_tokens": 16330,
+        "cached_input_tokens": 12288,
+        "output_tokens": 269
+      }
+    },
+    {
+      "task": "caddyserver__caddy-6051",
+      "arm": "smol-guide",
+      "repeat": 1,
+      "model": "gpt-6.1-sol",
+      "effort": "medium",
+      "counts": {
+        "prompt_tokens": 2542,
+        "instruction_tokens": 976,
+        "source_tokens": 1244,
+        "import_table_tokens": 50,
+        "original_go_source_tokens": 2948,
+        "guide_sha256": "3d60c13db1222325773d137fc33357ac3627b8222a9899ce9d19a775c44af8fb",
+        "prompt_sha256": "70f34a965e52f9e00e42663fac1ad0fd5decf9e1326809962946f5e7cb839e8f"
+      },
+      "attempts": [
+        {
+          "attempt": 0,
+          "usage": {
+            "input_tokens": 16992,
+            "cached_input_tokens": 0,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 300,
+            "reasoning_output_tokens": 183
+          },
+          "elapsed_seconds": 24.528,
+          "prompt_tokens": 2542,
+          "response_tokens": 105,
+          "prompt_sha256": "70f34a965e52f9e00e42663fac1ad0fd5decf9e1326809962946f5e7cb839e8f",
+          "response_sha256": "e279a73a0e160d0c344c9946b7e6eb393067a63b1a9c597b311eeb5f3dcabcb8",
+          "stage": "tests",
+          "resolved": true,
+          "passed": [
+            "TestDispenser_Val_Next",
+            "TestDispenser_NextArg",
+            "TestDispenser_NextLine",
+            "TestDispenser_NextBlock",
+            "TestDispenser_Args",
+            "TestDispenser_RemainingArgs",
+            "TestDispenser_ArgErr_Err",
+            "TestFormatter",
+            "TestLexer",
+            "TestParseVariadic",
+            "TestAllTokens",
+            "TestParseOneAndImport",
+            "TestRecursiveImport",
+            "TestDirectiveImport",
+            "TestParseAll",
+            "TestEnvironmentReplacement",
+            "TestImportReplacementInJSONWithBrace",
+            "TestSnippets",
+            "TestImportedFilesIgnoreNonDirectiveImportTokens",
+            "TestSnippetAcrossMultipleFiles"
+          ],
+          "failed": [],
+          "missing_expected_tests": [],
+          "canonical_before_format": false,
+          "feedback": ""
+        }
+      ],
+      "resolved": true,
+      "first_pass_resolved": true,
+      "usage": {
+        "input_tokens": 16992,
+        "cached_input_tokens": 0,
+        "output_tokens": 300
+      }
+    },
+    {
+      "task": "caddyserver__caddy-6051",
+      "arm": "smol-none",
+      "repeat": 1,
+      "model": "gpt-6.1-sol",
+      "effort": "medium",
+      "counts": {
+        "prompt_tokens": 1558,
+        "instruction_tokens": 0,
+        "source_tokens": 1244,
+        "import_table_tokens": 50,
+        "original_go_source_tokens": 2948,
+        "guide_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "prompt_sha256": "1aafc7b700cc8f3cc1f92adb2ec9f908068c10e25c6b4f4c7025077ac778c7f5"
+      },
+      "attempts": [
+        {
+          "attempt": 0,
+          "usage": {
+            "input_tokens": 16008,
+            "cached_input_tokens": 12288,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 246,
+            "reasoning_output_tokens": 129
+          },
+          "elapsed_seconds": 28.025,
+          "prompt_tokens": 1558,
+          "response_tokens": 105,
+          "prompt_sha256": "1aafc7b700cc8f3cc1f92adb2ec9f908068c10e25c6b4f4c7025077ac778c7f5",
+          "response_sha256": "e279a73a0e160d0c344c9946b7e6eb393067a63b1a9c597b311eeb5f3dcabcb8",
+          "stage": "tests",
+          "resolved": true,
+          "passed": [
+            "TestDispenser_Val_Next",
+            "TestDispenser_NextArg",
+            "TestDispenser_NextLine",
+            "TestDispenser_NextBlock",
+            "TestDispenser_Args",
+            "TestDispenser_RemainingArgs",
+            "TestDispenser_ArgErr_Err",
+            "TestFormatter",
+            "TestLexer",
+            "TestParseVariadic",
+            "TestAllTokens",
+            "TestParseOneAndImport",
+            "TestRecursiveImport",
+            "TestDirectiveImport",
+            "TestParseAll",
+            "TestEnvironmentReplacement",
+            "TestImportReplacementInJSONWithBrace",
+            "TestSnippets",
+            "TestImportedFilesIgnoreNonDirectiveImportTokens",
+            "TestSnippetAcrossMultipleFiles"
+          ],
+          "failed": [],
+          "missing_expected_tests": [],
+          "canonical_before_format": false,
+          "feedback": ""
+        }
+      ],
+      "resolved": true,
+      "first_pass_resolved": true,
+      "usage": {
+        "input_tokens": 16008,
+        "cached_input_tokens": 12288,
+        "output_tokens": 246
+      }
+    },
+    {
+      "task": "caddyserver__caddy-6051",
+      "arm": "go",
+      "repeat": 2,
+      "model": "gpt-6.1-sol",
+      "effort": "medium",
+      "counts": {
+        "prompt_tokens": 2043,
+        "instruction_tokens": 0,
+        "source_tokens": 1784,
+        "import_table_tokens": 0,
+        "original_go_source_tokens": 2948,
+        "guide_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "prompt_sha256": "b9353e3979364517732e3a78f2f5a3412cf74f9ac11fb8f93c5af757dae96c1a"
+      },
+      "attempts": [
+        {
+          "attempt": 0,
+          "usage": {
+            "input_tokens": 16493,
+            "cached_input_tokens": 0,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 225,
+            "reasoning_output_tokens": 88
+          },
+          "elapsed_seconds": 21.748,
+          "prompt_tokens": 2043,
+          "response_tokens": 125,
+          "prompt_sha256": "b9353e3979364517732e3a78f2f5a3412cf74f9ac11fb8f93c5af757dae96c1a",
+          "response_sha256": "194dc6e315c746ee6f883ecb6ef07ef6ad4f02624dbd41de7d8b0a8e1c965bf5",
+          "stage": "tests",
+          "resolved": true,
+          "passed": [
+            "TestDispenser_Val_Next",
+            "TestDispenser_NextArg",
+            "TestDispenser_NextLine",
+            "TestDispenser_NextBlock",
+            "TestDispenser_Args",
+            "TestDispenser_RemainingArgs",
+            "TestDispenser_ArgErr_Err",
+            "TestFormatter",
+            "TestLexer",
+            "TestParseVariadic",
+            "TestAllTokens",
+            "TestParseOneAndImport",
+            "TestRecursiveImport",
+            "TestDirectiveImport",
+            "TestParseAll",
+            "TestEnvironmentReplacement",
+            "TestImportReplacementInJSONWithBrace",
+            "TestSnippets",
+            "TestImportedFilesIgnoreNonDirectiveImportTokens",
+            "TestSnippetAcrossMultipleFiles"
+          ],
+          "failed": [],
+          "missing_expected_tests": [],
+          "canonical_before_format": null,
+          "feedback": ""
+        }
+      ],
+      "resolved": true,
+      "first_pass_resolved": true,
+      "usage": {
+        "input_tokens": 16493,
+        "cached_input_tokens": 0,
+        "output_tokens": 225
+      }
+    },
+    {
+      "task": "caddyserver__caddy-6051",
+      "arm": "smol-brief",
+      "repeat": 2,
+      "model": "gpt-6.1-sol",
+      "effort": "medium",
+      "counts": {
+        "prompt_tokens": 1880,
+        "instruction_tokens": 314,
+        "source_tokens": 1244,
+        "import_table_tokens": 50,
+        "original_go_source_tokens": 2948,
+        "guide_sha256": "7dded3b7f5a5471cc09454797fef8c75a9637ab558d2c31ee5aa2851bb6ce3c9",
+        "prompt_sha256": "ddc448504811f31ce69b91f957e76e23994954b8aedd92cb2b3c3d27da245fa0"
+      },
+      "attempts": [
+        {
+          "attempt": 0,
+          "usage": {
+            "input_tokens": 16330,
+            "cached_input_tokens": 12288,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 226,
+            "reasoning_output_tokens": 109
+          },
+          "elapsed_seconds": 14.328,
+          "prompt_tokens": 1880,
+          "response_tokens": 105,
+          "prompt_sha256": "ddc448504811f31ce69b91f957e76e23994954b8aedd92cb2b3c3d27da245fa0",
+          "response_sha256": "e279a73a0e160d0c344c9946b7e6eb393067a63b1a9c597b311eeb5f3dcabcb8",
+          "stage": "tests",
+          "resolved": true,
+          "passed": [
+            "TestDispenser_Val_Next",
+            "TestDispenser_NextArg",
+            "TestDispenser_NextLine",
+            "TestDispenser_NextBlock",
+            "TestDispenser_Args",
+            "TestDispenser_RemainingArgs",
+            "TestDispenser_ArgErr_Err",
+            "TestFormatter",
+            "TestLexer",
+            "TestParseVariadic",
+            "TestAllTokens",
+            "TestParseOneAndImport",
+            "TestRecursiveImport",
+            "TestDirectiveImport",
+            "TestParseAll",
+            "TestEnvironmentReplacement",
+            "TestImportReplacementInJSONWithBrace",
+            "TestSnippets",
+            "TestImportedFilesIgnoreNonDirectiveImportTokens",
+            "TestSnippetAcrossMultipleFiles"
+          ],
+          "failed": [],
+          "missing_expected_tests": [],
+          "canonical_before_format": false,
+          "feedback": ""
+        }
+      ],
+      "resolved": true,
+      "first_pass_resolved": true,
+      "usage": {
+        "input_tokens": 16330,
+        "cached_input_tokens": 12288,
+        "output_tokens": 226
+      }
+    },
+    {
+      "task": "caddyserver__caddy-6051",
+      "arm": "smol-guide",
+      "repeat": 2,
+      "model": "gpt-6.1-sol",
+      "effort": "medium",
+      "counts": {
+        "prompt_tokens": 2542,
+        "instruction_tokens": 976,
+        "source_tokens": 1244,
+        "import_table_tokens": 50,
+        "original_go_source_tokens": 2948,
+        "guide_sha256": "3d60c13db1222325773d137fc33357ac3627b8222a9899ce9d19a775c44af8fb",
+        "prompt_sha256": "70f34a965e52f9e00e42663fac1ad0fd5decf9e1326809962946f5e7cb839e8f"
+      },
+      "attempts": [
+        {
+          "attempt": 0,
+          "usage": {
+            "input_tokens": 16992,
+            "cached_input_tokens": 0,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 271,
+            "reasoning_output_tokens": 160
+          },
+          "elapsed_seconds": 17.544,
+          "prompt_tokens": 2542,
+          "response_tokens": 99,
+          "prompt_sha256": "70f34a965e52f9e00e42663fac1ad0fd5decf9e1326809962946f5e7cb839e8f",
+          "response_sha256": "b4d797284771a88a13f2c5ff995a9b829bad4e4883e185dfdb627fa7b94f556a",
+          "stage": "tests",
+          "resolved": false,
+          "passed": [
+            "TestDispenser_Val_Next",
+            "TestDispenser_NextArg",
+            "TestDispenser_NextLine",
+            "TestDispenser_NextBlock",
+            "TestDispenser_Args",
+            "TestDispenser_RemainingArgs",
+            "TestDispenser_ArgErr_Err",
+            "TestFormatter",
+            "TestParseVariadic",
+            "TestAllTokens",
+            "TestParseOneAndImport",
+            "TestRecursiveImport",
+            "TestDirectiveImport",
+            "TestParseAll",
+            "TestEnvironmentReplacement",
+            "TestImportReplacementInJSONWithBrace",
+            "TestSnippets",
+            "TestImportedFilesIgnoreNonDirectiveImportTokens",
+            "TestSnippetAcrossMultipleFiles"
+          ],
+          "failed": [
+            "TestLexer"
+          ],
+          "missing_expected_tests": [
+            "TestLexer"
+          ],
+          "canonical_before_format": false,
+          "feedback": ""
+        }
+      ],
+      "resolved": false,
+      "first_pass_resolved": false,
+      "usage": {
+        "input_tokens": 16992,
+        "cached_input_tokens": 0,
+        "output_tokens": 271
+      }
+    },
+    {
+      "task": "caddyserver__caddy-6051",
+      "arm": "smol-none",
+      "repeat": 2,
+      "model": "gpt-6.1-sol",
+      "effort": "medium",
+      "counts": {
+        "prompt_tokens": 1558,
+        "instruction_tokens": 0,
+        "source_tokens": 1244,
+        "import_table_tokens": 50,
+        "original_go_source_tokens": 2948,
+        "guide_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "prompt_sha256": "1aafc7b700cc8f3cc1f92adb2ec9f908068c10e25c6b4f4c7025077ac778c7f5"
+      },
+      "attempts": [
+        {
+          "attempt": 0,
+          "usage": {
+            "input_tokens": 16008,
+            "cached_input_tokens": 0,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 273,
+            "reasoning_output_tokens": 156
+          },
+          "elapsed_seconds": 17.802,
+          "prompt_tokens": 1558,
+          "response_tokens": 105,
+          "prompt_sha256": "1aafc7b700cc8f3cc1f92adb2ec9f908068c10e25c6b4f4c7025077ac778c7f5",
+          "response_sha256": "e279a73a0e160d0c344c9946b7e6eb393067a63b1a9c597b311eeb5f3dcabcb8",
+          "stage": "tests",
+          "resolved": true,
+          "passed": [
+            "TestDispenser_Val_Next",
+            "TestDispenser_NextArg",
+            "TestDispenser_NextLine",
+            "TestDispenser_NextBlock",
+            "TestDispenser_Args",
+            "TestDispenser_RemainingArgs",
+            "TestDispenser_ArgErr_Err",
+            "TestFormatter",
+            "TestLexer",
+            "TestParseVariadic",
+            "TestAllTokens",
+            "TestParseOneAndImport",
+            "TestRecursiveImport",
+            "TestDirectiveImport",
+            "TestParseAll",
+            "TestEnvironmentReplacement",
+            "TestImportReplacementInJSONWithBrace",
+            "TestSnippets",
+            "TestImportedFilesIgnoreNonDirectiveImportTokens",
+            "TestSnippetAcrossMultipleFiles"
+          ],
+          "failed": [],
+          "missing_expected_tests": [],
+          "canonical_before_format": false,
+          "feedback": ""
+        }
+      ],
+      "resolved": true,
+      "first_pass_resolved": true,
+      "usage": {
+        "input_tokens": 16008,
+        "cached_input_tokens": 0,
+        "output_tokens": 273
+      }
+    },
+    {
+      "task": "gin-gonic__gin-1957",
+      "arm": "go",
+      "repeat": 1,
+      "model": "gpt-6.1-sol",
+      "effort": "medium",
+      "counts": {
+        "prompt_tokens": 7856,
+        "instruction_tokens": 0,
+        "source_tokens": 7550,
+        "import_table_tokens": 0,
+        "original_go_source_tokens": 11422,
+        "guide_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "prompt_sha256": "14facd2e4e5e2b86b7862d0e036b978c036eef9004b9ae4d926d873df5b367ec"
+      },
+      "attempts": [
+        {
+          "attempt": 0,
+          "usage": {
+            "input_tokens": 22303,
+            "cached_input_tokens": 0,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 587,
+            "reasoning_output_tokens": 124
+          },
+          "elapsed_seconds": 36.641,
+          "prompt_tokens": 7856,
+          "response_tokens": 451,
+          "prompt_sha256": "14facd2e4e5e2b86b7862d0e036b978c036eef9004b9ae4d926d873df5b367ec",
+          "response_sha256": "fa6394d469930f95c4267c9b2b70b36b7c914eefccb88b18f9c6638eea673886",
+          "stage": "tests",
+          "resolved": true,
+          "passed": [
+            "TestContextAutoBindJSON",
+            "TestContextBindWithJSON",
+            "TestContextBindWithXML",
+            "TestContextBindHeader",
+            "TestContextBindWithQuery",
+            "TestContextBindWithYAML",
+            "TestContextBadAutoBind",
+            "TestContextAutoShouldBindJSON",
+            "TestContextShouldBindWithJSON",
+            "TestContextShouldBindWithXML",
+            "TestContextShouldBindHeader",
+            "TestContextShouldBindWithQuery",
+            "TestContextShouldBindWithYAML",
+            "TestContextBadAutoShouldBind",
+            "TestContextShouldBindBodyWith"
+          ],
+          "failed": [],
+          "missing_expected_tests": [],
+          "canonical_before_format": null,
+          "feedback": ""
+        }
+      ],
+      "resolved": true,
+      "first_pass_resolved": true,
+      "usage": {
+        "input_tokens": 22303,
+        "cached_input_tokens": 0,
+        "output_tokens": 587
+      }
+    },
+    {
+      "task": "gin-gonic__gin-1957",
+      "arm": "smol-brief",
+      "repeat": 1,
+      "model": "gpt-6.1-sol",
+      "effort": "medium",
+      "counts": {
+        "prompt_tokens": 6307,
+        "instruction_tokens": 314,
+        "source_tokens": 5343,
+        "import_table_tokens": 330,
+        "original_go_source_tokens": 11422,
+        "guide_sha256": "7dded3b7f5a5471cc09454797fef8c75a9637ab558d2c31ee5aa2851bb6ce3c9",
+        "prompt_sha256": "bb00048ad58dfdf87aa06a3bce5eb596bd91ec6d773ea5077f2344dbd42d3226"
+      },
+      "attempts": [
+        {
+          "attempt": 0,
+          "usage": {
+            "input_tokens": 20754,
+            "cached_input_tokens": 0,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 437,
+            "reasoning_output_tokens": 121
+          },
+          "elapsed_seconds": 25.89,
+          "prompt_tokens": 6307,
+          "response_tokens": 304,
+          "prompt_sha256": "bb00048ad58dfdf87aa06a3bce5eb596bd91ec6d773ea5077f2344dbd42d3226",
+          "response_sha256": "046737b039b2c406f0d6c74f041379ff7726653ac1248e703c446e1a6ee1144a",
+          "stage": "lower",
+          "feedback": "smol: /private/tmp/smol-overhead/candidate-gg0bao87/repo/binding/header.smol: lower: source.go:17:41: missing ',' in argument list (and 1 more errors)\n",
+          "resolved": false
+        },
+        {
+          "attempt": 1,
+          "usage": {
+            "input_tokens": 21146,
+            "cached_input_tokens": 0,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 393,
+            "reasoning_output_tokens": 74
+          },
+          "elapsed_seconds": 19.776,
+          "prompt_tokens": 6699,
+          "response_tokens": 307,
+          "prompt_sha256": "0718bf68a81e4a162c0ca8380f6a600833fe40faff88833d0092e09d52695085",
+          "response_sha256": "fd1cef73d8566aabf6d47a1e848d63757125a74c57f2589e5fde4a7a25704741",
+          "stage": "tests",
+          "resolved": true,
+          "passed": [
+            "TestContextAutoBindJSON",
+            "TestContextBindWithJSON",
+            "TestContextBindWithXML",
+            "TestContextBindHeader",
+            "TestContextBindWithQuery",
+            "TestContextBindWithYAML",
+            "TestContextBadAutoBind",
+            "TestContextAutoShouldBindJSON",
+            "TestContextShouldBindWithJSON",
+            "TestContextShouldBindWithXML",
+            "TestContextShouldBindHeader",
+            "TestContextShouldBindWithQuery",
+            "TestContextShouldBindWithYAML",
+            "TestContextBadAutoShouldBind",
+            "TestContextShouldBindBodyWith"
+          ],
+          "failed": [],
+          "missing_expected_tests": [],
+          "canonical_before_format": false,
+          "feedback": ""
+        }
+      ],
+      "resolved": true,
+      "first_pass_resolved": false,
+      "usage": {
+        "input_tokens": 41900,
+        "cached_input_tokens": 0,
+        "output_tokens": 830
+      }
+    },
+    {
+      "task": "gin-gonic__gin-1957",
+      "arm": "smol-guide",
+      "repeat": 1,
+      "model": "gpt-6.1-sol",
+      "effort": "medium",
+      "counts": {
+        "prompt_tokens": 6969,
+        "instruction_tokens": 976,
+        "source_tokens": 5343,
+        "import_table_tokens": 330,
+        "original_go_source_tokens": 11422,
+        "guide_sha256": "3d60c13db1222325773d137fc33357ac3627b8222a9899ce9d19a775c44af8fb",
+        "prompt_sha256": "2afb8a8dac5d9cc04e6da5bf1f4fcfd493dd2d17ca3bcd98cb1cddb0fee2085d"
+      },
+      "attempts": [
+        {
+          "attempt": 0,
+          "usage": {
+            "input_tokens": 21416,
+            "cached_input_tokens": 0,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 453,
+            "reasoning_output_tokens": 131
+          },
+          "elapsed_seconds": 16.92,
+          "prompt_tokens": 6969,
+          "response_tokens": 310,
+          "prompt_sha256": "2afb8a8dac5d9cc04e6da5bf1f4fcfd493dd2d17ca3bcd98cb1cddb0fee2085d",
+          "response_sha256": "a63058f6eca4cb39c577c3271f0b6cd7f2fea66bb9e00eba2789cf4d026d3f75",
+          "stage": "lower",
+          "feedback": "smol: /private/tmp/smol-overhead/candidate-khili5t6/repo/binding/header.smol: lower: source.go:17:41: missing ',' in argument list (and 1 more errors)\n",
+          "resolved": false
+        },
+        {
+          "attempt": 1,
+          "usage": {
+            "input_tokens": 21815,
+            "cached_input_tokens": 0,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 399,
+            "reasoning_output_tokens": 70
+          },
+          "elapsed_seconds": 18.028,
+          "prompt_tokens": 7368,
+          "response_tokens": 317,
+          "prompt_sha256": "c2ade7cd7ac24677c1f73f2d0bbda59d28ece0af7d00e5815da4413c7ad34ee6",
+          "response_sha256": "104983c9d2915263d2a7747054f51c9db6c96f4ef5a29bbd84ca34e6540e35e1",
+          "stage": "tests",
+          "resolved": true,
+          "passed": [
+            "TestContextAutoBindJSON",
+            "TestContextBindWithJSON",
+            "TestContextBindWithXML",
+            "TestContextBindHeader",
+            "TestContextBindWithQuery",
+            "TestContextBindWithYAML",
+            "TestContextBadAutoBind",
+            "TestContextAutoShouldBindJSON",
+            "TestContextShouldBindWithJSON",
+            "TestContextShouldBindWithXML",
+            "TestContextShouldBindHeader",
+            "TestContextShouldBindWithQuery",
+            "TestContextShouldBindWithYAML",
+            "TestContextBadAutoShouldBind",
+            "TestContextShouldBindBodyWith"
+          ],
+          "failed": [],
+          "missing_expected_tests": [],
+          "canonical_before_format": false,
+          "feedback": ""
+        }
+      ],
+      "resolved": true,
+      "first_pass_resolved": false,
+      "usage": {
+        "input_tokens": 43231,
+        "cached_input_tokens": 0,
+        "output_tokens": 852
+      }
+    },
+    {
+      "task": "gin-gonic__gin-1957",
+      "arm": "smol-none",
+      "repeat": 1,
+      "model": "gpt-6.1-sol",
+      "effort": "medium",
+      "counts": {
+        "prompt_tokens": 5985,
+        "instruction_tokens": 0,
+        "source_tokens": 5343,
+        "import_table_tokens": 330,
+        "original_go_source_tokens": 11422,
+        "guide_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "prompt_sha256": "630ff434056ee0f8cea13769a85d4a76c338e5ec2bb82a91ce596bb6f3df3b5c"
+      },
+      "attempts": [
+        {
+          "attempt": 0,
+          "usage": {
+            "input_tokens": 20432,
+            "cached_input_tokens": 0,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 470,
+            "reasoning_output_tokens": 161
+          },
+          "elapsed_seconds": 26.081,
+          "prompt_tokens": 5985,
+          "response_tokens": 297,
+          "prompt_sha256": "630ff434056ee0f8cea13769a85d4a76c338e5ec2bb82a91ce596bb6f3df3b5c",
+          "response_sha256": "3a6a9f65e4ee31cefe1294700f83e1b012dc53b83fa6a8c240a0c743d0249671",
+          "stage": "tests",
+          "resolved": true,
+          "passed": [
+            "TestContextAutoBindJSON",
+            "TestContextBindWithJSON",
+            "TestContextBindWithXML",
+            "TestContextBindHeader",
+            "TestContextBindWithQuery",
+            "TestContextBindWithYAML",
+            "TestContextBadAutoBind",
+            "TestContextAutoShouldBindJSON",
+            "TestContextShouldBindWithJSON",
+            "TestContextShouldBindWithXML",
+            "TestContextShouldBindHeader",
+            "TestContextShouldBindWithQuery",
+            "TestContextShouldBindWithYAML",
+            "TestContextBadAutoShouldBind",
+            "TestContextShouldBindBodyWith"
+          ],
+          "failed": [],
+          "missing_expected_tests": [],
+          "canonical_before_format": false,
+          "feedback": ""
+        }
+      ],
+      "resolved": true,
+      "first_pass_resolved": true,
+      "usage": {
+        "input_tokens": 20432,
+        "cached_input_tokens": 0,
+        "output_tokens": 470
+      }
+    },
+    {
+      "task": "gin-gonic__gin-1957",
+      "arm": "go",
+      "repeat": 2,
+      "model": "gpt-6.1-sol",
+      "effort": "medium",
+      "counts": {
+        "prompt_tokens": 7856,
+        "instruction_tokens": 0,
+        "source_tokens": 7550,
+        "import_table_tokens": 0,
+        "original_go_source_tokens": 11422,
+        "guide_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "prompt_sha256": "14facd2e4e5e2b86b7862d0e036b978c036eef9004b9ae4d926d873df5b367ec"
+      },
+      "attempts": [
+        {
+          "attempt": 0,
+          "usage": {
+            "input_tokens": 22303,
+            "cached_input_tokens": 0,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 521,
+            "reasoning_output_tokens": 60
+          },
+          "elapsed_seconds": 21.74,
+          "prompt_tokens": 7856,
+          "response_tokens": 449,
+          "prompt_sha256": "14facd2e4e5e2b86b7862d0e036b978c036eef9004b9ae4d926d873df5b367ec",
+          "response_sha256": "37fd60034dcebd8db0fc0136bf855f854f505e65249e135101c21522e7405d2b",
+          "stage": "tests",
+          "resolved": true,
+          "passed": [
+            "TestContextAutoBindJSON",
+            "TestContextBindWithJSON",
+            "TestContextBindWithXML",
+            "TestContextBindHeader",
+            "TestContextBindWithQuery",
+            "TestContextBindWithYAML",
+            "TestContextBadAutoBind",
+            "TestContextAutoShouldBindJSON",
+            "TestContextShouldBindWithJSON",
+            "TestContextShouldBindWithXML",
+            "TestContextShouldBindHeader",
+            "TestContextShouldBindWithQuery",
+            "TestContextShouldBindWithYAML",
+            "TestContextBadAutoShouldBind",
+            "TestContextShouldBindBodyWith"
+          ],
+          "failed": [],
+          "missing_expected_tests": [],
+          "canonical_before_format": null,
+          "feedback": ""
+        }
+      ],
+      "resolved": true,
+      "first_pass_resolved": true,
+      "usage": {
+        "input_tokens": 22303,
+        "cached_input_tokens": 0,
+        "output_tokens": 521
+      }
+    },
+    {
+      "task": "gin-gonic__gin-1957",
+      "arm": "smol-brief",
+      "repeat": 2,
+      "model": "gpt-6.1-sol",
+      "effort": "medium",
+      "counts": {
+        "prompt_tokens": 6307,
+        "instruction_tokens": 314,
+        "source_tokens": 5343,
+        "import_table_tokens": 330,
+        "original_go_source_tokens": 11422,
+        "guide_sha256": "7dded3b7f5a5471cc09454797fef8c75a9637ab558d2c31ee5aa2851bb6ce3c9",
+        "prompt_sha256": "bb00048ad58dfdf87aa06a3bce5eb596bd91ec6d773ea5077f2344dbd42d3226"
+      },
+      "attempts": [
+        {
+          "attempt": 0,
+          "usage": {
+            "input_tokens": 20754,
+            "cached_input_tokens": 0,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 381,
+            "reasoning_output_tokens": 55
+          },
+          "elapsed_seconds": 14.623,
+          "prompt_tokens": 6307,
+          "response_tokens": 314,
+          "prompt_sha256": "bb00048ad58dfdf87aa06a3bce5eb596bd91ec6d773ea5077f2344dbd42d3226",
+          "response_sha256": "e6b9aa4597f61dd856151159d03cfe41a4dee86e242f4d2a8e726be16713170a",
+          "stage": "lower",
+          "feedback": "smol: /private/tmp/smol-overhead/candidate-e3jvniiw/repo/binding/header.smol: lower: source.go:22:41: missing ',' in argument list (and 1 more errors)\n",
+          "resolved": false
+        },
+        {
+          "attempt": 1,
+          "usage": {
+            "input_tokens": 21157,
+            "cached_input_tokens": 12288,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 420,
+            "reasoning_output_tokens": 89
+          },
+          "elapsed_seconds": 27.434,
+          "prompt_tokens": 6710,
+          "response_tokens": 319,
+          "prompt_sha256": "fe1a10d4866fd2d743cc96d3ee4b7390009d3d2ddcb54dde36fc54fb3d32693e",
+          "response_sha256": "fee4f638169b875439a315cccbae4e6c1c5a83091e46d799a8603c2d63f59a11",
+          "stage": "tests",
+          "resolved": true,
+          "passed": [
+            "TestContextAutoBindJSON",
+            "TestContextBindWithJSON",
+            "TestContextBindWithXML",
+            "TestContextBindHeader",
+            "TestContextBindWithQuery",
+            "TestContextBindWithYAML",
+            "TestContextBadAutoBind",
+            "TestContextAutoShouldBindJSON",
+            "TestContextShouldBindWithJSON",
+            "TestContextShouldBindWithXML",
+            "TestContextShouldBindHeader",
+            "TestContextShouldBindWithQuery",
+            "TestContextShouldBindWithYAML",
+            "TestContextBadAutoShouldBind",
+            "TestContextShouldBindBodyWith"
+          ],
+          "failed": [],
+          "missing_expected_tests": [],
+          "canonical_before_format": false,
+          "feedback": ""
+        }
+      ],
+      "resolved": true,
+      "first_pass_resolved": false,
+      "usage": {
+        "input_tokens": 41911,
+        "cached_input_tokens": 12288,
+        "output_tokens": 801
+      }
+    },
+    {
+      "task": "gin-gonic__gin-1957",
+      "arm": "smol-guide",
+      "repeat": 2,
+      "model": "gpt-6.1-sol",
+      "effort": "medium",
+      "counts": {
+        "prompt_tokens": 6969,
+        "instruction_tokens": 976,
+        "source_tokens": 5343,
+        "import_table_tokens": 330,
+        "original_go_source_tokens": 11422,
+        "guide_sha256": "3d60c13db1222325773d137fc33357ac3627b8222a9899ce9d19a775c44af8fb",
+        "prompt_sha256": "2afb8a8dac5d9cc04e6da5bf1f4fcfd493dd2d17ca3bcd98cb1cddb0fee2085d"
+      },
+      "attempts": [
+        {
+          "attempt": 0,
+          "usage": {
+            "input_tokens": 21416,
+            "cached_input_tokens": 0,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 429,
+            "reasoning_output_tokens": 104
+          },
+          "elapsed_seconds": 15.594,
+          "prompt_tokens": 6969,
+          "response_tokens": 313,
+          "prompt_sha256": "2afb8a8dac5d9cc04e6da5bf1f4fcfd493dd2d17ca3bcd98cb1cddb0fee2085d",
+          "response_sha256": "7854d80a5fbca46db36c5c314d51b2232b1922edcb47e8077ea7d2118868f3f6",
+          "stage": "lower",
+          "feedback": "smol: /private/tmp/smol-overhead/candidate-90nkmmg3/repo/binding/header.smol: lower: source.go:17:47: missing ',' in argument list (and 1 more errors)\n",
+          "resolved": false
+        },
+        {
+          "attempt": 1,
+          "usage": {
+            "input_tokens": 21818,
+            "cached_input_tokens": 0,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 399,
+            "reasoning_output_tokens": 70
+          },
+          "elapsed_seconds": 17.561,
+          "prompt_tokens": 7371,
+          "response_tokens": 317,
+          "prompt_sha256": "0568e39e56347492c212e8321a338884c1c2fd2da5361e5c2814332966189023",
+          "response_sha256": "08b318f58f11819ac5cc9d0a6882e5b77bc08fcb7762ecb28fae3b6166e6a07b",
+          "stage": "tests",
+          "resolved": true,
+          "passed": [
+            "TestContextAutoBindJSON",
+            "TestContextBindWithJSON",
+            "TestContextBindWithXML",
+            "TestContextBindHeader",
+            "TestContextBindWithQuery",
+            "TestContextBindWithYAML",
+            "TestContextBadAutoBind",
+            "TestContextAutoShouldBindJSON",
+            "TestContextShouldBindWithJSON",
+            "TestContextShouldBindWithXML",
+            "TestContextShouldBindHeader",
+            "TestContextShouldBindWithQuery",
+            "TestContextShouldBindWithYAML",
+            "TestContextBadAutoShouldBind",
+            "TestContextShouldBindBodyWith"
+          ],
+          "failed": [],
+          "missing_expected_tests": [],
+          "canonical_before_format": false,
+          "feedback": ""
+        }
+      ],
+      "resolved": true,
+      "first_pass_resolved": false,
+      "usage": {
+        "input_tokens": 43234,
+        "cached_input_tokens": 0,
+        "output_tokens": 828
+      }
+    },
+    {
+      "task": "gin-gonic__gin-1957",
+      "arm": "smol-none",
+      "repeat": 2,
+      "model": "gpt-6.1-sol",
+      "effort": "medium",
+      "counts": {
+        "prompt_tokens": 5985,
+        "instruction_tokens": 0,
+        "source_tokens": 5343,
+        "import_table_tokens": 330,
+        "original_go_source_tokens": 11422,
+        "guide_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "prompt_sha256": "630ff434056ee0f8cea13769a85d4a76c338e5ec2bb82a91ce596bb6f3df3b5c"
+      },
+      "attempts": [
+        {
+          "attempt": 0,
+          "usage": {
+            "input_tokens": 20432,
+            "cached_input_tokens": 0,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 475,
+            "reasoning_output_tokens": 156
+          },
+          "elapsed_seconds": 22.564,
+          "prompt_tokens": 5985,
+          "response_tokens": 307,
+          "prompt_sha256": "630ff434056ee0f8cea13769a85d4a76c338e5ec2bb82a91ce596bb6f3df3b5c",
+          "response_sha256": "932c419953dd6e2b12db466cc38741746b35cf30dd11d73ce5777795e5c11453",
+          "stage": "tests",
+          "resolved": true,
+          "passed": [
+            "TestContextAutoBindJSON",
+            "TestContextBindWithJSON",
+            "TestContextBindWithXML",
+            "TestContextBindHeader",
+            "TestContextBindWithQuery",
+            "TestContextBindWithYAML",
+            "TestContextBadAutoBind",
+            "TestContextAutoShouldBindJSON",
+            "TestContextShouldBindWithJSON",
+            "TestContextShouldBindWithXML",
+            "TestContextShouldBindHeader",
+            "TestContextShouldBindWithQuery",
+            "TestContextShouldBindWithYAML",
+            "TestContextBadAutoShouldBind",
+            "TestContextShouldBindBodyWith"
+          ],
+          "failed": [],
+          "missing_expected_tests": [],
+          "canonical_before_format": false,
+          "feedback": ""
+        }
+      ],
+      "resolved": true,
+      "first_pass_resolved": true,
+      "usage": {
+        "input_tokens": 20432,
+        "cached_input_tokens": 0,
+        "output_tokens": 475
+      }
+    },
+    {
+      "task": "gin-gonic__gin-4003",
+      "arm": "go",
+      "repeat": 1,
+      "model": "gpt-6.1-sol",
+      "effort": "medium",
+      "counts": {
+        "prompt_tokens": 5075,
+        "instruction_tokens": 0,
+        "source_tokens": 4583,
+        "import_table_tokens": 0,
+        "original_go_source_tokens": 6550,
+        "guide_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "prompt_sha256": "72a651a9906f22dd05af321bb307d2489f0cb77bb727327219534ca196ad0178"
+      },
+      "attempts": [
+        {
+          "attempt": 0,
+          "usage": {
+            "input_tokens": 19525,
+            "cached_input_tokens": 0,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 117,
+            "reasoning_output_tokens": 29
+          },
+          "elapsed_seconds": 11.321,
+          "prompt_tokens": 5075,
+          "response_tokens": 76,
+          "prompt_sha256": "72a651a9906f22dd05af321bb307d2489f0cb77bb727327219534ca196ad0178",
+          "response_sha256": "8550870bb10420f9eb530c3e9654b7e66b15c8fe4ed6d0a50961ff3a0c17dac8",
+          "stage": "tests",
+          "resolved": true,
+          "passed": [
+            "TestMethodNotAllowedNoRoute"
+          ],
+          "failed": [],
+          "missing_expected_tests": [],
+          "canonical_before_format": null,
+          "feedback": ""
+        }
+      ],
+      "resolved": true,
+      "first_pass_resolved": true,
+      "usage": {
+        "input_tokens": 19525,
+        "cached_input_tokens": 0,
+        "output_tokens": 117
+      }
+    },
+    {
+      "task": "gin-gonic__gin-4003",
+      "arm": "smol-brief",
+      "repeat": 1,
+      "model": "gpt-6.1-sol",
+      "effort": "medium",
+      "counts": {
+        "prompt_tokens": 4515,
+        "instruction_tokens": 314,
+        "source_tokens": 3539,
+        "import_table_tokens": 157,
+        "original_go_source_tokens": 6550,
+        "guide_sha256": "7dded3b7f5a5471cc09454797fef8c75a9637ab558d2c31ee5aa2851bb6ce3c9",
+        "prompt_sha256": "2624cd4f4e27fe48c4fce4cf93b389747f8d8fd1d07231601efb64b9ef3578a0"
+      },
+      "attempts": [
+        {
+          "attempt": 0,
+          "usage": {
+            "input_tokens": 18965,
+            "cached_input_tokens": 0,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 124,
+            "reasoning_output_tokens": 51
+          },
+          "elapsed_seconds": 20.533,
+          "prompt_tokens": 4515,
+          "response_tokens": 61,
+          "prompt_sha256": "2624cd4f4e27fe48c4fce4cf93b389747f8d8fd1d07231601efb64b9ef3578a0",
+          "response_sha256": "3a658e954865957495d0ce6a77447f1721cd33c21525946daca4aae179e89691",
+          "stage": "tests",
+          "resolved": true,
+          "passed": [
+            "TestMethodNotAllowedNoRoute"
+          ],
+          "failed": [],
+          "missing_expected_tests": [],
+          "canonical_before_format": false,
+          "feedback": ""
+        }
+      ],
+      "resolved": true,
+      "first_pass_resolved": true,
+      "usage": {
+        "input_tokens": 18965,
+        "cached_input_tokens": 0,
+        "output_tokens": 124
+      }
+    },
+    {
+      "task": "gin-gonic__gin-4003",
+      "arm": "smol-guide",
+      "repeat": 1,
+      "model": "gpt-6.1-sol",
+      "effort": "medium",
+      "counts": {
+        "prompt_tokens": 5177,
+        "instruction_tokens": 976,
+        "source_tokens": 3539,
+        "import_table_tokens": 157,
+        "original_go_source_tokens": 6550,
+        "guide_sha256": "3d60c13db1222325773d137fc33357ac3627b8222a9899ce9d19a775c44af8fb",
+        "prompt_sha256": "32ec09533f8cde782dce0dbb366a7180dec3a00ccede248fb0e2f1784b90265c"
+      },
+      "attempts": [
+        {
+          "attempt": 0,
+          "usage": {
+            "input_tokens": 19627,
+            "cached_input_tokens": 0,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 130,
+            "reasoning_output_tokens": 57
+          },
+          "elapsed_seconds": 24.473,
+          "prompt_tokens": 5177,
+          "response_tokens": 61,
+          "prompt_sha256": "32ec09533f8cde782dce0dbb366a7180dec3a00ccede248fb0e2f1784b90265c",
+          "response_sha256": "3a658e954865957495d0ce6a77447f1721cd33c21525946daca4aae179e89691",
+          "stage": "tests",
+          "resolved": true,
+          "passed": [
+            "TestMethodNotAllowedNoRoute"
+          ],
+          "failed": [],
+          "missing_expected_tests": [],
+          "canonical_before_format": false,
+          "feedback": ""
+        }
+      ],
+      "resolved": true,
+      "first_pass_resolved": true,
+      "usage": {
+        "input_tokens": 19627,
+        "cached_input_tokens": 0,
+        "output_tokens": 130
+      }
+    },
+    {
+      "task": "gin-gonic__gin-4003",
+      "arm": "smol-none",
+      "repeat": 1,
+      "model": "gpt-6.1-sol",
+      "effort": "medium",
+      "counts": {
+        "prompt_tokens": 4193,
+        "instruction_tokens": 0,
+        "source_tokens": 3539,
+        "import_table_tokens": 157,
+        "original_go_source_tokens": 6550,
+        "guide_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "prompt_sha256": "8641c893040097cdf1a6dc1cf8e99935dab325ccd26a5bd6133d0d7e35b9eecd"
+      },
+      "attempts": [
+        {
+          "attempt": 0,
+          "usage": {
+            "input_tokens": 18643,
+            "cached_input_tokens": 0,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 119,
+            "reasoning_output_tokens": 46
+          },
+          "elapsed_seconds": 32.463,
+          "prompt_tokens": 4193,
+          "response_tokens": 61,
+          "prompt_sha256": "8641c893040097cdf1a6dc1cf8e99935dab325ccd26a5bd6133d0d7e35b9eecd",
+          "response_sha256": "3a658e954865957495d0ce6a77447f1721cd33c21525946daca4aae179e89691",
+          "stage": "tests",
+          "resolved": true,
+          "passed": [
+            "TestMethodNotAllowedNoRoute"
+          ],
+          "failed": [],
+          "missing_expected_tests": [],
+          "canonical_before_format": false,
+          "feedback": ""
+        }
+      ],
+      "resolved": true,
+      "first_pass_resolved": true,
+      "usage": {
+        "input_tokens": 18643,
+        "cached_input_tokens": 0,
+        "output_tokens": 119
+      }
+    },
+    {
+      "task": "gin-gonic__gin-4003",
+      "arm": "go",
+      "repeat": 2,
+      "model": "gpt-6.1-sol",
+      "effort": "medium",
+      "counts": {
+        "prompt_tokens": 5075,
+        "instruction_tokens": 0,
+        "source_tokens": 4583,
+        "import_table_tokens": 0,
+        "original_go_source_tokens": 6550,
+        "guide_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "prompt_sha256": "72a651a9906f22dd05af321bb307d2489f0cb77bb727327219534ca196ad0178"
+      },
+      "attempts": [
+        {
+          "attempt": 0,
+          "usage": {
+            "input_tokens": 19525,
+            "cached_input_tokens": 0,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 127,
+            "reasoning_output_tokens": 43
+          },
+          "elapsed_seconds": 16.88,
+          "prompt_tokens": 5075,
+          "response_tokens": 72,
+          "prompt_sha256": "72a651a9906f22dd05af321bb307d2489f0cb77bb727327219534ca196ad0178",
+          "response_sha256": "447101bc8ae89664e39c57e42fc38827af2e78622138e4a478d9e6ee85d7380f",
+          "stage": "tests",
+          "resolved": true,
+          "passed": [
+            "TestMethodNotAllowedNoRoute"
+          ],
+          "failed": [],
+          "missing_expected_tests": [],
+          "canonical_before_format": null,
+          "feedback": ""
+        }
+      ],
+      "resolved": true,
+      "first_pass_resolved": true,
+      "usage": {
+        "input_tokens": 19525,
+        "cached_input_tokens": 0,
+        "output_tokens": 127
+      }
+    },
+    {
+      "task": "gin-gonic__gin-4003",
+      "arm": "smol-brief",
+      "repeat": 2,
+      "model": "gpt-6.1-sol",
+      "effort": "medium",
+      "counts": {
+        "prompt_tokens": 4515,
+        "instruction_tokens": 314,
+        "source_tokens": 3539,
+        "import_table_tokens": 157,
+        "original_go_source_tokens": 6550,
+        "guide_sha256": "7dded3b7f5a5471cc09454797fef8c75a9637ab558d2c31ee5aa2851bb6ce3c9",
+        "prompt_sha256": "2624cd4f4e27fe48c4fce4cf93b389747f8d8fd1d07231601efb64b9ef3578a0"
+      },
+      "attempts": [
+        {
+          "attempt": 0,
+          "usage": {
+            "input_tokens": 18965,
+            "cached_input_tokens": 0,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 104,
+            "reasoning_output_tokens": 31
+          },
+          "elapsed_seconds": 16.234,
+          "prompt_tokens": 4515,
+          "response_tokens": 61,
+          "prompt_sha256": "2624cd4f4e27fe48c4fce4cf93b389747f8d8fd1d07231601efb64b9ef3578a0",
+          "response_sha256": "3a658e954865957495d0ce6a77447f1721cd33c21525946daca4aae179e89691",
+          "stage": "tests",
+          "resolved": true,
+          "passed": [
+            "TestMethodNotAllowedNoRoute"
+          ],
+          "failed": [],
+          "missing_expected_tests": [],
+          "canonical_before_format": false,
+          "feedback": ""
+        }
+      ],
+      "resolved": true,
+      "first_pass_resolved": true,
+      "usage": {
+        "input_tokens": 18965,
+        "cached_input_tokens": 0,
+        "output_tokens": 104
+      }
+    },
+    {
+      "task": "gin-gonic__gin-4003",
+      "arm": "smol-guide",
+      "repeat": 2,
+      "model": "gpt-6.1-sol",
+      "effort": "medium",
+      "counts": {
+        "prompt_tokens": 5177,
+        "instruction_tokens": 976,
+        "source_tokens": 3539,
+        "import_table_tokens": 157,
+        "original_go_source_tokens": 6550,
+        "guide_sha256": "3d60c13db1222325773d137fc33357ac3627b8222a9899ce9d19a775c44af8fb",
+        "prompt_sha256": "32ec09533f8cde782dce0dbb366a7180dec3a00ccede248fb0e2f1784b90265c"
+      },
+      "attempts": [
+        {
+          "attempt": 0,
+          "usage": {
+            "input_tokens": 19627,
+            "cached_input_tokens": 0,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 123,
+            "reasoning_output_tokens": 50
+          },
+          "elapsed_seconds": 22.253,
+          "prompt_tokens": 5177,
+          "response_tokens": 61,
+          "prompt_sha256": "32ec09533f8cde782dce0dbb366a7180dec3a00ccede248fb0e2f1784b90265c",
+          "response_sha256": "3a658e954865957495d0ce6a77447f1721cd33c21525946daca4aae179e89691",
+          "stage": "tests",
+          "resolved": true,
+          "passed": [
+            "TestMethodNotAllowedNoRoute"
+          ],
+          "failed": [],
+          "missing_expected_tests": [],
+          "canonical_before_format": false,
+          "feedback": ""
+        }
+      ],
+      "resolved": true,
+      "first_pass_resolved": true,
+      "usage": {
+        "input_tokens": 19627,
+        "cached_input_tokens": 0,
+        "output_tokens": 123
+      }
+    },
+    {
+      "task": "gin-gonic__gin-4003",
+      "arm": "smol-none",
+      "repeat": 2,
+      "model": "gpt-6.1-sol",
+      "effort": "medium",
+      "counts": {
+        "prompt_tokens": 4193,
+        "instruction_tokens": 0,
+        "source_tokens": 3539,
+        "import_table_tokens": 157,
+        "original_go_source_tokens": 6550,
+        "guide_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "prompt_sha256": "8641c893040097cdf1a6dc1cf8e99935dab325ccd26a5bd6133d0d7e35b9eecd"
+      },
+      "attempts": [
+        {
+          "attempt": 0,
+          "usage": {
+            "input_tokens": 18643,
+            "cached_input_tokens": 0,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 142,
+            "reasoning_output_tokens": 69
+          },
+          "elapsed_seconds": 23.863,
+          "prompt_tokens": 4193,
+          "response_tokens": 61,
+          "prompt_sha256": "8641c893040097cdf1a6dc1cf8e99935dab325ccd26a5bd6133d0d7e35b9eecd",
+          "response_sha256": "3a658e954865957495d0ce6a77447f1721cd33c21525946daca4aae179e89691",
+          "stage": "tests",
+          "resolved": true,
+          "passed": [
+            "TestMethodNotAllowedNoRoute"
+          ],
+          "failed": [],
+          "missing_expected_tests": [],
+          "canonical_before_format": false,
+          "feedback": ""
+        }
+      ],
+      "resolved": true,
+      "first_pass_resolved": true,
+      "usage": {
+        "input_tokens": 18643,
+        "cached_input_tokens": 0,
+        "output_tokens": 142
+      }
+    }
+  ]
+}

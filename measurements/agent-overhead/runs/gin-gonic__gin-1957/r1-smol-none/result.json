@@ -1,0 +1,63 @@
+{
+  "task": "gin-gonic__gin-1957",
+  "arm": "smol-none",
+  "repeat": 1,
+  "model": "gpt-6.1-sol",
+  "effort": "medium",
+  "counts": {
+    "prompt_tokens": 5985,
+    "instruction_tokens": 0,
+    "source_tokens": 5343,
+    "import_table_tokens": 330,
+    "original_go_source_tokens": 11422,
+    "guide_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "prompt_sha256": "630ff434056ee0f8cea13769a85d4a76c338e5ec2bb82a91ce596bb6f3df3b5c"
+  },
+  "attempts": [
+    {
+      "attempt": 0,
+      "usage": {
+        "input_tokens": 20432,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 470,
+        "reasoning_output_tokens": 161
+      },
+      "elapsed_seconds": 26.081,
+      "prompt_tokens": 5985,
+      "response_tokens": 297,
+      "prompt_sha256": "630ff434056ee0f8cea13769a85d4a76c338e5ec2bb82a91ce596bb6f3df3b5c",
+      "response_sha256": "3a6a9f65e4ee31cefe1294700f83e1b012dc53b83fa6a8c240a0c743d0249671",
+      "stage": "tests",
+      "resolved": true,
+      "passed": [
+        "TestContextAutoBindJSON",
+        "TestContextBindWithJSON",
+        "TestContextBindWithXML",
+        "TestContextBindHeader",
+        "TestContextBindWithQuery",
+        "TestContextBindWithYAML",
+        "TestContextBadAutoBind",
+        "TestContextAutoShouldBindJSON",
+        "TestContextShouldBindWithJSON",
+        "TestContextShouldBindWithXML",
+        "TestContextShouldBindHeader",
+        "TestContextShouldBindWithQuery",
+        "TestContextShouldBindWithYAML",
+        "TestContextBadAutoShouldBind",
+        "TestContextShouldBindBodyWith"
+      ],
+      "failed": [],
+      "missing_expected_tests": [],
+      "canonical_before_format": false,
+      "feedback": ""
+    }
+  ],
+  "resolved": true,
+  "first_pass_resolved": true,
+  "usage": {
+    "input_tokens": 20432,
+    "cached_input_tokens": 0,
+    "output_tokens": 470
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "attempt": 0,
+  "usage": {
+    "input_tokens": 18358,
+    "cached_input_tokens": 0,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 471,
+    "reasoning_output_tokens": 322
+  },
+  "elapsed_seconds": 25.577,
+  "generation_seconds": 23.799,
+  "prompt_tokens": 3908,
+  "response_tokens": 137,
+  "prompt_sha256": "fccedb4ea6a3686be84ada0b79c47120be325ce9c6ce6f50b54d46c8958ec687",
+  "response_sha256": "8a4c3703f59a437249b95380b61ea6ad90996a12681651615981b0feda4876a6",
+  "stage": "tests",
+  "resolved": false,
+  "passed": [
+    "TestMappingDefault",
+    "TestMappingSkipField",
+    "TestMappingIgnoreField",
+    "TestMappingUnexportedField",
+    "TestMappingPrivateField",
+    "TestMappingUnknownFieldType",
+    "TestMappingURI",
+    "TestMappingForm",
+    "TestMappingTime",
+    "TestMappingTimeDuration",
+    "TestMappingSlice",
+    "TestMappingArray",
+    "TestMappingStructField",
+    "TestMappingPtrField",
+    "TestMappingMapField",
+    "TestMappingIgnoredCircularRef"
+  ],
+  "failed": [
+    "TestMappingBaseTypes"
+  ],
+  "missing_expected_tests": [
+    "TestMappingBaseTypes"
+  ],
+  "canonical_before_format": null,
+  "feedback": ""
+}

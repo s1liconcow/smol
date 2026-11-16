@@ -1,0 +1,12 @@
+{
+  "command": [
+    "/private/tmp/smol-overhead/smol",
+    "fmt",
+    "-check",
+    "gin.smol"
+  ],
+  "exit_code": 0,
+  "stdout": "",
+  "stderr": "fmt: 1 files passed\n",
+  "elapsed_seconds": 1.798
+}

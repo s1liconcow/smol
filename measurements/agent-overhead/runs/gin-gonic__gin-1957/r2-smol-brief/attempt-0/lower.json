@@ -1,0 +1,13 @@
+{
+  "command": [
+    "/private/tmp/smol-overhead/smol",
+    "lower",
+    "binding/binding.smol",
+    "binding/header.smol",
+    "context.smol"
+  ],
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "smol: /private/tmp/smol-overhead/candidate-e3jvniiw/repo/binding/header.smol: lower: source.go:22:41: missing ',' in argument list (and 1 more errors)\n",
+  "elapsed_seconds": 0.438
+}

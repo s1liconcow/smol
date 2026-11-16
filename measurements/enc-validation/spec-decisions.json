@@ -1,0 +1,25 @@
+[
+  {
+    "id": "unformatted-base",
+    "Base": {
+      "a.go": "package p\nfunc F(x int)int{\nswitch x{\ncase 1:\nreturn 1\n}\nreturn 0\n}\n"
+    },
+    "Target": {
+      "a.go": "package p\nfunc F(x int)int{\nswitch x{\ncase 1:\nreturn 1\n}\nreturn 0\n}\nfunc G(){}\n"
+    }
+  },
+  {
+    "id": "declaration-spacing",
+    "Base": {},
+    "Target": {
+      "a.go": "package p\nfunc A(){\nprintln(1)\n}\nfunc B(){}\n"
+    }
+  },
+  {
+    "id": "significant-comment-indentation",
+    "Base": {},
+    "Target": {
+      "a.go": "package p\nfunc F(x int) {\n switch x {\n case 1:\n  // inside first case\n case 2:\n  println(x)\n }\n}\n"
+    }
+  }
+]

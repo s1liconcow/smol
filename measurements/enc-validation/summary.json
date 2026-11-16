@@ -1,0 +1,152 @@
+{
+  "spec_sha256": "a38757485ffea1f24a262be2d46c2173c5593997fbff3173ecdde609969e6f39",
+  "tests": {
+    "pass": 188,
+    "fail": 0,
+    "skip": 0
+  },
+  "coverage": [
+    {
+      "section": "4.1 headers/bodies",
+      "tests": [
+        "TestDecodeForms",
+        "TestRejectAtomic",
+        "TestLiteralAndCommentLines",
+        "TestEncodingCLI"
+      ],
+      "tested": 4,
+      "passing": 4,
+      "status": "PASS"
+    },
+    {
+      "section": "4.2 anchors/regions",
+      "tests": [
+        "TestNestedScopesUnicodeAndDeterminism",
+        "TestFailureDiagnosticsAndLocality",
+        "TestRejectAtomic"
+      ],
+      "tested": 3,
+      "passing": 3,
+      "status": "PASS"
+    },
+    {
+      "section": "4.3 blocks/spans",
+      "tests": [
+        "TestDecodeForms",
+        "TestOriginalCoordinatesAndInsertionOrder",
+        "TestRejectAtomic"
+      ],
+      "tested": 3,
+      "passing": 3,
+      "status": "PASS"
+    },
+    {
+      "section": "4.4 attached comments",
+      "tests": [
+        "TestDecodeForms"
+      ],
+      "tested": 1,
+      "passing": 1,
+      "status": "PASS"
+    },
+    {
+      "section": "4.5 errors",
+      "tests": [
+        "TestFailureDiagnosticsAndLocality",
+        "TestImportAmbiguityAndPrecedence"
+      ],
+      "tested": 2,
+      "passing": 2,
+      "status": "PASS"
+    },
+    {
+      "section": "5.1 layout/literal preservation",
+      "tests": [
+        "TestLiteralAndCommentLines",
+        "TestUnformattedLocality"
+      ],
+      "tested": 2,
+      "passing": 2,
+      "status": "PASS"
+    },
+    {
+      "section": "5.2 import recovery",
+      "tests": [
+        "TestImportsAndPackages",
+        "TestImportAmbiguityAndPrecedence",
+        "TestDeclarationSpacingAndImportOrder"
+      ],
+      "tested": 3,
+      "passing": 3,
+      "status": "PASS"
+    },
+    {
+      "section": "5.3 declaration spacing",
+      "tests": [
+        "TestDeclarationSpacingAndImportOrder"
+      ],
+      "tested": 1,
+      "passing": 1,
+      "status": "PASS"
+    },
+    {
+      "section": "5.4 formatting/locality",
+      "tests": [
+        "TestUnformattedLocality",
+        "TestFailureDiagnosticsAndLocality"
+      ],
+      "tested": 2,
+      "passing": 2,
+      "status": "PASS"
+    },
+    {
+      "section": "6 profiles and plain Go",
+      "tests": [
+        "TestE2AndPlainFixedPoint",
+        "TestE2ReturnValues"
+      ],
+      "tested": 2,
+      "passing": 2,
+      "status": "PASS"
+    },
+    {
+      "section": "8.1 commands/atomic application",
+      "tests": [
+        "TestEncodingCLI",
+        "TestWriteTreeAndDryDiff"
+      ],
+      "tested": 2,
+      "passing": 2,
+      "status": "PASS"
+    },
+    {
+      "section": "8.2 canonical encoding",
+      "tests": [
+        "TestEncoderRecovery"
+      ],
+      "tested": 1,
+      "passing": 1,
+      "status": "PASS"
+    }
+  ],
+  "coverage_unit": "Named behavioral cases; not a claim that each normative clause is exhaustively enumerated.",
+  "tool_corpus": null,
+  "tool_gate": "NOT PASSED",
+  "corpus_scope": "Changed-directory Go trees, including unchanged siblings; vendor and invalid testdata excluded. See history-report.json for complete selection.",
+  "model_gate": "NOT RUN: 100 held-out tasks/10 repositories and the paired acceptance measurements are required before any model-accuracy claim.",
+  "source_sha256": {
+    "cmd/smol/encoding.go": "f23d756b9d10bcfad9b0e49a50c273ad0e0b1a85cd8047fd06e13539a2b35e65",
+    "cmd/smol/encoding_test.go": "08dc2dbe26b059076c4b81f4e5970e1f06fcfd0dc69751b039214e8280a932be",
+    "cmd/smol/main.go": "3d364ca75712ce799a8c569e5e38853ee3833c6e20a68547c1003e5949505bfc",
+    "cmd/smol/main_test.go": "49eb583acba4f897edad2028ad649e4777cb49c6c4f764b82dd815e96ab7e63e",
+    "internal/enc/check.go": "2339ade7777a7b23de561707d66a7c21213eebc77fdf5cd61dd9ce34931fe4dd",
+    "internal/enc/encode.go": "9d3e9bc7fc4447e551ace74b3d3a8d53ab73297ad5ba5e8b8691a8a26214b24f",
+    "internal/enc/files.go": "2bb51a44c1f8411e24e46c46a0409f2c978584a11e85a685f23d8be7bc02525c",
+    "internal/enc/format.go": "80207b192bdcdb1275920976312d0d2c08508ef893450e42ede9d5a3030dde54",
+    "internal/enc/instructions.go": "51a590d2203ff61290d2f2702498772165d96866a4729029b6c528504b42e836",
+    "internal/enc/lines.go": "2f3b800802793b8b608a668d6c0a77da12806e3005a7f9fb2adab643160726f4",
+    "internal/enc/patch.go": "c3f9775df6f13a40ba8bf09817989c0dc30f14138d16f2426851efd2c6130234",
+    "internal/enc/patch_test.go": "0b6564a786adb6566dae48476b5f53cc02b9afdf4f20d8498942a765a917b156",
+    "internal/smol/output.go": "c6b258c2e07f9e3ae4a945b10b94e8103eec3d0e8bd162ff697084bdf2c6df61"
+  }
+}

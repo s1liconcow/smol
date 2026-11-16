@@ -1,0 +1,18 @@
+{
+  "command": [
+    "go",
+    "test",
+    "-count=1",
+    "-json",
+    ".",
+    "-run",
+    "^TestContext.*Bind"
+  ],
+  "exit_code": 1,
+  "stdout": "{\"ImportPath\":\"github.com/gin-gonic/gin [github.com/gin-gonic/gin.test]\",\"Action\":\"build-output\",\"Output\":\"# github.com/gin-gonic/gin [github.com/gin-gonic/gin.test]\\n\"}\n{\"ImportPath\":\"github.com/gin-gonic/gin [github.com/gin-gonic/gin.test]\",\"Action\":\"build-output\",\"Output\":\"./context_test.go:1454:22: c.BindHeader undefined (type *Context has no field or method BindHeader)\\n\"}\n{\"ImportPath\":\"github.com/gin-gonic/gin [github.com/gin-gonic/gin.test]\",\"Action\":\"build-output\",\"Output\":\"./context_test.go:1583:22: c.ShouldBindHeader undefined (type *Context has no field or method ShouldBindHeader)\\n\"}\n{\"ImportPath\":\"github.com/gin-gonic/gin [github.com/gin-gonic/gin.test]\",\"Action\":\"build-fail\"}\n{\"Time\":\"2026-11-15T19:21:49.935398-08:00\",\"Action\":\"start\",\"Package\":\"github.com/gin-gonic/gin\"}\n{\"Time\":\"2026-11-15T19:21:49.935432-08:00\",\"Action\":\"output\",\"Package\":\"github.com/gin-gonic/gin\",\"Output\":\"FAIL\\tgithub.com/gin-gonic/gin [build failed]\\n\"}\n{\"Time\":\"2026-11-15T19:21:49.935438-08:00\",\"Action\":\"fail\",\"Package\":\"github.com/gin-gonic/gin\",\"Elapsed\":0,\"FailedBuild\":\"github.com/gin-gonic/gin [github.com/gin-gonic/gin.test]\"}\n",
+  "stderr": "",
+  "elapsed_seconds": 0.179,
+  "passed": [],
+  "failed": [],
+  "skipped": []
+}

@@ -1,0 +1,173 @@
+{
+  "complete_planned_matrix": true,
+  "groups": {
+    "all": {
+      "go": {
+        "episodes": 8,
+        "resolved": 2,
+        "first_pass_builds": 8,
+        "repairs": 0,
+        "input_tokens": 163425,
+        "output_tokens": 3064,
+        "cached_input_tokens": 36864,
+        "visible_initial_prompt_tokens": 47872,
+        "generation_seconds_median": 13.306999999999999,
+        "total_tokens": 166489,
+        "token_savings_percent": 0.0,
+        "paired_success_vs_go": {
+          "wins": 0,
+          "losses": 0,
+          "ties": 8
+        }
+      },
+      "smol-commas": {
+        "episodes": 8,
+        "resolved": 2,
+        "first_pass_builds": 8,
+        "repairs": 0,
+        "input_tokens": 153877,
+        "output_tokens": 3047,
+        "cached_input_tokens": 61440,
+        "visible_initial_prompt_tokens": 38324,
+        "generation_seconds_median": 18.295499999999997,
+        "total_tokens": 156924,
+        "token_savings_percent": 5.745124302506477,
+        "paired_success_vs_go": {
+          "wins": 0,
+          "losses": 0,
+          "ties": 8
+        }
+      },
+      "smol-go": {
+        "episodes": 8,
+        "resolved": 2,
+        "first_pass_builds": 8,
+        "repairs": 0,
+        "input_tokens": 156869,
+        "output_tokens": 3361,
+        "cached_input_tokens": 49152,
+        "visible_initial_prompt_tokens": 38692,
+        "generation_seconds_median": 22.493,
+        "total_tokens": 160230,
+        "token_savings_percent": 3.759407528425296,
+        "paired_success_vs_go": {
+          "wins": 0,
+          "losses": 0,
+          "ties": 8
+        }
+      }
+    },
+    "development": {
+      "go": {
+        "episodes": 2,
+        "resolved": 2,
+        "first_pass_builds": 2,
+        "repairs": 0,
+        "input_tokens": 44612,
+        "output_tokens": 1010,
+        "cached_input_tokens": 24576,
+        "visible_initial_prompt_tokens": 15712,
+        "generation_seconds_median": 18.895,
+        "total_tokens": 45622,
+        "token_savings_percent": 0.0,
+        "paired_success_vs_go": {
+          "wins": 0,
+          "losses": 0,
+          "ties": 2
+        }
+      },
+      "smol-commas": {
+        "episodes": 2,
+        "resolved": 2,
+        "first_pass_builds": 2,
+        "repairs": 0,
+        "input_tokens": 40958,
+        "output_tokens": 976,
+        "cached_input_tokens": 12288,
+        "visible_initial_prompt_tokens": 12058,
+        "generation_seconds_median": 18.7665,
+        "total_tokens": 41934,
+        "token_savings_percent": 8.083819210030253,
+        "paired_success_vs_go": {
+          "wins": 0,
+          "losses": 0,
+          "ties": 2
+        }
+      },
+      "smol-go": {
+        "episodes": 2,
+        "resolved": 2,
+        "first_pass_builds": 2,
+        "repairs": 0,
+        "input_tokens": 41050,
+        "output_tokens": 1191,
+        "cached_input_tokens": 12288,
+        "visible_initial_prompt_tokens": 12150,
+        "generation_seconds_median": 24.774,
+        "total_tokens": 42241,
+        "token_savings_percent": 7.410898250843889,
+        "paired_success_vs_go": {
+          "wins": 0,
+          "losses": 0,
+          "ties": 2
+        }
+      }
+    },
+    "new_tasks": {
+      "go": {
+        "episodes": 6,
+        "resolved": 0,
+        "first_pass_builds": 6,
+        "repairs": 0,
+        "input_tokens": 118813,
+        "output_tokens": 2054,
+        "cached_input_tokens": 12288,
+        "visible_initial_prompt_tokens": 32160,
+        "generation_seconds_median": 12.555,
+        "total_tokens": 120867,
+        "token_savings_percent": 0.0,
+        "paired_success_vs_go": {
+          "wins": 0,
+          "losses": 0,
+          "ties": 6
+        }
+      },
+      "smol-commas": {
+        "episodes": 6,
+        "resolved": 0,
+        "first_pass_builds": 6,
+        "repairs": 0,
+        "input_tokens": 112919,
+        "output_tokens": 2071,
+        "cached_input_tokens": 49152,
+        "visible_initial_prompt_tokens": 26266,
+        "generation_seconds_median": 16.680999999999997,
+        "total_tokens": 114990,
+        "token_savings_percent": 4.862369381220677,
+        "paired_success_vs_go": {
+          "wins": 0,
+          "losses": 0,
+          "ties": 6
+        }
+      },
+      "smol-go": {
+        "episodes": 6,
+        "resolved": 0,
+        "first_pass_builds": 6,
+        "repairs": 0,
+        "input_tokens": 115819,
+        "output_tokens": 2170,
+        "cached_input_tokens": 36864,
+        "visible_initial_prompt_tokens": 26542,
+        "generation_seconds_median": 19.8085,
+        "total_tokens": 117989,
+        "token_savings_percent": 2.3811296714570607,
+        "paired_success_vs_go": {
+          "wins": 0,
+          "losses": 0,
+          "ties": 6
+        }
+      }
+    }
+  }
+}

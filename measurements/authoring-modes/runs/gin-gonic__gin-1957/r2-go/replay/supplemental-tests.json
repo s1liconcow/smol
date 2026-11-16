@@ -1,0 +1,20 @@
+{
+  "command": [
+    "go",
+    "test",
+    "-count=1",
+    "-json",
+    "./binding",
+    "-run",
+    "^TestHeaderBinding$"
+  ],
+  "exit_code": 0,
+  "stdout": "{\"Time\":\"2026-11-15T19:33:08.016101-08:00\",\"Action\":\"start\",\"Package\":\"github.com/gin-gonic/gin/binding\"}\n{\"Time\":\"2026-11-15T19:33:08.234954-08:00\",\"Action\":\"run\",\"Package\":\"github.com/gin-gonic/gin/binding\",\"Test\":\"TestHeaderBinding\"}\n{\"Time\":\"2026-11-15T19:33:08.23499-08:00\",\"Action\":\"output\",\"Package\":\"github.com/gin-gonic/gin/binding\",\"Test\":\"TestHeaderBinding\",\"Output\":\"=== RUN   TestHeaderBinding\\n\"}\n{\"Time\":\"2026-11-15T19:33:08.235102-08:00\",\"Action\":\"output\",\"Package\":\"github.com/gin-gonic/gin/binding\",\"Test\":\"TestHeaderBinding\",\"Output\":\"--- PASS: TestHeaderBinding (0.00s)\\n\"}\n{\"Time\":\"2026-11-15T19:33:08.235107-08:00\",\"Action\":\"pass\",\"Package\":\"github.com/gin-gonic/gin/binding\",\"Test\":\"TestHeaderBinding\",\"Elapsed\":0}\n{\"Time\":\"2026-11-15T19:33:08.235109-08:00\",\"Action\":\"output\",\"Package\":\"github.com/gin-gonic/gin/binding\",\"Output\":\"PASS\\n\"}\n{\"Time\":\"2026-11-15T19:33:08.235525-08:00\",\"Action\":\"output\",\"Package\":\"github.com/gin-gonic/gin/binding\",\"Output\":\"ok  \\tgithub.com/gin-gonic/gin/binding\\t0.219s\\n\"}\n{\"Time\":\"2026-11-15T19:33:08.235532-08:00\",\"Action\":\"pass\",\"Package\":\"github.com/gin-gonic/gin/binding\",\"Elapsed\":0.219}\n",
+  "stderr": "",
+  "elapsed_seconds": 0.504,
+  "passed": [
+    "TestHeaderBinding"
+  ],
+  "failed": [],
+  "skipped": []
+}

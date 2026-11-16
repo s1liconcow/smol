@@ -1,0 +1,38 @@
+{
+  "attempt": 1,
+  "usage": {
+    "input_tokens": 21818,
+    "cached_input_tokens": 0,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 399,
+    "reasoning_output_tokens": 70
+  },
+  "elapsed_seconds": 17.561,
+  "prompt_tokens": 7371,
+  "response_tokens": 317,
+  "prompt_sha256": "0568e39e56347492c212e8321a338884c1c2fd2da5361e5c2814332966189023",
+  "response_sha256": "08b318f58f11819ac5cc9d0a6882e5b77bc08fcb7762ecb28fae3b6166e6a07b",
+  "stage": "tests",
+  "resolved": true,
+  "passed": [
+    "TestContextAutoBindJSON",
+    "TestContextBindWithJSON",
+    "TestContextBindWithXML",
+    "TestContextBindHeader",
+    "TestContextBindWithQuery",
+    "TestContextBindWithYAML",
+    "TestContextBadAutoBind",
+    "TestContextAutoShouldBindJSON",
+    "TestContextShouldBindWithJSON",
+    "TestContextShouldBindWithXML",
+    "TestContextShouldBindHeader",
+    "TestContextShouldBindWithQuery",
+    "TestContextShouldBindWithYAML",
+    "TestContextBadAutoShouldBind",
+    "TestContextShouldBindBodyWith"
+  ],
+  "failed": [],
+  "missing_expected_tests": [],
+  "canonical_before_format": false,
+  "feedback": ""
+}

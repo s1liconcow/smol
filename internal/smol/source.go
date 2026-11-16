@@ -17,11 +17,12 @@ type edit struct {
 	text string
 }
 type source struct {
-	text  string
-	fs    *token.FileSet
-	file  *ast.File
-	edits []edit
-	conv  map[string]string
+	text           string
+	fs             *token.FileSet
+	file           *ast.File
+	edits          []edit
+	conv           map[string]string
+	errorQualifier string
 }
 
 func parse(text string) (*source, error) {

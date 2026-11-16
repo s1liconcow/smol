@@ -1,0 +1,14 @@
+{
+  "command": [
+    "/private/tmp/smol-overhead/smol",
+    "fmt",
+    "-check",
+    "binding/binding.smol",
+    "binding/header.smol",
+    "context.smol"
+  ],
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "smol: /private/tmp/smol-overhead/candidate-qy0gj1un/repo/context.smol needs formatting\n",
+  "elapsed_seconds": 0.766
+}

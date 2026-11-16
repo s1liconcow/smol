@@ -1,0 +1,103 @@
+{
+  "benchmark": "SWE-bench/SWE-bench_Multilingual",
+  "dataset_revision_observed": "846e647b9f33c0b51b739d005d13d85493c9af09",
+  "dataset_response_sha256": "eb0674a958e91763a2aeb1f9b481efeea7ffce43b6205077d89465a1ebc1188a",
+  "translator_commit": "cf180d37e02f03e81d5f4866ac45f7033dcbac79",
+  "translator_binary_sha256": "cb23e4a457a72284bab837b8493dca56ff05ed25ff09598a90e24cb51763c720",
+  "go_version": "go version go1.26.3 darwin/arm64",
+  "tasks": {
+    "gin-gonic__gin-1957": {
+      "files": [
+        "context.go",
+        "binding/binding.go",
+        "binding/query.go",
+        "binding/form_mapping.go"
+      ],
+      "new": [
+        "binding/header.go"
+      ],
+      "package": ".",
+      "test_regex": "^TestContext.*Bind",
+      "repo": "gin-gonic/gin",
+      "base_commit": "09a3650c97ca7ef3a542d428a9fb2c8da8c18002",
+      "fail_to_pass": [
+        "TestContextBindHeader",
+        "TestContextShouldBindHeader"
+      ],
+      "pass_to_pass": [
+        "TestContextAutoBindJSON",
+        "TestContextBindWithJSON",
+        "TestContextBindWithXML",
+        "TestContextBindWithQuery",
+        "TestContextBindWithYAML",
+        "TestContextBadAutoBind",
+        "TestContextAutoShouldBindJSON",
+        "TestContextShouldBindWithJSON",
+        "TestContextShouldBindWithXML",
+        "TestContextShouldBindWithQuery",
+        "TestContextShouldBindWithYAML",
+        "TestContextBadAutoShouldBind",
+        "TestContextShouldBindBodyWith"
+      ],
+      "problem_statement_sha256": "b61abf5f38fe94c7eeaf4f19b4e3cb827a4cc605861a50d38587b4590db7b34d",
+      "test_patch_sha256": "d4699346456cbacafa6396de57be63b01166554234e38eeda48314d65bc7adef",
+      "gold_patch_sha256": "41f3f8e1219faf39919df7a41dff1edeb8ad51d339ef7f878c0937ffe5acf26e"
+    },
+    "gin-gonic__gin-4003": {
+      "files": [
+        "gin.go"
+      ],
+      "new": [],
+      "package": ".",
+      "test_regex": "TestMethodNotAllowedNoRoute",
+      "repo": "gin-gonic/gin",
+      "base_commit": "9c081de9cdd1948f521d47d170d18cbc2981c33a",
+      "fail_to_pass": [
+        "TestMethodNotAllowedNoRoute"
+      ],
+      "pass_to_pass": [],
+      "problem_statement_sha256": "4277704f328363ab614b8ac6cee910e79c6fa39c4884fdd9b335d1962e61b17c",
+      "test_patch_sha256": "620a38f9a795974ad781c6a21687d72553ef0b46e591657818d4acc2a2305700",
+      "gold_patch_sha256": "cf7300f525bfd5dd6e153cd69cf28d75fc8ae5fd3faca118a78648d8b2ba80f6"
+    },
+    "caddyserver__caddy-6051": {
+      "files": [
+        "caddyconfig/caddyfile/lexer.go"
+      ],
+      "new": [],
+      "package": "./caddyconfig/caddyfile",
+      "test_regex": ".",
+      "repo": "caddyserver/caddy",
+      "base_commit": "4181c79a8130a59c40c76437e15265452422ccb1",
+      "fail_to_pass": [
+        "TestLexer"
+      ],
+      "pass_to_pass": [
+        "TestDispenser_Val_Next",
+        "TestDispenser_NextArg",
+        "TestDispenser_NextLine",
+        "TestDispenser_NextBlock",
+        "TestDispenser_Args",
+        "TestDispenser_RemainingArgs",
+        "TestDispenser_ArgErr_Err",
+        "TestFormatter",
+        "TestParseVariadic",
+        "TestAllTokens",
+        "TestParseOneAndImport",
+        "TestRecursiveImport",
+        "TestDirectiveImport",
+        "TestParseAll",
+        "TestEnvironmentReplacement",
+        "TestImportReplacementInJSONWithBrace",
+        "TestSnippets",
+        "TestImportedFilesIgnoreNonDirectiveImportTokens",
+        "TestSnippetAcrossMultipleFiles"
+      ],
+      "problem_statement_sha256": "c8aa91f461a0bf20567dfeb9fb5a87c249e4cf5361ac8a5a4decd954f0594143",
+      "test_patch_sha256": "3050b9b9f89af9b2ceb2015081b37877500d25e0896af344a4f9fe7c0815044e",
+      "gold_patch_sha256": "65538536ebeb5adb690005aa44f4e5bc117912be79f0f8f997acdb584c5a02b2"
+    }
+  },
+  "benchmark_fixtures_sha256": "bd045a9d52b8c19f7539a4f6b5ed0fc0fadd80607da7982224fc0895576a9bb3",
+  "codex_version": "codex-cli 0.164.0"
+}

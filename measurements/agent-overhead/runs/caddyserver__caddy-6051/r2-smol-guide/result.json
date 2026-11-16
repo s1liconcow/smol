@@ -1,0 +1,71 @@
+{
+  "task": "caddyserver__caddy-6051",
+  "arm": "smol-guide",
+  "repeat": 2,
+  "model": "gpt-6.1-sol",
+  "effort": "medium",
+  "counts": {
+    "prompt_tokens": 2542,
+    "instruction_tokens": 976,
+    "source_tokens": 1244,
+    "import_table_tokens": 50,
+    "original_go_source_tokens": 2948,
+    "guide_sha256": "3d60c13db1222325773d137fc33357ac3627b8222a9899ce9d19a775c44af8fb",
+    "prompt_sha256": "70f34a965e52f9e00e42663fac1ad0fd5decf9e1326809962946f5e7cb839e8f"
+  },
+  "attempts": [
+    {
+      "attempt": 0,
+      "usage": {
+        "input_tokens": 16992,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 271,
+        "reasoning_output_tokens": 160
+      },
+      "elapsed_seconds": 17.544,
+      "prompt_tokens": 2542,
+      "response_tokens": 99,
+      "prompt_sha256": "70f34a965e52f9e00e42663fac1ad0fd5decf9e1326809962946f5e7cb839e8f",
+      "response_sha256": "b4d797284771a88a13f2c5ff995a9b829bad4e4883e185dfdb627fa7b94f556a",
+      "stage": "tests",
+      "resolved": false,
+      "passed": [
+        "TestDispenser_Val_Next",
+        "TestDispenser_NextArg",
+        "TestDispenser_NextLine",
+        "TestDispenser_NextBlock",
+        "TestDispenser_Args",
+        "TestDispenser_RemainingArgs",
+        "TestDispenser_ArgErr_Err",
+        "TestFormatter",
+        "TestParseVariadic",
+        "TestAllTokens",
+        "TestParseOneAndImport",
+        "TestRecursiveImport",
+        "TestDirectiveImport",
+        "TestParseAll",
+        "TestEnvironmentReplacement",
+        "TestImportReplacementInJSONWithBrace",
+        "TestSnippets",
+        "TestImportedFilesIgnoreNonDirectiveImportTokens",
+        "TestSnippetAcrossMultipleFiles"
+      ],
+      "failed": [
+        "TestLexer"
+      ],
+      "missing_expected_tests": [
+        "TestLexer"
+      ],
+      "canonical_before_format": false,
+      "feedback": ""
+    }
+  ],
+  "resolved": false,
+  "first_pass_resolved": false,
+  "usage": {
+    "input_tokens": 16992,
+    "cached_input_tokens": 0,
+    "output_tokens": 271
+  }
+}

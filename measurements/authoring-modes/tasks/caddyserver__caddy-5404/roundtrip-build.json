@@ -1,0 +1,18 @@
+{
+  "command": [
+    "/private/tmp/smol-overhead/toolchains/go1.20.14/go/bin/go",
+    "test",
+    "-count=1",
+    "-json",
+    "./caddyconfig/caddyfile",
+    "-run",
+    "^$"
+  ],
+  "exit_code": 0,
+  "stdout": "{\"Time\":\"2026-11-15T19:30:11.094324-08:00\",\"Action\":\"start\",\"Package\":\"github.com/caddyserver/caddy/v2/caddyconfig/caddyfile\"}\n{\"Time\":\"2026-11-15T19:30:11.342392-08:00\",\"Action\":\"output\",\"Package\":\"github.com/caddyserver/caddy/v2/caddyconfig/caddyfile\",\"Output\":\"testing: warning: no tests to run\\n\"}\n{\"Time\":\"2026-11-15T19:30:11.342423-08:00\",\"Action\":\"output\",\"Package\":\"github.com/caddyserver/caddy/v2/caddyconfig/caddyfile\",\"Output\":\"PASS\\n\"}\n{\"Time\":\"2026-11-15T19:30:11.342775-08:00\",\"Action\":\"output\",\"Package\":\"github.com/caddyserver/caddy/v2/caddyconfig/caddyfile\",\"Output\":\"ok  \\tgithub.com/caddyserver/caddy/v2/caddyconfig/caddyfile\\t0.248s [no tests to run]\\n\"}\n{\"Time\":\"2026-11-15T19:30:11.342791-08:00\",\"Action\":\"pass\",\"Package\":\"github.com/caddyserver/caddy/v2/caddyconfig/caddyfile\",\"Elapsed\":0.248}\n",
+  "stderr": "",
+  "elapsed_seconds": 0.801,
+  "passed": [],
+  "failed": [],
+  "skipped": []
+}

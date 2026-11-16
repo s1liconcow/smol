@@ -1,0 +1,425 @@
+{
+  "all_raw_evidence_verified": true,
+  "episodes": 24,
+  "api_requests": 28,
+  "checks": [
+    {
+      "task": "caddyserver__caddy-6051",
+      "arm": "go",
+      "repeat": 1,
+      "verified": true
+    },
+    {
+      "task": "caddyserver__caddy-6051",
+      "arm": "smol-brief",
+      "repeat": 1,
+      "verified": true
+    },
+    {
+      "task": "caddyserver__caddy-6051",
+      "arm": "smol-guide",
+      "repeat": 1,
+      "verified": true
+    },
+    {
+      "task": "caddyserver__caddy-6051",
+      "arm": "smol-none",
+      "repeat": 1,
+      "verified": true
+    },
+    {
+      "task": "caddyserver__caddy-6051",
+      "arm": "go",
+      "repeat": 2,
+      "verified": true
+    },
+    {
+      "task": "caddyserver__caddy-6051",
+      "arm": "smol-brief",
+      "repeat": 2,
+      "verified": true
+    },
+    {
+      "task": "caddyserver__caddy-6051",
+      "arm": "smol-guide",
+      "repeat": 2,
+      "verified": true
+    },
+    {
+      "task": "caddyserver__caddy-6051",
+      "arm": "smol-none",
+      "repeat": 2,
+      "verified": true
+    },
+    {
+      "task": "gin-gonic__gin-1957",
+      "arm": "go",
+      "repeat": 1,
+      "verified": true
+    },
+    {
+      "task": "gin-gonic__gin-1957",
+      "arm": "smol-brief",
+      "repeat": 1,
+      "verified": true
+    },
+    {
+      "task": "gin-gonic__gin-1957",
+      "arm": "smol-guide",
+      "repeat": 1,
+      "verified": true
+    },
+    {
+      "task": "gin-gonic__gin-1957",
+      "arm": "smol-none",
+      "repeat": 1,
+      "verified": true
+    },
+    {
+      "task": "gin-gonic__gin-1957",
+      "arm": "go",
+      "repeat": 2,
+      "verified": true
+    },
+    {
+      "task": "gin-gonic__gin-1957",
+      "arm": "smol-brief",
+      "repeat": 2,
+      "verified": true
+    },
+    {
+      "task": "gin-gonic__gin-1957",
+      "arm": "smol-guide",
+      "repeat": 2,
+      "verified": true
+    },
+    {
+      "task": "gin-gonic__gin-1957",
+      "arm": "smol-none",
+      "repeat": 2,
+      "verified": true
+    },
+    {
+      "task": "gin-gonic__gin-4003",
+      "arm": "go",
+      "repeat": 1,
+      "verified": true
+    },
+    {
+      "task": "gin-gonic__gin-4003",
+      "arm": "smol-brief",
+      "repeat": 1,
+      "verified": true
+    },
+    {
+      "task": "gin-gonic__gin-4003",
+      "arm": "smol-guide",
+      "repeat": 1,
+      "verified": true
+    },
+    {
+      "task": "gin-gonic__gin-4003",
+      "arm": "smol-none",
+      "repeat": 1,
+      "verified": true
+    },
+    {
+      "task": "gin-gonic__gin-4003",
+      "arm": "go",
+      "repeat": 2,
+      "verified": true
+    },
+    {
+      "task": "gin-gonic__gin-4003",
+      "arm": "smol-brief",
+      "repeat": 2,
+      "verified": true
+    },
+    {
+      "task": "gin-gonic__gin-4003",
+      "arm": "smol-guide",
+      "repeat": 2,
+      "verified": true
+    },
+    {
+      "task": "gin-gonic__gin-4003",
+      "arm": "smol-none",
+      "repeat": 2,
+      "verified": true
+    }
+  ],
+  "replays": [
+    {
+      "task": "caddyserver__caddy-6051",
+      "arm": "go",
+      "repeat": 1,
+      "canonical_format_passed": true,
+      "resolved": true,
+      "supplemental_exit_code": null,
+      "supplemental_passed": []
+    },
+    {
+      "task": "caddyserver__caddy-6051",
+      "arm": "smol-brief",
+      "repeat": 1,
+      "canonical_format_passed": true,
+      "resolved": true,
+      "supplemental_exit_code": null,
+      "supplemental_passed": []
+    },
+    {
+      "task": "caddyserver__caddy-6051",
+      "arm": "smol-guide",
+      "repeat": 1,
+      "canonical_format_passed": true,
+      "resolved": true,
+      "supplemental_exit_code": null,
+      "supplemental_passed": []
+    },
+    {
+      "task": "caddyserver__caddy-6051",
+      "arm": "smol-none",
+      "repeat": 1,
+      "canonical_format_passed": true,
+      "resolved": true,
+      "supplemental_exit_code": null,
+      "supplemental_passed": []
+    },
+    {
+      "task": "caddyserver__caddy-6051",
+      "arm": "go",
+      "repeat": 2,
+      "canonical_format_passed": true,
+      "resolved": true,
+      "supplemental_exit_code": null,
+      "supplemental_passed": []
+    },
+    {
+      "task": "caddyserver__caddy-6051",
+      "arm": "smol-brief",
+      "repeat": 2,
+      "canonical_format_passed": true,
+      "resolved": true,
+      "supplemental_exit_code": null,
+      "supplemental_passed": []
+    },
+    {
+      "task": "caddyserver__caddy-6051",
+      "arm": "smol-guide",
+      "repeat": 2,
+      "canonical_format_passed": true,
+      "resolved": false,
+      "supplemental_exit_code": null,
+      "supplemental_passed": []
+    },
+    {
+      "task": "caddyserver__caddy-6051",
+      "arm": "smol-none",
+      "repeat": 2,
+      "canonical_format_passed": true,
+      "resolved": true,
+      "supplemental_exit_code": null,
+      "supplemental_passed": []
+    },
+    {
+      "task": "gin-gonic__gin-1957",
+      "arm": "go",
+      "repeat": 1,
+      "canonical_format_passed": true,
+      "resolved": true,
+      "supplemental_exit_code": 0,
+      "supplemental_passed": [
+        "TestHeaderBinding"
+      ]
+    },
+    {
+      "task": "gin-gonic__gin-1957",
+      "arm": "smol-brief",
+      "repeat": 1,
+      "canonical_format_passed": true,
+      "resolved": true,
+      "supplemental_exit_code": 0,
+      "supplemental_passed": [
+        "TestHeaderBinding"
+      ]
+    },
+    {
+      "task": "gin-gonic__gin-1957",
+      "arm": "smol-guide",
+      "repeat": 1,
+      "canonical_format_passed": true,
+      "resolved": true,
+      "supplemental_exit_code": 0,
+      "supplemental_passed": [
+        "TestHeaderBinding"
+      ]
+    },
+    {
+      "task": "gin-gonic__gin-1957",
+      "arm": "smol-none",
+      "repeat": 1,
+      "canonical_format_passed": true,
+      "resolved": true,
+      "supplemental_exit_code": 0,
+      "supplemental_passed": [
+        "TestHeaderBinding"
+      ]
+    },
+    {
+      "task": "gin-gonic__gin-1957",
+      "arm": "go",
+      "repeat": 2,
+      "canonical_format_passed": true,
+      "resolved": true,
+      "supplemental_exit_code": 0,
+      "supplemental_passed": [
+        "TestHeaderBinding"
+      ]
+    },
+    {
+      "task": "gin-gonic__gin-1957",
+      "arm": "smol-brief",
+      "repeat": 2,
+      "canonical_format_passed": true,
+      "resolved": true,
+      "supplemental_exit_code": 0,
+      "supplemental_passed": [
+        "TestHeaderBinding"
+      ]
+    },
+    {
+      "task": "gin-gonic__gin-1957",
+      "arm": "smol-guide",
+      "repeat": 2,
+      "canonical_format_passed": true,
+      "resolved": true,
+      "supplemental_exit_code": 0,
+      "supplemental_passed": [
+        "TestHeaderBinding"
+      ]
+    },
+    {
+      "task": "gin-gonic__gin-1957",
+      "arm": "smol-none",
+      "repeat": 2,
+      "canonical_format_passed": true,
+      "resolved": true,
+      "supplemental_exit_code": 0,
+      "supplemental_passed": [
+        "TestHeaderBinding"
+      ]
+    },
+    {
+      "task": "gin-gonic__gin-4003",
+      "arm": "go",
+      "repeat": 1,
+      "canonical_format_passed": true,
+      "resolved": true,
+      "supplemental_exit_code": 0,
+      "supplemental_passed": [
+        "TestNoRouteWithoutGlobalHandlers",
+        "TestNoRouteWithGlobalHandlers",
+        "TestMiddlewareNoRoute",
+        "TestEngineHandleMethodNotAllowedCornerCase"
+      ]
+    },
+    {
+      "task": "gin-gonic__gin-4003",
+      "arm": "smol-brief",
+      "repeat": 1,
+      "canonical_format_passed": true,
+      "resolved": true,
+      "supplemental_exit_code": 0,
+      "supplemental_passed": [
+        "TestNoRouteWithoutGlobalHandlers",
+        "TestNoRouteWithGlobalHandlers",
+        "TestMiddlewareNoRoute",
+        "TestEngineHandleMethodNotAllowedCornerCase"
+      ]
+    },
+    {
+      "task": "gin-gonic__gin-4003",
+      "arm": "smol-guide",
+      "repeat": 1,
+      "canonical_format_passed": true,
+      "resolved": true,
+      "supplemental_exit_code": 0,
+      "supplemental_passed": [
+        "TestNoRouteWithoutGlobalHandlers",
+        "TestNoRouteWithGlobalHandlers",
+        "TestMiddlewareNoRoute",
+        "TestEngineHandleMethodNotAllowedCornerCase"
+      ]
+    },
+    {
+      "task": "gin-gonic__gin-4003",
+      "arm": "smol-none",
+      "repeat": 1,
+      "canonical_format_passed": true,
+      "resolved": true,
+      "supplemental_exit_code": 0,
+      "supplemental_passed": [
+        "TestNoRouteWithoutGlobalHandlers",
+        "TestNoRouteWithGlobalHandlers",
+        "TestMiddlewareNoRoute",
+        "TestEngineHandleMethodNotAllowedCornerCase"
+      ]
+    },
+    {
+      "task": "gin-gonic__gin-4003",
+      "arm": "go",
+      "repeat": 2,
+      "canonical_format_passed": true,
+      "resolved": true,
+      "supplemental_exit_code": 0,
+      "supplemental_passed": [
+        "TestNoRouteWithoutGlobalHandlers",
+        "TestNoRouteWithGlobalHandlers",
+        "TestMiddlewareNoRoute",
+        "TestEngineHandleMethodNotAllowedCornerCase"
+      ]
+    },
+    {
+      "task": "gin-gonic__gin-4003",
+      "arm": "smol-brief",
+      "repeat": 2,
+      "canonical_format_passed": true,
+      "resolved": true,
+      "supplemental_exit_code": 0,
+      "supplemental_passed": [
+        "TestNoRouteWithoutGlobalHandlers",
+        "TestNoRouteWithGlobalHandlers",
+        "TestMiddlewareNoRoute",
+        "TestEngineHandleMethodNotAllowedCornerCase"
+      ]
+    },
+    {
+      "task": "gin-gonic__gin-4003",
+      "arm": "smol-guide",
+      "repeat": 2,
+      "canonical_format_passed": true,
+      "resolved": true,
+      "supplemental_exit_code": 0,
+      "supplemental_passed": [
+        "TestNoRouteWithoutGlobalHandlers",
+        "TestNoRouteWithGlobalHandlers",
+        "TestMiddlewareNoRoute",
+        "TestEngineHandleMethodNotAllowedCornerCase"
+      ]
+    },
+    {
+      "task": "gin-gonic__gin-4003",
+      "arm": "smol-none",
+      "repeat": 2,
+      "canonical_format_passed": true,
+      "resolved": true,
+      "supplemental_exit_code": 0,
+      "supplemental_passed": [
+        "TestNoRouteWithoutGlobalHandlers",
+        "TestNoRouteWithGlobalHandlers",
+        "TestMiddlewareNoRoute",
+        "TestEngineHandleMethodNotAllowedCornerCase"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "task": "gin-gonic__gin-3227",
+  "arm": "smol-commas",
+  "repeat": 2,
+  "model": "gpt-6.1-sol",
+  "effort": "medium",
+  "counts": {
+    "prompt_tokens": 7289,
+    "instruction_tokens": 34,
+    "source_tokens": 6598,
+    "import_table_tokens": 143,
+    "original_go_source_tokens": 12244,
+    "guide_sha256": "1d62531d98a45196e388bd243be0ea4cb807a1a3b28ca8bbb6465f7cada7fcb8",
+    "prompt_sha256": "5b2a237942e3a494dc5f569b0ed56de4ea75c9ba392966cc2833b041355cdbe5"
+  },
+  "attempts": [
+    {
+      "attempt": 0,
+      "usage": {
+        "input_tokens": 21742,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 123,
+        "reasoning_output_tokens": 55
+      },
+      "elapsed_seconds": 17.096,
+      "generation_seconds": 12.663,
+      "prompt_tokens": 7289,
+      "response_tokens": 56,
+      "prompt_sha256": "5b2a237942e3a494dc5f569b0ed56de4ea75c9ba392966cc2833b041355cdbe5",
+      "response_sha256": "eeb89738d88bc8fc022eeccfb520dfc3d4ced6e0c2a3734725618ac5dd31ed20",
+      "stage": "tests",
+      "resolved": false,
+      "passed": [],
+      "failed": [
+        "TestRedirectTrailingSlash"
+      ],
+      "missing_expected_tests": [
+        "TestRedirectTrailingSlash"
+      ],
+      "canonical_before_format": false,
+      "feedback": ""
+    }
+  ],
+  "resolved": false,
+  "first_pass_resolved": false,
+  "usage": {
+    "input_tokens": 21742,
+    "cached_input_tokens": 0,
+    "output_tokens": 123
+  }
+}

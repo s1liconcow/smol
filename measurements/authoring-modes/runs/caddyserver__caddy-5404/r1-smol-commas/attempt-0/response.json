@@ -1,0 +1,1 @@
+{"edits":[{"path":"caddyconfig/caddyfile/lexer.smol","old":"lastNewline:=LastIndex(string(val),\"\\n\")","new":"lastNewline:=-1\nfor index,ch in val{\nif ch=='\\n'{\nlastNewline=index\n}\n}"}]}

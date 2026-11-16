@@ -1,0 +1,27 @@
+{
+  "attempt": 0,
+  "usage": {
+    "input_tokens": 21788,
+    "cached_input_tokens": 12288,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 122,
+    "reasoning_output_tokens": 53
+  },
+  "elapsed_seconds": 26.781,
+  "generation_seconds": 22.208,
+  "prompt_tokens": 7335,
+  "response_tokens": 57,
+  "prompt_sha256": "c404ae2cb018512189ce367abee2c8cda4ec58ca407f8bc7f0875c363921c469",
+  "response_sha256": "52a27471accbb020ef5e79ef25b5922ffb2f6dd75ab2255cfab700d8b29573e4",
+  "stage": "tests",
+  "resolved": false,
+  "passed": [],
+  "failed": [
+    "TestRedirectTrailingSlash"
+  ],
+  "missing_expected_tests": [
+    "TestRedirectTrailingSlash"
+  ],
+  "canonical_before_format": false,
+  "feedback": ""
+}

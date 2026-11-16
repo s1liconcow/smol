@@ -1,0 +1,13 @@
+{
+  "command": [
+    "/private/tmp/smol-overhead/smol",
+    "lower",
+    "binding/binding.smol",
+    "binding/header.smol",
+    "context.smol"
+  ],
+  "exit_code": 0,
+  "stdout": "",
+  "stderr": "lower: 3 files passed\n",
+  "elapsed_seconds": 0.452
+}
