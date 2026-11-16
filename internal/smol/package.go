@@ -3,6 +3,7 @@ package smol
 import (
 	"fmt"
 	"go/ast"
+	"go/token"
 	"sort"
 	"strconv"
 	"strings"
@@ -64,7 +65,7 @@ func desugar(text, prefix string) (string, []string, map[string]string, error) {
 	if err != nil {
 		return "", nil, nil, err
 	}
-	for _, phase := range []func(string) (string, error){lowerImportMarker,
+	for _, phase := range []func(string) (string, error){func(t string) (string, error) { return lowerImportMarker(t, prefix) },
 		func(t string) (string, error) { return lowerReceivers(t, conv) }, lowerDecls, lowerCommas,
 		func(t string) (string, error) { return lowerSignatures(t, conv) }, lowerTags, lowerRanges, lowerArrows,
 		func(t string) (string, error) { return lowerStatements(t, prefix) }} {
@@ -76,7 +77,7 @@ func desugar(text, prefix string) (string, []string, map[string]string, error) {
 	return text, uses, conv, nil
 }
 
-// Check verifies L1, L2 and formatter idempotence without writing source files.
+// Check verifies L1–L4 and formatter idempotence without writing source files.
 func Check(text string, o Options) error {
 	n, e := Normalize(text)
 	if e != nil {
@@ -123,7 +124,56 @@ func Check(text string, o Options) error {
 	if c2, n2 := Pack(wide); c2 != code || n2 != notes {
 		return fmt.Errorf("L3 (packed): packing is not stable")
 	}
+	bare, e := Lower(code, o)
+	if e != nil {
+		return fmt.Errorf("L4 lower: %w", e)
+	}
+	want, e := programTokens(n)
+	if e != nil {
+		return e
+	}
+	got, e := programTokens(bare)
+	if e != nil {
+		return e
+	}
+	if want != got {
+		return fmt.Errorf("L4 Go tokens/directives differ at %s", difference(want, got))
+	}
 	return nil
+}
+
+// programTokens uses Go's scanner, retaining toolchain directives and cgo
+// preambles while ignoring only ordinary comments and their layout.
+func programTokens(text string) (string, error) {
+	s, err := parse(text)
+	if err != nil {
+		return "", err
+	}
+	preamble := map[int]bool{}
+	for _, d := range s.file.Decls {
+		if g, ok := d.(*ast.GenDecl); ok && g.Tok == token.IMPORT {
+			for _, sp := range g.Specs {
+				im := sp.(*ast.ImportSpec)
+				if im.Path.Value == `"C"` {
+					for _, cg := range []*ast.CommentGroup{g.Doc, im.Doc} {
+						if cg != nil {
+							for _, c := range cg.List {
+								preamble[s.off(c.Pos())] = true
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	var b strings.Builder
+	for _, t := range lex(text) {
+		if t.k == token.COMMENT && !directiveAt(text, t.a, t.lit) && !preamble[t.a] {
+			continue
+		}
+		fmt.Fprintf(&b, "%s %q\n", t.k, t.lit)
+	}
+	return b.String(), nil
 }
 func difference(a, b string) string {
 	line := 1

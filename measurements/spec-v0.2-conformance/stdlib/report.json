@@ -1,0 +1,14 @@
+{
+  "go_version": "go version go1.26.3 darwin/arm64",
+  "command": [
+    "bin/smol",
+    "check",
+    "std"
+  ],
+  "exit_code": 0,
+  "passed_files": 2800,
+  "failed_files": 0,
+  "elapsed_seconds": 513.797,
+  "scope": "Host GOOS/GOARCH and build constraints; GoFiles, CgoFiles, TestGoFiles, XTestGoFiles.",
+  "meaning": "L1 byte equality, L2 deterministic lifting, L3 formatter idempotence, and L4 code-only Go token/directive equality. Mandatory folds and package behavior are checked separately."
+}

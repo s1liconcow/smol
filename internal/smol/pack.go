@@ -13,6 +13,7 @@ import (
 type lexeme struct {
 	lit     string
 	comment bool
+	keep    bool // active directive at its original position
 	nl      int  // newlines in the gap before this lexeme
 	tab     bool // the gap ends in a tab (significant comment indentation)
 	items   []note
@@ -30,12 +31,21 @@ type note struct {
 
 // directive reports whether a comment changes what the Go toolchain builds.
 func directive(text string) bool {
-	for _, p := range []string{"//go:", "//line ", "//export ", "//extern ", "// +build"} {
+	for _, p := range []string{"//go:", "//line ", "/*line ", "//export ", "//extern ", "// +build"} {
 		if strings.HasPrefix(text, p) {
 			return true
 		}
 	}
 	return false
+}
+
+func directiveAt(text string, offset int, comment string) bool {
+	// A //line comment has meaning only in column one. Moving an indented
+	// example to column one would activate it, so it belongs in notes.
+	if strings.HasPrefix(comment, "//line ") && offset != strings.LastIndex(text[:offset], "\n")+1 {
+		return false
+	}
+	return directive(comment)
 }
 
 const notesHeader = "smol-notes 1"
@@ -74,7 +84,7 @@ func scanLexemes(text string) []lexeme {
 			out[len(out)-1].lit = "=>"
 			continue
 		}
-		out = append(out, lexeme{lit: l, comment: k == token.COMMENT, nl: strings.Count(gap, "\n"), tab: strings.HasSuffix(gap, "\t") && strings.Contains(gap, "\n")})
+		out = append(out, lexeme{lit: l, comment: k == token.COMMENT, keep: k == token.COMMENT && directiveAt(text, a, l), nl: strings.Count(gap, "\n"), tab: strings.HasSuffix(gap, "\t") && strings.Contains(gap, "\n")})
 	}
 	return out
 }
@@ -131,12 +141,12 @@ func codeLexemes(text string) []lexeme {
 		total += x.nl
 		if x.comment {
 			total += strings.Count(x.lit, "\n")
-			items = append(items, note{nl: x.nl, tab: x.tab, text: x.lit})
+			items = append(items, note{nl: x.nl, tab: x.tab, text: x.lit, keep: x.keep})
 			continue
 		}
 		for j := range items {
 			// The cgo preamble is part of the program, like a directive.
-			items[j].keep = directive(items[j].text) || (x.lit == "import" && cgoNext)
+			items[j].keep = items[j].keep || (x.lit == "import" && cgoNext)
 		}
 		x.items, x.total = items, total
 		x.inner = depth > 0
@@ -248,7 +258,21 @@ func operandGap(a, b string) bool {
 // Pack splits Smol text into the dense code channel and the notes channel.
 // Comments and blank lines move to the notes; optional spaces are dropped.
 func Pack(text string) (code, notes string) {
+	return pack(text, false)
+}
+
+// keepComments is used only for the outline, after non-doc comments have
+// been removed. It shares the code channel's dense layout without unpacking
+// the blank lines recorded in notes.
+func pack(text string, keepComments bool) (code, notes string) {
 	ls := codeLexemes(text)
+	if keepComments {
+		for i := range ls {
+			for j := range ls[i].items {
+				ls[i].items[j].keep = true
+			}
+		}
+	}
 	segs := segments(ls)
 	var cb, nb strings.Builder
 	si := 0
@@ -545,25 +569,87 @@ func Outline(text string, o Options, docs bool) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	for _, d := range s.file.Decls {
-		if f, ok := d.(*ast.FuncDecl); ok && f.Body != nil {
-			s.put(s.off(f.Type.End()), s.off(f.Body.End()), "")
+	keep := map[*ast.Comment]bool{}
+	remember := func(g *ast.CommentGroup) {
+		if g != nil {
+			for _, c := range g.List {
+				keep[c] = true
+			}
 		}
 	}
+	if docs {
+		ast.Inspect(s.file, func(n ast.Node) bool {
+			switch n := n.(type) {
+			case *ast.File:
+				remember(n.Doc)
+			case *ast.GenDecl:
+				remember(n.Doc)
+			case *ast.FuncDecl:
+				remember(n.Doc)
+			case *ast.TypeSpec:
+				remember(n.Doc)
+			case *ast.ValueSpec:
+				remember(n.Doc)
+			case *ast.ImportSpec:
+				remember(n.Doc)
+			case *ast.Field:
+				remember(n.Doc)
+			}
+			return true
+		})
+	}
+	for _, d := range s.file.Decls {
+		if g, ok := d.(*ast.GenDecl); ok && g.Tok == token.IMPORT {
+			for _, sp := range g.Specs {
+				im := sp.(*ast.ImportSpec)
+				if im.Path.Value == `"C"` {
+					remember(g.Doc)
+					remember(im.Doc)
+				}
+			}
+		}
+	}
+	for _, g := range s.file.Comments {
+		for _, c := range g.List {
+			if !keep[c] && !directiveAt(text, s.off(c.Pos()), c.Text) {
+				s.replace(c, "")
+			}
+		}
+	}
+	placeholder := "__smol_outline_body"
+	for strings.Contains(text, placeholder) {
+		placeholder += "x"
+	}
+	ast.Inspect(s.file, func(n ast.Node) bool {
+		switch f := n.(type) {
+		case *ast.FuncDecl:
+			if f.Body != nil {
+				s.put(s.off(f.Type.End()), s.off(f.Body.End()), "")
+			}
+			return false
+		case *ast.FuncLit:
+			// Go requires a literal body while the lifting passes parse it.
+			// Use a collision-free body, then remove it from the read-only view.
+			s.replace(f.Body, "{"+placeholder+"()}")
+			return false
+		}
+		return true
+	})
 	wide, err := Lift(s.render(0, len(text)), o)
 	if err != nil {
 		return "", err
 	}
-	code, notes := Pack(wide)
-	if !docs || notes == "" {
-		return code, nil
-	}
-	var keep []string
-	for _, l := range strings.Split(strings.TrimRight(notes, "\n"), "\n") {
-		if l == notesHeader || strings.HasPrefix(l, "@") || strings.HasPrefix(l, "0 c") || strings.HasPrefix(l, "0 e") {
-			keep = append(keep, l)
+	ts := significant(lex(wide))
+	var cuts []edit
+	for i, t := range ts {
+		if t.lit == placeholder && i > 0 && i+3 < len(ts) && ts[i-1].lit == "{" && ts[i+1].lit == "(" && ts[i+2].lit == ")" && ts[i+3].lit == "}" {
+			cuts = append(cuts, edit{ts[i-1].a, ts[i+3].b, ""})
 		}
 	}
-	out, _, err := Unpack(code, strings.Join(keep, "\n")+"\n")
-	return out, err
+	wide, err = apply(wide, cuts)
+	if err != nil {
+		return "", err
+	}
+	code, _ := pack(wide, docs)
+	return code, nil
 }

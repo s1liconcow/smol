@@ -1,74 +1,74 @@
 # Validation coverage
 
-The current specification is **SPEC.md v0.2 (draft)**. The validation verdict is
-**not conformant**: byte-preserving round trips fail on the module itself and on
-targeted comment fixtures; code-only directive retention and mandatory forms also
-have gaps. [VALIDATION.md](VALIDATION.md) gives the findings and token uplift.
+The current target is **SPEC.md v0.2**, including the approved §6.8 clarification
+that ambiguous expression boundaries keep braces. The reproducible, scoped
+verdict is in [summary.json](measurements/spec-v0.2-conformance/summary.json).
+[VALIDATION.md](VALIDATION.md) records results, environment and token uplift.
 
-Tests compare observable source and compiled behavior with Go's parser, scanner,
-formatter and package tests. No implementation output was used to regenerate
-the spec's expected example. The original 70 unit/CLI cases all pass, including
-subtests; passing these tests alone does not establish conformance.
+The original seven failing probes now pass. No expected outputs were regenerated
+from the translator to hide failures; the §11 example fixtures remain unchanged.
+Tests use Go's parser, scanner, formatter and compiled package behavior as oracles.
 
-## Coverage matrix
+## Required form matrix (§12.3)
 
-| Specification | Existing coverage | New audit / remaining limits |
-|---|---|---|
-| §3 L1–L3 | `roundtrip`, `TestSpecExample`, `packRound`, `smol check` | 2,800 active stdlib files pass; original module 12 pass / 1 fail; two new inline-comment fixtures fail L1 |
-| §3 L4 | `TestDirectivesStayInCode`, code-only example | Independent Go-scanner token/directive comparison passes ordinary directive/cgo fixture; trailing directive fails; three package test suites pass after production notes are removed |
-| §4 CLI/files | `TestCLIWorkflow`, `TestModuleImportTable`, `TestUnsupportedGoVersion`, `TestLines` | Existing CLI behavior passes; Go-version tables still use installed toolchain (DISC-004) |
-| §4.1 notes | `TestNotes`, `TestPackStandardPackage` | Exact restoration and changed-count relocation pass; full invalid-notes grammar and all edit permutations untested |
-| §5 layout | `TestImpliedBreaks`, `TestUnicodeAndLiterals` | Dense inline/implied-break/contextual-identifier probes pass; `outline -docs` introduces blank lines |
-| §6.1 imports | `TestForms/6.1_*`, `TestPartialImportBlock`, package/dot-import regressions | Partial-import positive and blank-line near miss pass; raw placeholder collision corrupts source |
-| §6.2 declarations | Receiver inheritance, changed/commented receivers, generic funcs, literals/types | Covered in `TestForms`, `TestCorpusRegressions`, `TestRoundTrips` |
-| §6.3 error results | Unnamed/named results, parenthesized error, nested types | Existing cases pass |
-| §6.4 parameters | Conventional, typed, escaped, unnamed, commented, interface/literal forms | Existing cases pass; new inline-comment normalization failure also affects signatures |
-| §6.5 handlers | Bare/formatted/custom, assignments, initializer, comment/blank/else near misses | Existing cases pass |
-| §6.6 returns | Success/failure, nested literals, noncanonical zeros, comments, invalid usage | Existing cases pass |
-| §6.7 range | Value/pair folds, index/assignment near misses, `in` identifier, comments | Existing cases pass |
-| §6.8 expression bodies | Declaration/literal layout, tuples, comments | Existing cases pass; ambiguity exceptions remain in DISC-002 |
-| §6.9 tags | Multiple keys, acronyms, explicit/suppressed tags, unexported/grouped fields, near miss | `TestStructTags` and round-trip cases pass |
-| §6.10 opened packages | `TestScopeForms`: thresholds, shadowing, ambiguous exports | Fold, near miss, local scope, key exclusion pass; comment fixture fails L1 |
-| §6.11 subjects | `TestScopeForms`: receiver/first parameter, closure shadow, keys | Direct member, shadow, comment, closure, promoted near miss pass; imported embedded pointer field misses fold |
-| §6.12 conventions | `TestScopeForms`: let, escapes, call integration | Threshold, tie-breaking, inherited-receiver count pass; comment fixture fails L1 |
-| §6.13 implied commas | Calls, cases, directives fixture | Fold, operator near miss, comment, case pass |
-| §7 zeros | Builtin, package/imported named, composite/local, unavailable type parameters | Existing cases pass |
-| §8 lifting order | Golden example, corpus, scope fallback in `Lift` | No exhaustive stage-order proof; fallback does not fix failures outside scope elision |
-| §9 outlines | Regenerated benchmark outlines | Literal body retention and docs layout fail new probes |
-| §10 measurements | Preserved raw Codex input usage | Fresh bundle/token/hash verification passes; no new API requests; no model-accuracy measurement |
-| §11 example | `TestSpecExample` | Go, code, notes fixtures match spec verbatim |
-| §12 conformance | Host stdlib and original-module corpus; selected lowered-package tests | Full standard-library test suite and exhaustive fold/near-miss/comment matrix not completed; known violations prevent conformance |
+Each row has three independently named cases in `TestRequiredForms`: a mandatory
+fold, the nearest non-match, and an interior comment. Each case checks round-trip
+laws, expected/forbidden code fragments, and comment retention. The machine
+report is generated from the actual Go test events by `scripts/report_conformance.py`.
 
-## Spec-derived probe accounting
-
-These are audit-case counts, **not** counts of every MUST/SHOULD clause in the
-spec. They must not be reported as an overall spec coverage percentage. Each
-failed probe is a demonstrated unmet requirement; none is marked skipped or
-accepted. [Machine-readable cases and reproducers](measurements/spec-v0.2-validation/probes.json).
-
-| Section | Tested | Passing | Failing |
+| Form | Required cases | Tested | Passing |
 |---|---:|---:|---:|
-| §3 L1 | 1 | 0 | 1 |
-| §3 L4 | 3 | 2 | 1 |
-| §4.1 | 2 | 2 | 0 |
-| §5 | 4 | 4 | 0 |
-| §6.1 | 2 | 2 | 0 |
-| §6.10 | 5 | 4 | 1 |
-| §6.11 | 6 | 5 | 1 |
-| §6.12 | 5 | 4 | 1 |
-| §6.13 | 4 | 4 | 0 |
-| §9 | 2 | 0 | 2 |
-| Total | 34 | 27 | 7 |
+| §6.1 imports | 3 | 3 | 3 |
+| §6.2 declarations/receivers | 3 | 3 | 3 |
+| §6.3 error results | 3 | 3 | 3 |
+| §6.4 conventional parameters | 3 | 3 | 3 |
+| §6.5 handlers | 3 | 3 | 3 |
+| §6.6 returns | 3 | 3 | 3 |
+| §6.7 range | 3 | 3 | 3 |
+| §6.8 expression bodies | 3 | 3 | 3 |
+| §6.9 tags | 3 | 3 | 3 |
+| §6.10 opened packages | 3 | 3 | 3 |
+| §6.11 subjects | 3 | 3 | 3 |
+| §6.12 file conventions | 3 | 3 | 3 |
+| §6.13 commas | 3 | 3 | 3 |
+| **Total** | **39** | **39** | **39** |
 
-The stdlib corpus uses active GoFiles, CgoFiles, TestGoFiles and XTestGoFiles for
-Go 1.26.3 on darwin/arm64. It excludes deliberately invalid compiler testdata,
-inactive platforms, other experiments and historical Go releases. Behavioral
-validation uses overlays of transformed `fmt`, `encoding/json`, and `go/parser`,
-with `GODEBUG=asynctimerchan=0` and loopback access. Installed sources are untouched.
-Test comments remain in both modes so Go's Example assertions execute.
+These are the cases required by §12.3, not an enumeration of every normative
+clause or a claim of 100% input-space coverage. §6.14 summarizes the grammar of
+the preceding forms and introduces no additional fold.
 
-Original evidence in `measurements/conformance/` and `measurements/tests/` is
-historical. Current evidence is in `measurements/spec-v0.2-validation/`.
-Fixture provenance is in [testdata/PROVENANCE.md](testdata/PROVENANCE.md).
+## Contract and regression coverage
 
-Reproduction commands are in [VALIDATION.md](VALIDATION.md#reproduce).
+| Requirement | Evidence |
+|---|---|
+| §3 L1–L4, §8 lifting order | `smol check` across active stdlib and module files; independent scanner probes; golden §11 example |
+| §4 tools and package context | `TestCLIWorkflow`, `TestModuleImportTable`, `TestUnsupportedGoVersion`, `TestPackageScopeAndZeros`, `TestExternalTestDotImport`, `TestLines` |
+| §4.1 notes | `TestNotes`, `TestPackStandardPackage`; exact restoration, changed-count relocation, missing/stale heads |
+| §4.1 active directives and cgo | `TestDirectivesStayInCode`, `TestEOFDirectives`, `TestInactiveLineDirective`; independent code-only scanner probes and compiled standard packages |
+| §5 dense layout and literals | `TestImpliedBreaks`, `TestUnicodeAndLiterals`, `TestCommentLayout`, `TestCorpusRegressions` |
+| §6.1 import boundaries/collisions | `TestImportMarkerIsolation`, `TestCodeOnlyImportBoundaries`, `TestPartialImportBlock`; unused/shadowed imports and real sentinel-path imports |
+| §6.2–§6.4 declaration comments | `TestDeclarationCommentsAndTagKeys`, `TestForms`, required-form matrix |
+| §6.5–§6.7 handlers/returns/range | `TestForms`, `TestRoundTrips`, `TestNestedReturnsAndOperators`, required-form matrix |
+| §6.8 boundary clarification | `TestArrowBoundaries`: invoked literal versus returned call, binary operators, outer parentheses, tuples and intervening comments |
+| §6.9 tags | `TestStructTags`, `TestDeclarationCommentsAndTagKeys`, required-form matrix |
+| §6.10–§6.13 scopes | `TestScopeForms`, independent threshold/tie/shadow/key probes, `TestEmbeddedPointerSubject`, required-form matrix |
+| §7 zeros | `TestPackageScopeAndZeros`, `TestLocalResultTypes`, imported types, unavailable type parameters and invalid-form tests |
+| §9 outlines | `TestOutline`: declaration/literal bodies, nested literals, doc/field comments, detached/trailing comments, dense layout |
+| §10 measurements | Fresh bundles and local tokenizer counts, archived payload/prompt hashes and raw API usage verification |
+| §11 complete example | `TestSpecExample`; Go/code/notes fixtures unchanged |
+| §12 compiled behavior | Every selected standard package under `go test -short`, plus this module; overlays in both channel modes |
+
+## Bounds of the claim
+
+The report covers Go 1.26.3, darwin/arm64 and active GoFiles, CgoFiles, TestGoFiles
+and XTestGoFiles. Inactive platforms, other Go releases and deliberately invalid
+compiler fixtures are excluded. Behavioral test skips and flags are recorded;
+`-short` does not exercise all long-running or external-network tests. Test notes
+remain present so Go's Example assertions execute in both modes.
+
+No complete enumeration of all malformed notes, edit permutations, valid Go
+programs or valid handwritten Smol is claimed. See [DISCREPANCIES.md](DISCREPANCIES.md)
+for toolchain/version and source-position limits. Historical audit results remain
+in `measurements/spec-v0.2-validation/`; current results are in
+`measurements/spec-v0.2-conformance/`. Fixture provenance is recorded in
+[testdata/PROVENANCE.md](testdata/PROVENANCE.md) and the measurement manifests.

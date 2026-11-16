@@ -1,0 +1,181 @@
+{
+  "elapsed_seconds": 0.905628542,
+  "failed": 0,
+  "go_version": "go1.26.3",
+  "passed": 34,
+  "results": [
+    {
+      "id": "open_fold",
+      "section": "6.10",
+      "status": "PASS"
+    },
+    {
+      "id": "open_one_use",
+      "section": "6.10",
+      "status": "PASS"
+    },
+    {
+      "id": "open_local_shadow",
+      "section": "6.10",
+      "status": "PASS"
+    },
+    {
+      "id": "open_comment",
+      "section": "6.10",
+      "status": "PASS"
+    },
+    {
+      "id": "open_composite_key",
+      "section": "6.10",
+      "status": "PASS"
+    },
+    {
+      "id": "subject_fold",
+      "section": "6.11",
+      "status": "PASS"
+    },
+    {
+      "id": "subject_shadow",
+      "section": "6.11",
+      "status": "PASS"
+    },
+    {
+      "id": "subject_comment",
+      "section": "6.11",
+      "status": "PASS"
+    },
+    {
+      "id": "subject_nested_closure",
+      "section": "6.11",
+      "status": "PASS"
+    },
+    {
+      "id": "subject_promoted_near_miss",
+      "section": "6.11",
+      "status": "PASS"
+    },
+    {
+      "id": "subject_embedded_pointer",
+      "section": "6.11",
+      "status": "PASS"
+    },
+    {
+      "id": "convention_three",
+      "section": "6.12",
+      "status": "PASS"
+    },
+    {
+      "id": "convention_two",
+      "section": "6.12",
+      "status": "PASS"
+    },
+    {
+      "id": "convention_comment",
+      "section": "6.12",
+      "status": "PASS"
+    },
+    {
+      "id": "convention_tie",
+      "section": "6.12",
+      "status": "PASS"
+    },
+    {
+      "id": "convention_inherited_receiver_not_counted",
+      "section": "6.12",
+      "status": "PASS"
+    },
+    {
+      "id": "comma_fold",
+      "section": "6.13",
+      "status": "PASS"
+    },
+    {
+      "id": "comma_operator_near_miss",
+      "section": "6.13",
+      "status": "PASS"
+    },
+    {
+      "id": "comma_comment",
+      "section": "6.13",
+      "status": "PASS"
+    },
+    {
+      "id": "comma_case",
+      "section": "6.13",
+      "status": "PASS"
+    },
+    {
+      "id": "contextual_identifiers",
+      "section": "5",
+      "status": "PASS"
+    },
+    {
+      "id": "partial_import",
+      "section": "6.1",
+      "status": "PASS"
+    },
+    {
+      "id": "partial_import_blank_near_miss",
+      "section": "6.1",
+      "status": "PASS"
+    },
+    {
+      "id": "inline_fold",
+      "section": "5",
+      "status": "PASS"
+    },
+    {
+      "id": "inline_comment",
+      "section": "5",
+      "status": "PASS"
+    },
+    {
+      "id": "implied_break",
+      "section": "5",
+      "status": "PASS"
+    },
+    {
+      "id": "import_marker_literal_roundtrip",
+      "section": "3/L1",
+      "status": "PASS"
+    },
+    {
+      "id": "directives_and_cgo_without_notes",
+      "section": "3/L4",
+      "status": "PASS"
+    },
+    {
+      "id": "trailing_directive_without_notes",
+      "section": "3/L4",
+      "status": "PASS"
+    },
+    {
+      "id": "code_only_program_tokens",
+      "section": "3/L4",
+      "status": "PASS"
+    },
+    {
+      "id": "outline_removes_literal_bodies",
+      "section": "9",
+      "status": "PASS"
+    },
+    {
+      "id": "outline_docs_dense_layout",
+      "section": "9",
+      "status": "PASS"
+    },
+    {
+      "id": "notes_unchanged",
+      "section": "4.1",
+      "status": "PASS"
+    },
+    {
+      "id": "notes_after_edit",
+      "section": "4.1",
+      "status": "PASS"
+    }
+  ],
+  "scope": "Targeted spec-derived probes, not an exhaustive requirement count. FAIL means observed divergence, not an accepted exception.",
+  "spec": "SPEC.md v0.2 draft",
+  "total": 34
+}

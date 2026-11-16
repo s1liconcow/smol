@@ -1,0 +1,134 @@
+{
+  "go_version": "go version go1.26.3 darwin/arm64",
+  "translator_sha256": "a60bb911f34169c893d2ddcd8f23a9b74231aa66c8856cc18d1a68147a45498e",
+  "method": "go test using an overlay of actively selected GoFiles, CgoFiles, TestGoFiles and XTestGoFiles after lift/lower",
+  "GODEBUG": "",
+  "short": false,
+  "runs": [
+    {
+      "mode": "with-notes",
+      "command": [
+        "go",
+        "test",
+        "-count=1",
+        "-json",
+        "-overlay",
+        "<overlay>",
+        "./..."
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 3.096,
+      "passed_cases": 128,
+      "failed_cases": [],
+      "skipped_cases": 0,
+      "packages": [
+        {
+          "package": "smolang/scripts",
+          "status": "skip"
+        },
+        {
+          "package": "smolang/cmd/smol",
+          "status": "pass"
+        },
+        {
+          "package": "smolang/internal/smol",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "mode": "without-notes",
+      "command": [
+        "go",
+        "test",
+        "-count=1",
+        "-json",
+        "-overlay",
+        "<overlay>",
+        "./..."
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 3.017,
+      "passed_cases": 128,
+      "failed_cases": [],
+      "skipped_cases": 0,
+      "packages": [
+        {
+          "package": "smolang/scripts",
+          "status": "skip"
+        },
+        {
+          "package": "smolang/cmd/smol",
+          "status": "pass"
+        },
+        {
+          "package": "smolang/internal/smol",
+          "status": "pass"
+        }
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "path": "/Users/david/projects/smolang/cmd/smol/main.go",
+      "sha256": "852473c3dc0a43110830371125e1eedcf032738526760f526a26dc61ad4daddc"
+    },
+    {
+      "path": "/Users/david/projects/smolang/cmd/smol/main_test.go",
+      "sha256": "49eb583acba4f897edad2028ad649e4777cb49c6c4f764b82dd815e96ab7e63e"
+    },
+    {
+      "path": "/Users/david/projects/smolang/internal/smol/conformance_test.go",
+      "sha256": "5e83f4d696413316c9f3a9976256983fafc5ae3dbe5fdbcb53a038ce82e995d0"
+    },
+    {
+      "path": "/Users/david/projects/smolang/internal/smol/imports.go",
+      "sha256": "d591f91c0f7c013d34e9c91f0e15054aa2dee113fa7a171f5583ffd757b81dd1"
+    },
+    {
+      "path": "/Users/david/projects/smolang/internal/smol/lift.go",
+      "sha256": "628bf839dea76d808d7f2f98d2889bd49ace578b42f585678dc2ac40d2811783"
+    },
+    {
+      "path": "/Users/david/projects/smolang/internal/smol/lower.go",
+      "sha256": "7933885a9053e9b060b2573b4978fd8d2f5d1788db82e94fcb80869d3ca1129a"
+    },
+    {
+      "path": "/Users/david/projects/smolang/internal/smol/pack.go",
+      "sha256": "d47e2b5c0ab8e5269bcfad8dda4615298b81b60b3aadacf8df971ffdac3bb479"
+    },
+    {
+      "path": "/Users/david/projects/smolang/internal/smol/pack_test.go",
+      "sha256": "fd8cff0eb305d131c2c71597a29a272b7d5c5c1d1867d2511f13ef9b7adb4b40"
+    },
+    {
+      "path": "/Users/david/projects/smolang/internal/smol/package.go",
+      "sha256": "b0d807cc02cfacf72ac9cd80bc0f3daac0794529ee647c6ebde6030494e9a497"
+    },
+    {
+      "path": "/Users/david/projects/smolang/internal/smol/print.go",
+      "sha256": "b66d5e8b2b5b4c2d54fd6dc4271dc71f9be95617c578b298d55768b2e5886e8e"
+    },
+    {
+      "path": "/Users/david/projects/smolang/internal/smol/scope.go",
+      "sha256": "0a07612fb8fe6ae231877d92022f8f106cd3abeaf01cfff18c499ccd32a38dcf"
+    },
+    {
+      "path": "/Users/david/projects/smolang/internal/smol/source.go",
+      "sha256": "9576465608b1147a2f557c203b34466c82ea7baec1c821ddb386dce2515c823a"
+    },
+    {
+      "path": "/Users/david/projects/smolang/internal/smol/v02_test.go",
+      "sha256": "9442a95319d8690266cc964ef29e66c0be06216e2feb7528a9ff790d6e877fd1"
+    },
+    {
+      "path": "/Users/david/projects/smolang/internal/smol/zero.go",
+      "sha256": "a102fe876d214a1c266a13487007f4d108f36bc8dc68c7ea4dcd7fe45c33eb18"
+    },
+    {
+      "path": "/Users/david/projects/smolang/scripts/validate_v02.go",
+      "sha256": "0a8b6d4d505827a76282f8b411ff0235388c42c69c3e86a2b44a6e69a7d71257"
+    }
+  ],
+  "limits": "Selection and -short are recorded in the commands; GOROOT unchanged. Without-notes mode removes production notes only; test notes remain so Example output assertions still run."
+}

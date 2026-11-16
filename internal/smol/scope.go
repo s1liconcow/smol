@@ -48,6 +48,15 @@ func fieldNames(t ast.Expr, into map[string]bool) {
 		}
 		if len(f.Names) == 0 {
 			e := f.Type
+			if p, ok := e.(*ast.StarExpr); ok {
+				e = p.X
+			}
+			switch t := e.(type) {
+			case *ast.IndexExpr:
+				e = t.X
+			case *ast.IndexListExpr:
+				e = t.X
+			}
 			if sel, ok := e.(*ast.SelectorExpr); ok {
 				into[sel.Sel.Name] = true
 			} else if n := recvBase(e); n != "" {

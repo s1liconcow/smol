@@ -65,7 +65,9 @@ func lift(text string, o Options) (string, error) {
 		if !ok {
 			continue
 		}
-		s.put(s.off(f.Pos()), s.off(f.Pos())+5, "")
+		if s.clean(s.off(f.Pos()), s.off(f.Name.Pos())) {
+			s.put(s.off(f.Pos()), s.off(f.Pos())+5, "")
+		}
 		if f.Recv != nil {
 			s.liftParams(f.Recv)
 			recv := s.raw(f.Recv)
@@ -156,13 +158,29 @@ func lift(text string, o Options) (string, error) {
 					}
 					ambiguous := false
 					if !decl && len(r.Results) < len(results(ft)) {
-						rest := strings.TrimSpace(s.text[s.off(t.End()):])
-						ambiguous = strings.HasPrefix(rest, ",")
+						for _, next := range lex(s.text[s.off(t.End()):]) {
+							if next.k != token.COMMENT {
+								ambiguous = next.lit == ","
+								break
+							}
+						}
 					}
 					if !decl {
-						rest := strings.TrimSpace(s.text[s.off(t.End()):])
-						if strings.HasPrefix(rest, "(") || strings.HasPrefix(rest, "[") || strings.HasPrefix(rest, ".") {
-							ambiguous = true
+						if literal, ok := parents[t].(*ast.FuncLit); ok {
+							switch outer := parents[literal].(type) {
+							case *ast.CallExpr:
+								ambiguous = ambiguous || outer.Fun == literal
+							case *ast.IndexExpr:
+								ambiguous = ambiguous || outer.X == literal
+							case *ast.IndexListExpr:
+								ambiguous = ambiguous || outer.X == literal
+							case *ast.SelectorExpr:
+								ambiguous = ambiguous || outer.X == literal
+							case *ast.TypeAssertExpr:
+								ambiguous = ambiguous || outer.X == literal
+							case *ast.BinaryExpr:
+								ambiguous = ambiguous || outer.X == literal
+							}
 						}
 					}
 					if multi == decl && !ambiguous {
@@ -231,7 +249,7 @@ func (s *source) liftSignature(ft *ast.FuncType) {
 	}
 	last := r.List[len(r.List)-1]
 	id, ok := last.Type.(*ast.Ident)
-	if !ok || id.Name != "error" || len(last.Names) > 0 || !s.clean(s.off(r.Pos()), s.off(r.End())) {
+	if !ok || id.Name != "error" || len(last.Names) > 0 || !s.clean(s.off(ft.Params.End()), s.off(r.End())) {
 		return
 	}
 	for _, f := range r.List {
@@ -284,7 +302,7 @@ func tagKeys(tag, name string) []string {
 	var keys []string
 	for _, part := range strings.Split(body, " ") {
 		i := strings.IndexByte(part, ':')
-		if i <= 0 || part[i+1:] != strconv.Quote(snake(name)) {
+		if i <= 0 || !token.IsIdentifier(part[:i]) || part[i+1:] != strconv.Quote(snake(name)) {
 			return nil
 		}
 		keys = append(keys, part[:i])
@@ -296,6 +314,9 @@ func tagKeys(tag, name string) []string {
 }
 func exported(f *ast.Field) bool { return len(f.Names) == 1 && ast.IsExported(f.Names[0].Name) }
 func (s *source) liftTags(t *ast.StructType) {
+	if !s.clean(s.off(t.Struct), s.off(t.Fields.Opening)) {
+		return
+	}
 	var keys []string
 	for _, f := range t.Fields.List {
 		if !exported(f) || f.Tag == nil {
@@ -311,7 +332,7 @@ func (s *source) liftTags(t *ast.StructType) {
 	}
 	count := 0
 	for _, f := range t.Fields.List {
-		if exported(f) && f.Tag != nil && s.raw(f.Tag) == implied(keys, f.Names[0].Name) {
+		if exported(f) && f.Tag != nil && s.raw(f.Tag) == implied(keys, f.Names[0].Name) && s.clean(s.off(f.Pos()), s.off(f.End())) {
 			count++
 		}
 	}
@@ -325,7 +346,7 @@ func (s *source) liftTags(t *ast.StructType) {
 		}
 		if f.Tag == nil {
 			s.put(s.off(f.End()), s.off(f.End()), " ~")
-		} else if s.raw(f.Tag) == implied(keys, f.Names[0].Name) {
+		} else if s.raw(f.Tag) == implied(keys, f.Names[0].Name) && s.clean(s.off(f.Pos()), s.off(f.End())) {
 			s.put(s.off(f.Type.End()), s.off(f.Tag.End()), "")
 		}
 	}

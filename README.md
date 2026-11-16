@@ -5,9 +5,12 @@ lifted into a dense code channel (`.smol`) and a notes channel
 (`.smol.notes`) holding comments and blank lines. The Go standard library is
 the translator's only dependency. Requires Go 1.22 or newer.
 
-**Current validation: not yet conformant.** The standard-library round-trip
-corpus and existing unit tests pass, but targeted v0.2 probes expose seven
-failures, including source corruption in import inference. See
+The recorded v0.2 conformance profile passes: 2,815 files satisfy L1–L4, and
+the 360-package standard-library run succeeds under `-short` in both
+channel modes. The fixes cover import inference, exact comment layout,
+code-only directives, embedded subjects, expression boundaries, and outlines.
+The original 34 spec probes pass, with 39 required fold/near-miss/comment cases
+and a strengthened L1–L4 corpus checker. See the recorded validation profile in
 [VALIDATION.md](VALIDATION.md), [COVERAGE.md](COVERAGE.md), and
 [DISCREPANCIES.md](DISCREPANCIES.md).
 
@@ -18,7 +21,7 @@ bin/smol fmt ./...        # canonicalize both channels
 bin/smol fmt -check ./... # verify formatting without writing
 bin/smol lower ./...      # code + optional notes -> normalized Go
 bin/smol lower -lines .   # include Smol source positions
-bin/smol check ./...      # verify L1-L3; currently exposes a known module defect
+bin/smol check ./...      # verify L1–L4 without writing
 bin/smol check std        # audit the installed standard library
 bin/smol outline .        # signatures and declarations
 bin/smol outline -docs .  # include doc comments
@@ -62,7 +65,7 @@ empty-input baseline; cached input tokens are included. Identical filename
 markers appear in each bundle.
 
 [Current audit and uplift](VALIDATION.md) ·
-[Machine-readable uplift](measurements/spec-v0.2-validation/uplift.json) ·
+[Machine-readable uplift](measurements/spec-v0.2-conformance/uplift.json) ·
 [Preserved v0.2 API usage](measurements/encoding-json/usage/report.json) ·
 [Preserved v0.1 baseline](measurements/encoding-json-v0.1/usage/report.json)
 
@@ -72,10 +75,13 @@ markers appear in each bundle.
 go test ./...
 go vet ./...
 python3 scripts/check_corpus.py
-go run ./scripts/validate_v02.go  # records known failures; currently exits nonzero
+go run ./scripts/validate_v02.go  # independent spec-derived probes
 python3 scripts/prepare_package.py encoding/json \
-  --output measurements/spec-v0.2-validation/encoding-json
-python3 scripts/validate_lowered.py
+  --output measurements/spec-v0.2-conformance/encoding-json
+python3 scripts/check_corpus.py --output measurements/spec-v0.2-conformance/module ./...
+python3 scripts/validate_lowered.py ./... --output measurements/spec-v0.2-conformance/lowered-module
+# Full host stdlib profile needs complete Go distribution test fixtures:
+python3 scripts/validate_lowered.py std --short
 python3 scripts/measure_uplift.py # requires tiktoken; no API requests
 ```
 
@@ -83,8 +89,8 @@ To collect new real-request usage with an authenticated Codex CLI:
 
 ```sh
 python3 scripts/measure_usage.py \
-  --go measurements/spec-v0.2-validation/encoding-json/package.go.txt \
-  --smol measurements/spec-v0.2-validation/encoding-json/package.smol.txt \
+  --go measurements/spec-v0.2-conformance/encoding-json/package.go.txt \
+  --smol measurements/spec-v0.2-conformance/encoding-json/package.smol.txt \
   --model gpt-6.1-sol --repeats 3 \
   --output measurements/new-usage
 ```

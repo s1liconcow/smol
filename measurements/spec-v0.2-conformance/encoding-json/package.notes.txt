@@ -1,0 +1,1679 @@
+// File: encoding/json/decode.go
+smol-notes 1
+@2 package json
+0 c00 "// Copyright 2010 The Go Authors. All rights reserved."
+0 c10 "// Use of this source code is governed by a BSD-style"
+0 c10 "// license that can be found in the LICENSE file."
+0 c20 "// Represents JSON data structure using native Go types: booleans, floats,"
+0 c10 "// strings, arrays, and maps."
+0 d20
+0 e2
+@6 import(
+0 b
+5 c00 "// for linkname"
+5 e1
+@41 Unmarshal(data[]byte,v any)
+0 c20 "// Unmarshal parses the JSON-encoded data and stores the result"
+0 c10 "// in the value pointed to by v. If v is nil or not a pointer,"
+0 c10 "// Unmarshal returns an [InvalidUnmarshalError]."
+0 c10 "//"
+0 c10 "// Unmarshal uses the inverse of the encodings that"
+0 c10 "// [Marshal] uses, allocating maps, slices, and pointers as necessary,"
+0 c10 "// with the following additional rules:"
+0 c10 "//"
+0 c10 "// To unmarshal JSON into a pointer, Unmarshal first handles the case of"
+0 c10 "// the JSON being the JSON literal null. In that case, Unmarshal sets"
+0 c10 "// the pointer to nil. Otherwise, Unmarshal unmarshals the JSON into"
+0 c10 "// the value pointed at by the pointer. If the pointer is nil, Unmarshal"
+0 c10 "// allocates a new value for it to point to."
+0 c10 "//"
+0 c10 "// To unmarshal JSON into a value implementing [Unmarshaler],"
+0 c10 "// Unmarshal calls that value's [Unmarshaler.UnmarshalJSON] method, including"
+0 c10 "// when the input is a JSON null."
+0 c10 "// Otherwise, if the value implements [encoding.TextUnmarshaler]"
+0 c10 "// and the input is a JSON quoted string, Unmarshal calls"
+0 c10 "// [encoding.TextUnmarshaler.UnmarshalText] with the unquoted form of the string."
+0 c10 "//"
+0 c10 "// To unmarshal JSON into a struct, Unmarshal matches incoming object keys to"
+0 c10 "// the keys used by [Marshal] (either the struct field name or its tag),"
+0 c10 "// ignoring case. If multiple struct fields match an object key, an exact case"
+0 c10 "// match is preferred over a case-insensitive one."
+0 c10 "//"
+0 c10 "// Incoming object members are processed in the order observed. If an object"
+0 c10 "// includes duplicate keys, later duplicates will replace or be merged into"
+0 c10 "// prior values."
+0 c10 "//"
+0 c10 "// To unmarshal JSON into an interface value,"
+0 c10 "// Unmarshal stores one of these in the interface value:"
+0 c10 "//"
+0 c10 "//   - bool, for JSON booleans"
+0 c10 "//   - float64, for JSON numbers"
+0 c10 "//   - string, for JSON strings"
+0 c10 "//   - []any, for JSON arrays"
+0 c10 "//   - map[string]any, for JSON objects"
+0 c10 "//   - nil for JSON null"
+0 c10 "//"
+0 c10 "// To unmarshal a JSON array into a slice, Unmarshal resets the slice length"
+0 c10 "// to zero and then appends each element to the slice."
+0 c10 "// As a special case, to unmarshal an empty JSON array into a slice,"
+0 c10 "// Unmarshal replaces the slice with a new empty slice."
+0 c10 "//"
+0 c10 "// To unmarshal a JSON array into a Go array, Unmarshal decodes"
+0 c10 "// JSON array elements into corresponding Go array elements."
+0 c10 "// If the Go array is smaller than the JSON array,"
+0 c10 "// the additional JSON array elements are discarded."
+0 c10 "// If the JSON array is smaller than the Go array,"
+0 c10 "// the additional Go array elements are set to zero values."
+0 c10 "//"
+0 c10 "// To unmarshal a JSON object into a map, Unmarshal first establishes a map to"
+0 c10 "// use. If the map is nil, Unmarshal allocates a new map. Otherwise Unmarshal"
+0 c10 "// reuses the existing map, keeping existing entries. Unmarshal then stores"
+0 c10 "// key-value pairs from the JSON object into the map. The map's key type must"
+0 c10 "// either be any string type, an integer, or implement [encoding.TextUnmarshaler]."
+0 c10 "//"
+0 c10 "// If the JSON-encoded data contain a syntax error, Unmarshal returns a [SyntaxError]."
+0 c10 "//"
+0 c10 "// If a JSON value is not appropriate for a given target type,"
+0 c10 "// or if a JSON number overflows the target type, Unmarshal"
+0 c10 "// skips that field and completes the unmarshaling as best it can."
+0 c10 "// If no more serious errors are encountered, Unmarshal returns"
+0 c10 "// an [UnmarshalTypeError] describing the earliest such error. In any"
+0 c10 "// case, it's not guaranteed that all the remaining fields following"
+0 c10 "// the problematic one will be unmarshaled into the target object."
+0 c10 "//"
+0 c10 "// The JSON null value unmarshals into an interface, map, pointer, or slice"
+0 c10 "// by setting that Go value to nil. Because null is often used in JSON to mean"
+0 c10 "// “not present,” unmarshaling a JSON null into any other Go type has no effect"
+0 c10 "// on the value and produces no error."
+0 c10 "//"
+0 c10 "// When unmarshaling quoted strings, invalid UTF-8 or"
+0 c10 "// invalid UTF-16 surrogate pairs are not treated as an error."
+0 c10 "// Instead, they are replaced by the Unicode replacement"
+0 c10 "// character U+FFFD."
+0 e1
+12 c10 "// Check for well-formedness."
+12 c10 "// Avoids filling out half a data structure"
+12 c10 "// before discovering a JSON syntax error."
+12 e1
+27 b
+@12 type Unmarshaler interface
+0 c20 "// Unmarshaler is the interface implemented by types"
+0 c10 "// that can unmarshal a JSON description of themselves."
+0 c10 "// The input can be assumed to be a valid encoding of"
+0 c10 "// a JSON value. UnmarshalJSON must copy the JSON data"
+0 c10 "// if it wishes to retain the data after returning."
+0 e1
+@15 type UnmarshalTypeError struct
+0 c20 "// An UnmarshalTypeError describes a JSON value that was"
+0 c10 "// not appropriate for a value of a specific Go type."
+0 e1
+6 c00 "// description of JSON value - \"bool\", \"array\", \"number -5\""
+6 e1
+8 c00 "// type of Go value it could not be assigned to"
+8 e1
+10 c00 "// error occurred after reading Offset bytes"
+10 e1
+12 c00 "// name of the struct type containing the field"
+12 e1
+14 c00 "// the full path from root node to the field, include embedded struct"
+14 e1
+@53 (e*UnmarshalTypeError)Error()string
+0 b
+@11 type UnmarshalFieldError struct
+0 c20 "// An UnmarshalFieldError describes a JSON object key that"
+0 c10 "// led to an unexported (and therefore unwritable) struct field."
+0 c10 "//"
+0 c10 "// Deprecated: No longer used; kept for compatibility."
+0 e1
+@30 (e*UnmarshalFieldError)Error()string=>
+0 b
+@7 type InvalidUnmarshalError struct
+0 c20 "// An InvalidUnmarshalError describes an invalid argument passed to [Unmarshal]."
+0 c10 "// (The argument to [Unmarshal] must be a non-nil pointer.)"
+0 e1
+@49 (e*InvalidUnmarshalError)Error()string
+0 b
+18 b
+@69 (d*decodeState)unmarshal(v any)
+0 b
+43 b
+52 c10 "// We decode rv not rv.Elem because the Unmarshaler interface"
+52 c10 "// test must be applied at the top level of the value."
+52 e1
+@3 type Number string
+0 c20 "// A Number represents a JSON number literal."
+0 e1
+@15 (n Number)String()string
+0 c20 "// String returns the literal text of the number."
+0 e1
+@16 .Float64()float64! =>ParseFloat(string
+0 c20 "// Float64 returns the number as a float64."
+0 e1
+@17 .Int64()int64! =>ParseInt(string
+0 c20 "// Int64 returns the number as an int64."
+0 e1
+@11 type errorContext struct
+0 c20 "// An errorContext provides context for type errors during decoding."
+0 e1
+@24 type decodeState struct
+0 c20 "// decodeState represents the state while decoding a JSON value."
+0 e1
+10 c00 "// next read offset in data"
+10 e1
+12 c00 "// last read result"
+12 e1
+@13 (d*decodeState)readIndex()int=>
+0 c20 "// readIndex returns the position of the last byte read."
+0 e1
+@4 const phasePanicMsg="JSON decoder out of sync - data changing underfoot?"
+0 c20 "// phasePanicMsg is used as a panic message when we end up with something that"
+0 c10 "// shouldn't happen. It can indicate a bug in the JSON decoder, or that"
+0 c10 "// something is editing the data slice while the decoder executes."
+0 e1
+@55 .init(data[]byte)*decodeState
+0 b
+36 c10 "// Reuse the allocated space for the FieldStack slice."
+36 e1
+@20 .saveError(err error)
+0 c20 "// saveError saves the first err it is called with,"
+0 c10 "// for reporting at the end of the unmarshal."
+0 e1
+@102 .addErrorContext(err error)!
+0 c20 "// addErrorContext returns a new error enhanced with information from d.errorContext"
+0 e1
+@61 .skip()
+0 c20 "// skip scans to the end of what was started."
+0 e1
+@48 .scanNext()
+0 c20 "// scanNext processes the byte at d.data[d.off]."
+0 e1
+46 c00 "// mark processed EOF with len+1"
+46 e1
+@71 .scanWhile(op int)
+0 c20 "// scanWhile processes bytes in d.data[d.off:] until it"
+0 c10 "// receives a scan code not equal to op."
+0 e1
+55 b
+63 c00 "// mark processed EOF with len+1"
+63 e1
+@172 .rescanLiteral()
+0 c20 "// rescanLiteral is similar to scanWhile(scanContinue), but it specialises the"
+0 c10 "// common case where we're decoding a literal. The decoder scans the input"
+0 c10 "// twice, once for syntax errors and to check the length of the value, and the"
+0 c10 "// second to perform the decoding."
+0 c10 "//"
+0 c10 "// Only in the second step do we use decodeState to tokenize literals, so we"
+0 c10 "// know there aren't any syntax errors. We can take advantage of that knowledge,"
+0 c10 "// and scan a literal's bytes much more quickly."
+0 e1
+25 c00 "// string"
+25 e1
+48 c00 "// escaped char"
+48 e1
+53 c00 "// tokenize the closing quote too"
+53 e1
+70 c00 "// number"
+70 e1
+115 c00 "// true"
+115 e1
+124 c00 "// false"
+124 e1
+133 c00 "// null"
+133 e1
+@103 .value(v)!
+0 c20 "// value consumes a JSON value from d.data[d.off-1:], decoding into v, and"
+0 c10 "// reads the following byte ahead. If v is invalid, the value is discarded."
+0 c10 "// The first byte of the value has been read already."
+0 e1
+16 b
+41 b
+66 b
+69 c10 "// All bytes inside literal return scanContinue op code."
+69 e1
+77 b
+@5 type unquotedValue struct
+0 b
+@53 .valueQuoted()any
+0 c20 "// valueQuoted is like value but decodes a"
+0 c10 "// quoted string literal or literal null into an interface value."
+0 c10 "// If it finds anything other than a quoted string literal or null,"
+0 c10 "// valueQuoted returns unquotedValue{}."
+0 e1
+15 b
+25 b
+@311 indirect(v,decodingNull bool)(Unmarshaler,
+0 c20 "// indirect walks down v allocating pointers as needed,"
+0 c10 "// until it gets to a non-pointer."
+0 c10 "// If it encounters an Unmarshaler, indirect stops and returns that."
+0 c10 "// If decodingNull is true, indirect stops at the first settable pointer so it"
+0 c10 "// can be set to nil."
+0 e1
+15 c10 "// Issue #24153 indicates that it is generally not a guaranteed property"
+15 c10 "// that you may round-trip a reflect.Value by calling Value.Addr().Elem()"
+15 c10 "// and expect the value to still be settable for values derived from"
+15 c10 "// unexported embedded struct fields."
+15 c10 "//"
+15 c10 "// The logic below effectively does this when it first addresses the value"
+15 c10 "// (to satisfy possible pointer methods) and continues to dereference"
+15 c10 "// subsequent pointers as necessary."
+15 c10 "//"
+15 c10 "// After the first round-trip, we set v back to the original value to"
+15 c10 "// preserve the original RW flags contained in reflect.Value."
+15 e1
+21 c20 "// If v is a named type and is addressable,"
+21 c10 "// start with its address, so that if the type has pointer methods,"
+21 c10 "// we find them."
+21 e1
+61 c10 "// Load value from interface, but only if the result will be"
+61 c10 "// usefully addressable."
+61 e1
+126 b
+137 b
+148 c20 "// Prevent infinite loop if v is an interface pointing to its own address:"
+148 c10 "//     var v any"
+148 c10 "//     v = &v"
+148 e1
+283 b
+289 c00 "// restore original value after round-trip Value.Addr().Elem()"
+289 e1
+@360 .array(v)!
+0 c20 "// array consumes an array from d.data[d.off-1:], decoding into v."
+0 c10 "// The first byte of the array ('[') has been read already."
+0 e1
+7 c10 "// Check for unmarshaler."
+7 e1
+82 c20 "// Check type of target."
+82 e1
+101 c10 "// Decoding into nil interface? Switch to non-reflect code."
+101 e1
+117 c10 "// Otherwise it's invalid."
+117 e1
+155 b
+160 c10 "// Look ahead for ] - can only happen on first iteration."
+160 e1
+171 c20 "// Expand slice length, growing the slice if necessary."
+171 e1
+215 b
+224 c10 "// Decode into element."
+224 e1
+237 c10 "// Ran out of fixed array: skip."
+237 e1
+247 c20 "// Next token must be , or ]."
+247 e1
+275 b
+316 c00 "// zero remainder of array"
+316 e1
+326 c00 "// truncate the slice"
+326 e1
+@9 var nullLiteral=[]byte("null")
+0 b
+@1066 .object(v)!
+0 c20 "// object consumes an object from d.data[d.off-1:], decoding into v."
+0 c10 "// The first byte ('{') of the object has been read already."
+0 e1
+7 c10 "// Check for unmarshaler."
+7 e1
+89 c20 "// Decoding into nil interface? Switch to non-reflect code."
+89 e1
+122 b
+125 c20 "// Check type of target:"
+125 c10 "//   struct or"
+125 c10 "//   map[T1]T2 where T1 is string, an integer type,"
+125 c10 "//             or an encoding.TextUnmarshaler"
+125 e1
+135 c10 "// Map key must either have string kind, have an integer kind,"
+135 c10 "// or be an encoding.TextUnmarshaler."
+135 e1
+233 c11 "// ok"
+233 e1
+261 b
+281 b
+283 c10 "// Read opening \" of string key or closing }."
+283 e1
+292 c10 "// closing } - can only happen on first iteration."
+292 e1
+304 c20 "// Read key."
+304 e1
+339 c20 "// Figure out field corresponding to key."
+339 e1
+345 c00 "// whether the value is wrapped in a string to be decoded first"
+345 e2
+479 c10 "// If a struct embeds a pointer to an unexported type,"
+479 c10 "// it is not possible to set a newly allocated value"
+479 c10 "// since the field is unexported."
+479 c10 "//"
+479 c10 "// See https://golang.org/issue/21357"
+479 e1
+503 c10 "// Invalidate subv to ensure d.value(subv) skips over"
+503 c10 "// the JSON value without assigning it to subv."
+503 e1
+628 c20 "// Read : before value."
+628 e1
+652 b
+736 c20 "// Write value back to map;"
+736 c10 "// if using struct, subv points into struct already."
+736 e1
+981 c00 "// should never occur"
+981 e1
+999 c20 "// Next token must be , or }."
+999 e1
+1016 c10 "// Reset errorContext to its original state."
+1016 c10 "// Keep the same underlying array for FieldStack, to reuse the"
+1016 c10 "// space and avoid unnecessary allocs."
+1016 e1
+@57 .convertNumber(s string)any!
+0 c20 "// convertNumber converts the number literal s to a float64 or a Number"
+0 c10 "// depending on the setting of d.useNumber."
+0 e1
+@9 var numberType=TypeFor[Number]()
+0 b
+@1093 .literalStore(item[]byte,v,
+0 c20 "// literalStore decodes a literal stored in item into v."
+0 c10 "//"
+0 c10 "// fromQuoted indicates whether this literal came from unwrapping a"
+0 c10 "// string from the \",string\" struct tag option. this is used only to"
+0 c10 "// produce more helpful error messages."
+0 e1
+15 c10 "// Check for unmarshaler."
+15 e1
+23 c10 "// Empty string given."
+23 e1
+46 c00 "// null"
+46 e1
+193 b
+196 b
+209 c00 "// null"
+209 c10 "// The main parser checks that only true and false can reach here,"
+209 c10 "// but if this was a quoted string input, it could be anything."
+209 e1
+252 c11 "// otherwise, ignore null for primitives/string"
+252 e1
+257 c00 "// true, false"
+257 e1
+265 c10 "// The main parser checks that only true and false can reach here,"
+265 c10 "// but if this was a quoted string input, it could be anything."
+265 e1
+415 b
+418 c00 "// string"
+418 e1
+677 b
+679 c00 "// number"
+679 e1
+740 c10 "// s must be a valid number, because it's"
+740 c10 "// already been tokenized."
+740 e1
+865 b
+938 b
+1012 b
+@51 .valueInterface()(val any)
+0 c20 "// The xxxInterface routines build up a value to be stored"
+0 c10 "// in an empty interface. They are not strictly necessary,"
+0 c10 "// but they avoid the weight of reflection in this common case."
+0 c20 "// valueInterface is like value but returns any."
+0 e1
+@71 .arrayInterface()[]any
+0 c20 "// arrayInterface is like array but returns []any."
+0 e1
+20 c10 "// Look ahead for ] - can only happen on first iteration."
+20 e1
+31 b
+40 c20 "// Next token must be , or ]."
+40 e1
+@141 .objectInterface()map[string]any
+0 c20 "// objectInterface is like object but returns map[string]any."
+0 e1
+22 c10 "// Read opening \" of string key or closing }."
+22 e1
+31 c10 "// closing } - can only happen on first iteration."
+31 e1
+43 c20 "// Read string key."
+43 e1
+78 c20 "// Read : before value."
+78 e1
+102 c20 "// Read value."
+102 e1
+110 c20 "// Next token must be , or }."
+110 e1
+@116 .literalInterface()any
+0 c20 "// literalInterface consumes and returns a literal from d.data[d.off-1:] and"
+0 c10 "// it reads the following byte ahead. The first byte of the literal has been"
+0 c10 "// read already (that's how the caller knows it's a literal)."
+0 e1
+6 c10 "// All bytes inside literal return scanContinue op code."
+6 e1
+14 b
+24 b
+37 c00 "// null"
+37 e1
+39 b
+43 c00 "// true, false"
+43 e1
+47 b
+50 c00 "// string"
+50 e1
+69 b
+71 c00 "// number"
+71 e1
+@113 getu4(s)rune
+0 c20 "// getu4 decodes \\uXXXX from the beginning of s, returning the hex value,"
+0 c10 "// or it returns -1."
+0 e1
+@28 unquote(s)(t string,ok bool
+0 c20 "// unquote converts a quoted JSON string literal s into an actual string t."
+0 c10 "// The rules are different than for Go, so cannot use strconv.Unquote."
+0 e1
+@493 unquoteBytes(s)(t[]byte,
+0 b
+56 c20 "// Check for unusual characters. If there are none,"
+56 c10 "// then no unquoting is needed, so return a slice of the"
+56 c10 "// original bytes."
+56 e1
+130 b
+166 c10 "// Out of room? Can only happen if s is full of"
+166 c10 "// malformed UTF-8 and we're replacing each"
+166 c10 "// byte with RuneError."
+166 e1
+386 c10 "// A valid pair; consume."
+386 e1
+405 c10 "// Invalid surrogate; fall back to replacement rune."
+405 e1
+424 c20 "// Quote, control characters are invalid."
+424 e1
+433 c20 "// ASCII"
+433 e1
+448 c20 "// Coerce to well-formed UTF-8."
+448 e1
+
+// File: encoding/json/encode.go
+smol-notes 1
+@2 package json
+0 c00 "// Copyright 2010 The Go Authors. All rights reserved."
+0 c10 "// Use of this source code is governed by a BSD-style"
+0 c10 "// license that can be found in the LICENSE file."
+0 d20
+0 c20 "// Package json implements encoding and decoding of JSON as defined in RFC 7159."
+0 c10 "// The mapping between JSON and Go values is described in the documentation for"
+0 c10 "// the Marshal and Unmarshal functions."
+0 c10 "//"
+0 c10 "// See \"JSON and Go\" for an introduction to this package:"
+0 c10 "// https://golang.org/doc/articles/json_and_go.html"
+0 c10 "//"
+0 c10 "// # Security Considerations"
+0 c10 "//"
+0 c10 "// The JSON standard (RFC 7159) is lax in its definition of a number of parser"
+0 c10 "// behaviors. As such, many JSON parsers behave differently in various"
+0 c10 "// scenarios. These differences in parsers mean that systems that use multiple"
+0 c10 "// independent JSON parser implementations may parse the same JSON object in"
+0 c10 "// differing ways."
+0 c10 "//"
+0 c10 "// Systems that rely on a JSON object being parsed consistently for security"
+0 c10 "// purposes should be careful to understand the behaviors of this parser, as"
+0 c10 "// well as how these behaviors may cause interoperability issues with other"
+0 c10 "// parser implementations."
+0 c10 "//"
+0 c10 "// Due to the Go Backwards Compatibility promise (https://go.dev/doc/go1compat)"
+0 c10 "// there are a number of behaviors this package exhibits that may cause"
+0 c10 "// interopability issues, but cannot be changed. In particular the following"
+0 c10 "// parsing behaviors may cause issues:"
+0 c10 "//"
+0 c10 "//   - If a JSON object contains duplicate keys, keys are processed in the order"
+0 c10 "//     they are observed, meaning later values will replace or be merged into"
+0 c10 "//     prior values, depending on the field type (in particular maps and structs"
+0 c10 "//     will have values merged, while other types have values replaced)."
+0 c10 "//   - When parsing a JSON object into a Go struct, keys are considered in a"
+0 c10 "//     case-insensitive fashion."
+0 c10 "//   - When parsing a JSON object into a Go struct, unknown keys in the JSON"
+0 c10 "//     object are ignored (unless a [Decoder] is used and"
+0 c10 "//     [Decoder.DisallowUnknownFields] has been called)."
+0 c10 "//   - Invalid UTF-8 bytes in JSON strings are replaced by the Unicode"
+0 c10 "//     replacement character."
+0 c10 "//   - Large JSON number integers will lose precision when unmarshaled into"
+0 c10 "//     floating-point types."
+0 e1
+@6 import(
+0 b
+5 c00 "// for linkname"
+5 e1
+@58 Marshal(v any)[]byte!
+0 c20 "// Marshal returns the JSON encoding of v."
+0 c10 "//"
+0 c10 "// Marshal traverses the value v recursively."
+0 c10 "// If an encountered value implements [Marshaler]"
+0 c10 "// and is not a nil pointer, Marshal calls [Marshaler.MarshalJSON]"
+0 c10 "// to produce JSON. If no [Marshaler.MarshalJSON] method is present but the"
+0 c10 "// value implements [encoding.TextMarshaler] instead, Marshal calls"
+0 c10 "// [encoding.TextMarshaler.MarshalText] and encodes the result as a JSON string."
+0 c10 "// The nil pointer exception is not strictly necessary"
+0 c10 "// but mimics a similar, necessary exception in the behavior of"
+0 c10 "// [Unmarshaler.UnmarshalJSON]."
+0 c10 "//"
+0 c10 "// Otherwise, Marshal uses the following type-dependent default encodings:"
+0 c10 "//"
+0 c10 "// Boolean values encode as JSON booleans."
+0 c10 "//"
+0 c10 "// Floating point, integer, and [Number] values encode as JSON numbers."
+0 c10 "// NaN and +/-Inf values will return an [UnsupportedValueError]."
+0 c10 "//"
+0 c10 "// String values encode as JSON strings coerced to valid UTF-8,"
+0 c10 "// replacing invalid bytes with the Unicode replacement rune."
+0 c10 "// So that the JSON will be safe to embed inside HTML <script> tags,"
+0 c10 "// the string is encoded using [HTMLEscape],"
+0 c10 "// which replaces \"<\", \">\", \"&\", U+2028, and U+2029 are escaped"
+0 c10 "// to \"\\u003c\",\"\\u003e\", \"\\u0026\", \"\\u2028\", and \"\\u2029\"."
+0 c10 "// This replacement can be disabled when using an [Encoder],"
+0 c10 "// by calling [Encoder.SetEscapeHTML](false)."
+0 c10 "//"
+0 c10 "// Array and slice values encode as JSON arrays, except that"
+0 c10 "// []byte encodes as a base64-encoded string, and a nil slice"
+0 c10 "// encodes as the null JSON value."
+0 c10 "//"
+0 c10 "// Struct values encode as JSON objects."
+0 c10 "// Each exported struct field becomes a member of the object, using the"
+0 c10 "// field name as the object key, unless the field is omitted for one of the"
+0 c10 "// reasons given below."
+0 c10 "//"
+0 c10 "// The encoding of each struct field can be customized by the format string"
+0 c10 "// stored under the \"json\" key in the struct field's tag."
+0 c10 "// The format string gives the name of the field, possibly followed by a"
+0 c10 "// comma-separated list of options. The name may be empty in order to"
+0 c10 "// specify options without overriding the default field name."
+0 c10 "//"
+0 c10 "// The \"omitempty\" option specifies that the field should be omitted"
+0 c10 "// from the encoding if the field has an empty value, defined as"
+0 c10 "// false, 0, a nil pointer, a nil interface value, and any array,"
+0 c10 "// slice, map, or string of length zero."
+0 c10 "//"
+0 c10 "// As a special case, if the field tag is \"-\", the field is always omitted."
+0 c10 "// Note that a field with name \"-\" can still be generated using the tag \"-,\"."
+0 c10 "//"
+0 c10 "// Examples of struct field tags and their meanings:"
+0 c10 "//"
+0 c10 "//\t// Field appears in JSON as key \"myName\"."
+0 c10 "//\tField int `json:\"myName\"`"
+0 c10 "//"
+0 c10 "//\t// Field appears in JSON as key \"myName\" and"
+0 c10 "//\t// the field is omitted from the object if its value is empty,"
+0 c10 "//\t// as defined above."
+0 c10 "//\tField int `json:\"myName,omitempty\"`"
+0 c10 "//"
+0 c10 "//\t// Field appears in JSON as key \"Field\" (the default), but"
+0 c10 "//\t// the field is skipped if empty."
+0 c10 "//\t// Note the leading comma."
+0 c10 "//\tField int `json:\",omitempty\"`"
+0 c10 "//"
+0 c10 "//\t// Field is ignored by this package."
+0 c10 "//\tField int `json:\"-\"`"
+0 c10 "//"
+0 c10 "//\t// Field appears in JSON as key \"-\"."
+0 c10 "//\tField int `json:\"-,\"`"
+0 c10 "//"
+0 c10 "// The \"omitzero\" option specifies that the field should be omitted"
+0 c10 "// from the encoding if the field has a zero value, according to rules:"
+0 c10 "//"
+0 c10 "// 1) If the field type has an \"IsZero() bool\" method, that will be used to"
+0 c10 "// determine whether the value is zero."
+0 c10 "//"
+0 c10 "// 2) Otherwise, the value is zero if it is the zero value for its type."
+0 c10 "//"
+0 c10 "// If both \"omitempty\" and \"omitzero\" are specified, the field will be omitted"
+0 c10 "// if the value is either empty or zero (or both)."
+0 c10 "//"
+0 c10 "// The \"string\" option signals that a field is stored as JSON inside a"
+0 c10 "// JSON-encoded string. It applies only to fields of string, floating point,"
+0 c10 "// integer, or boolean types. This extra level of encoding is sometimes used"
+0 c10 "// when communicating with JavaScript programs:"
+0 c10 "//"
+0 c10 "//\tInt64String int64 `json:\",string\"`"
+0 c10 "//"
+0 c10 "// The key name will be used if it's a non-empty string consisting of"
+0 c10 "// only Unicode letters, digits, and ASCII punctuation except quotation"
+0 c10 "// marks, backslash, and comma."
+0 c10 "//"
+0 c10 "// Embedded struct fields are usually marshaled as if their inner exported fields"
+0 c10 "// were fields in the outer struct, subject to the usual Go visibility rules amended"
+0 c10 "// as described in the next paragraph."
+0 c10 "// An anonymous struct field with a name given in its JSON tag is treated as"
+0 c10 "// having that name, rather than being anonymous."
+0 c10 "// An anonymous struct field of interface type is treated the same as having"
+0 c10 "// that type as its name, rather than being anonymous."
+0 c10 "//"
+0 c10 "// The Go visibility rules for struct fields are amended for JSON when"
+0 c10 "// deciding which field to marshal or unmarshal. If there are"
+0 c10 "// multiple fields at the same level, and that level is the least"
+0 c10 "// nested (and would therefore be the nesting level selected by the"
+0 c10 "// usual Go rules), the following extra rules apply:"
+0 c10 "//"
+0 c10 "// 1) Of those fields, if any are JSON-tagged, only tagged fields are considered,"
+0 c10 "// even if there are multiple untagged fields that would otherwise conflict."
+0 c10 "//"
+0 c10 "// 2) If there is exactly one field (tagged or not according to the first rule), that is selected."
+0 c10 "//"
+0 c10 "// 3) Otherwise there are multiple fields, and all are ignored; no error occurs."
+0 c10 "//"
+0 c10 "// Handling of anonymous struct fields is new in Go 1.1."
+0 c10 "// Prior to Go 1.1, anonymous struct fields were ignored. To force ignoring of"
+0 c10 "// an anonymous struct field in both current and earlier versions, give the field"
+0 c10 "// a JSON tag of \"-\"."
+0 c10 "//"
+0 c10 "// Map values encode as JSON objects. The map's key type must either be a"
+0 c10 "// string, an integer type, or implement [encoding.TextMarshaler]. The map keys"
+0 c10 "// are sorted and used as JSON object keys by applying the following rules,"
+0 c10 "// subject to the UTF-8 coercion described for string values above:"
+0 c10 "//   - keys of any string type are used directly"
+0 c10 "//   - keys that implement [encoding.TextMarshaler] are marshaled"
+0 c10 "//   - integer keys are converted to strings"
+0 c10 "//"
+0 c10 "// Pointer values encode as the value pointed to."
+0 c10 "// A nil pointer encodes as the null JSON value."
+0 c10 "//"
+0 c10 "// Interface values encode as the value contained in the interface."
+0 c10 "// A nil interface value encodes as the null JSON value."
+0 c10 "//"
+0 c10 "// Channel, complex, and function values cannot be encoded in JSON."
+0 c10 "// Attempting to encode such a value causes Marshal to return"
+0 c10 "// an [UnsupportedTypeError]."
+0 c10 "//"
+0 c10 "// JSON cannot represent cyclic data structures and Marshal does not"
+0 c10 "// handle them. Passing cyclic structures to Marshal will result in"
+0 c10 "// an error."
+0 e1
+22 b
+55 b
+@50 MarshalIndent(v any,prefix,indent string)
+0 c20 "// MarshalIndent is like [Marshal] but applies [Indent] to format the output."
+0 c10 "// Each JSON element in the output will begin on a new line beginning with prefix"
+0 c10 "// followed by one or more copies of indent according to the indentation nesting."
+0 e1
+@12 type Marshaler interface
+0 c20 "// Marshaler is the interface implemented by types that"
+0 c10 "// can marshal themselves into valid JSON."
+0 e1
+@7 type UnsupportedTypeError struct
+0 c20 "// An UnsupportedTypeError is returned by [Marshal] when attempting"
+0 c10 "// to encode an unsupported value type."
+0 e1
+@17 (e*UnsupportedTypeError)Error()string=>
+0 b
+@9 type UnsupportedValueError struct
+0 c20 "// An UnsupportedValueError is returned by [Marshal] when attempting"
+0 c10 "// to encode an unsupported value."
+0 e1
+@13 (e*UnsupportedValueError)Error()string=>
+0 b
+@7 type InvalidUTF8Error struct
+0 c20 "// Before Go 1.2, an InvalidUTF8Error was returned by [Marshal] when"
+0 c10 "// attempting to encode a string value with invalid UTF-8 sequences."
+0 c10 "// As of Go 1.2, [Marshal] instead coerces the string to valid UTF-8 by"
+0 c10 "// replacing invalid bytes with the Unicode replacement rune U+FFFD."
+0 c10 "//"
+0 c10 "// Deprecated: No longer used; kept for compatibility."
+0 e1
+6 c00 "// the whole string value that caused the error"
+6 e1
+@16 (e*InvalidUTF8Error)Error()string=>
+0 b
+@11 type MarshalerError struct
+0 c20 "// A MarshalerError represents an error from calling a"
+0 c10 "// [Marshaler.MarshalJSON] or [encoding.TextMarshaler.MarshalText] method."
+0 e1
+@43 (e*MarshalerError)Error()string
+0 b
+@9 .Unwrap()!
+0 c20 "// Unwrap returns the underlying error."
+0 e1
+@4 const hex="0123456789abcdef"
+0 b
+@18 type encodeState struct
+0 c20 "// An encodeState encodes JSON into a bytes.Buffer."
+0 e1
+7 c00 "// accumulated output"
+7 c20 "// Keep track of what pointers we've seen in the current recursive call"
+7 c10 "// path, to avoid cycles that could lead to a stack overflow. Only do"
+7 c10 "// the relatively expensive map operations if ptrLevel is larger than"
+7 c10 "// startDetectingCyclesAfter, so that we skip the work if we're within a"
+7 c10 "// reasonable amount of nested pointers deep."
+7 e1
+@4 const startDetectingCyclesAfter=1000
+0 b
+@3 var encodeStatePool Pool
+0 b
+@73 newEncodeState()*encodeState
+0 b
+@6 type jsonError struct
+0 c20 "// jsonError is an error wrapper type for internal use only."
+0 c10 "// Panics with errors are wrapped in jsonError so that the top-level recover"
+0 c10 "// can distinguish intentional panics from this package."
+0 e1
+@72 (e)marshal(v any,opts)
+0 b
+@15 .error(err error)
+0 c20 "// error aborts the encoding by panicking with err wrapped in jsonError."
+0 e1
+@61 isEmptyValue(v)bool
+0 b
+@18 .reflectValue(v,opts)
+0 b
+@9 type encOpts struct
+0 b
+4 c10 "// quoted causes primitive fields to be encoded inside JSON strings."
+4 e1
+6 c10 "// escapeHTML causes '<', '>', and '&' to be escaped in JSON strings."
+6 e1
+@10 type encoderFunc func(e,v,opts)
+0 b
+@5 var encoderCache sync.Map
+0 b
+@27 valueEncoder(v)encoderFunc
+0 c00 "// map[reflect.Type]encoderFunc"
+0 e2
+@100 typeEncoder(t)encoderFunc
+0 b
+27 c20 "// To deal with recursive types, populate the map with an"
+27 c10 "// indirect func before we build it. If the type is recursive,"
+27 c10 "// the second lookup for the type will return the indirect func."
+27 c10 "//"
+27 c10 "// This indirect func is only used for recursive types,"
+27 c10 "// and briefly during racing calls to typeEncoder."
+27 e1
+85 b
+@19 var(
+0 b
+@194 newTypeEncoder(t,allowAddr bool)encoderFunc
+0 c20 "// newTypeEncoder constructs an encoderFunc for a type."
+0 c10 "// The returned encoder only checks CanAddr when allowAddr is true."
+0 e1
+9 c10 "// If we have a non-pointer value whose type implements"
+9 c10 "// Marshaler with a value receiver, then we're better off taking"
+9 c10 "// the address of the value - otherwise we end up with an"
+9 c10 "// allocation as we cast the value to an interface."
+9 e1
+95 b
+@17 invalidValueEncoder(e,v,_ encOpts)
+0 b
+@129 marshalerEncoder(e,v,opts)
+0 b
+@116 addrMarshalerEncoder(e,v,opts)
+0 b
+@102 textMarshalerEncoder(e,v,opts)
+0 b
+@89 addrTextMarshalerEncoder(e,v,opts)
+0 b
+@52 boolEncoder(e,v,opts)
+0 b
+@54 intEncoder(e,v,opts)
+0 b
+@54 uintEncoder(e,v,opts)
+0 b
+@3 type floatEncoder int
+0 b
+@227 (bits floatEncoder)encode(e,v,
+0 c00 "// number of bits"
+0 e2
+56 c20 "// Convert as if by ES6 number to string conversion."
+56 c10 "// This matches most other JSON generators."
+56 c10 "// See golang.org/issue/6384 and golang.org/issue/14135."
+56 c10 "// Like fmt %g, but the exponent cutoffs are different"
+56 c10 "// and exponents themselves are not padded to two digits."
+56 e1
+84 c10 "// Note: Must use float32 comparisons for underlying float32 value to get precise cutoffs right."
+84 e1
+149 c10 "// clean up e-09 to e-9"
+149 e1
+@23 var( #2
+0 b
+@157 stringEncoder(e,v,opts)
+0 b
+25 c10 "// In Go1.5 the empty string encodes to \"0\", while this is not a valid number literal"
+25 c10 "// we keep compatibility so check validity after this."
+25 e1
+33 c00 "// Number's zero-val"
+33 e1
+129 c00 "// no need to escape again since it is already escaped"
+129 e1
+@278 isValidNumber(s string)bool
+0 b
+7 c10 "// This function implements the JSON numbers grammar."
+7 c10 "// See https://tools.ietf.org/html/rfc7159#section-6"
+7 c10 "// and https://www.json.org/img/number.png"
+7 e2
+15 c20 "// Optional -"
+15 e1
+39 c20 "// Digits"
+39 e1
+45 b
+60 b
+113 c20 "// . followed by 1 or more digits."
+113 e1
+180 c20 "// e or E followed by an optional - or + and"
+180 c10 "// 1 or more digits."
+180 e1
+273 c20 "// Make sure we are at the end."
+273 e1
+@35 interfaceEncoder(e,v,opts)
+0 b
+@25 unsupportedTypeEncoder(e,v,_ encOpts)
+0 b
+@7 type structEncoder struct
+0 b
+@23 type structFields struct
+0 b
+@205 (se structEncoder)encode(e,v,
+0 b
+38 c20 "// Find the nested struct field by following f.index."
+38 e1
+84 b
+@22 newStructEncoder(t)encoderFunc
+0 b
+@7 type mapEncoder struct
+0 b
+@301 (me mapEncoder)encode(e,v,
+0 b
+40 c10 "// We're a large number of nested ptrEncoder.encode calls deep;"
+40 c10 "// start checking if we've run into a pointer cycle."
+40 e1
+109 c20 "// Extract and sort the keys."
+109 e1
+236 b
+@70 newMapEncoder(t)encoderFunc
+0 b
+@71 encodeByteSlice(e,v,_ encOpts)
+0 b
+25 b
+@7 type sliceEncoder struct
+0 c20 "// sliceEncoder just wraps an arrayEncoder, checking to make sure the value isn't nil."
+0 e1
+@129 (se sliceEncoder)encode(e,v,
+0 b
+40 c10 "// We're a large number of nested ptrEncoder.encode calls deep;"
+40 c10 "// start checking if we've run into a pointer cycle."
+40 c10 "// Here we use a struct to memorize the pointer to the first element of the slice"
+40 c10 "// and its length."
+40 e1
+46 c00 "// always an unsafe.Pointer, but avoids a dependency on package unsafe"
+46 e1
+@64 newSliceEncoder(t)encoderFunc
+0 b
+6 c10 "// Byte slices get special treatment; arrays don't."
+6 e1
+@7 type arrayEncoder struct
+0 b
+@70 (ae arrayEncoder)encode(e,v,
+0 b
+@24 newArrayEncoder(t)encoderFunc
+0 b
+@7 type ptrEncoder struct
+0 b
+@119 (pe ptrEncoder)encode(e,v,
+0 b
+40 c10 "// We're a large number of nested ptrEncoder.encode calls deep;"
+40 c10 "// start checking if we've run into a pointer cycle."
+40 e1
+@24 newPtrEncoder(t)encoderFunc
+0 b
+@9 type condAddrEncoder struct
+0 b
+@37 (ce condAddrEncoder)encode(e,v,
+0 b
+@26 newCondAddrEncoder(canAddrEnc,elseEnc encoderFunc)encoderFunc
+0 c20 "// newCondAddrEncoder returns an encoder that checks whether its value"
+0 c10 "// CanAddr and delegates to canAddrEnc if so, else to elseEnc."
+0 e1
+@49 isValidTag(s string)bool
+0 b
+29 c11 "// Backslash and quote chars are reserved, but"
+29 c11 "// otherwise any punctuation chars are allowed"
+29 c11 "// in a tag name."
+29 e1
+@47 typeByIndex(t,index[]int)Type
+0 b
+@9 type reflectWithString struct
+0 b
+@124 resolveKeyName(k Value)string!
+0 b
+@337 appendString[Bytes[]byte|string](
+0 b
+165 c10 "// This encodes bytes < 0x20 except for \\b, \\f, \\n, \\r and \\t."
+165 c10 "// If escapeHTML is set, it also escapes <, >, and &"
+165 c10 "// because they can lead to security holes when"
+165 c10 "// user-controlled strings are rendered into JSON"
+165 c10 "// and served to some browsers."
+165 e1
+196 c10 "// TODO(https://go.dev/issue/56948): Use generic utf8 functionality."
+196 c10 "// For now, cast only a small portion of byte slices to a string"
+196 c10 "// so that it can be stack allocated. This slows down []byte slightly"
+196 c10 "// due to the extra copy, but keeps string performance roughly the same."
+196 e1
+264 c10 "// U+2028 is LINE SEPARATOR."
+264 c10 "// U+2029 is PARAGRAPH SEPARATOR."
+264 c10 "// They are both technically valid characters in JSON strings,"
+264 c10 "// but don't work in JSONP, which has to be evaluated as JavaScript,"
+264 c10 "// and can lead to security holes there. It is valid JSON to"
+264 c10 "// escape them, so we do so unconditionally."
+264 c10 "// See https://en.wikipedia.org/wiki/JSON#Safety."
+264 e1
+@37 type field struct
+0 c20 "// A field represents a single field found in a struct."
+0 e1
+10 c00 "// []byte(name)"
+10 e2
+12 c00 "// `\"` + name + `\":`"
+12 e1
+14 c00 "// `\"` + HTMLEscape(name) + `\":`"
+14 e2
+34 b
+@9 type isZeroer interface
+0 b
+@9 var isZeroerType=TypeFor[isZeroer]()
+0 b
+@1148 typeFields(t)structFields
+0 b
+6 c10 "// Anonymous fields to explore at the current level and the next."
+6 e1
+25 c20 "// Count of queued names for current level and the next."
+25 e1
+34 c20 "// Types already visited at an earlier level."
+34 e1
+43 c20 "// Fields found."
+43 e1
+48 c20 "// Buffer to run appendHTMLEscape on field names."
+48 e1
+53 b
+85 b
+108 c20 "// Scan f.typ for fields to include."
+108 e1
+179 c10 "// Ignore embedded fields of unexported non-struct types."
+179 e1
+181 c11 "// Do not ignore embedded fields of unexported struct types"
+181 c11 "// since they may have exported fields."
+181 e1
+191 c10 "// Ignore unexported non-embedded fields."
+191 e1
+263 b
+285 c10 "// Follow pointer."
+285 e1
+293 c20 "// Only strings, floats, integers, and booleans can be quoted."
+293 e1
+337 c20 "// Record found field and index sequence."
+337 e1
+426 c20 "// Build nameEscHTML and nameNonEsc ahead of time."
+426 e1
+463 b
+473 c10 "// Provide a function that uses a type's IsZero method."
+473 e1
+501 c10 "// Avoid panics calling IsZero on a nil interface or"
+501 c10 "// non-nil interface with nil pointer."
+501 e1
+572 c10 "// Avoid panics calling IsZero on nil pointer."
+572 e1
+655 c10 "// Temporarily box v so we can take the address."
+655 e1
+700 b
+717 c10 "// If there were multiple instances, add a second,"
+717 c10 "// so that the annihilation code will see a duplicate."
+717 c10 "// It only cares about the distinction between 1 and 2,"
+717 c10 "// so don't bother generating any more copies."
+717 e1
+735 c20 "// Record new anonymous struct to explore in next round."
+735 e1
+776 b
+789 c10 "// sort field by name, breaking ties with depth, then"
+789 c10 "// breaking ties with \"name came from json tag\", then"
+789 c10 "// breaking ties with index sequence."
+789 e1
+876 c20 "// Delete all fields that are hidden by the Go rules for embedded fields,"
+876 c10 "// except that fields with JSON tags are promoted."
+876 c20 "// The fields are sorted in primary order of name, secondary order"
+876 c10 "// of field index length. Loop over names; for each name, delete"
+876 c10 "// hidden fields by choosing the one dominant field that survives."
+876 e1
+903 c10 "// One iteration per name."
+903 c10 "// Find the sequence of fields with the name of this first field."
+903 e1
+954 c00 "// Only one field with this name"
+954 e1
+990 b
+1020 b
+1097 c10 "// For historical reasons, first folded match takes precedence."
+1097 e1
+@70 dominantField(fields[]field)(field,
+0 c20 "// dominantField looks through the fields, all of which are known to"
+0 c10 "// have the same name, to find the single field that dominates the"
+0 c10 "// others using Go's embedding rules, modified by the presence of"
+0 c10 "// JSON tags. If there are multiple top-level fields, the boolean"
+0 c10 "// will be false: This condition is an error in Go and we skip all"
+0 c10 "// the fields."
+0 e1
+13 c10 "// The fields are sorted in increasing index-length order, then by presence of tag."
+13 c10 "// That means that the first field is the dominant one. We need only check"
+13 c10 "// for error cases: two fields at top level, either both tagged or neither tagged."
+13 e1
+@5 var fieldCache sync.Map
+0 b
+@48 cachedTypeFields(t)structFields
+0 c00 "// map[reflect.Type]structFields"
+0 c20 "// cachedTypeFields is like typeFields but uses a cache to avoid repeated work."
+0 e1
+@28 mayAppendQuote(b[]byte,quoted bool)
+0 b
+
+// File: encoding/json/fold.go
+smol-notes 1
+@2 package json
+0 c00 "// Copyright 2013 The Go Authors. All rights reserved."
+0 c10 "// Use of this source code is governed by a BSD-style"
+0 c10 "// license that can be found in the LICENSE file."
+0 d20
+0 e2
+@29 foldName(in[]byte)[]byte
+0 c20 "// foldName returns a folded string such that foldName(x) == foldName(y)"
+0 c10 "// is identical to bytes.EqualFold(x, y)."
+0 e1
+11 c10 "// This is inlinable to take advantage of \"function outlining\"."
+11 e1
+17 c00 "// large enough for most JSON names"
+17 e1
+@93 appendFoldedName(out,in[]byte)[
+0 b
+26 c10 "// Handle single-byte ASCII."
+26 e1
+64 c10 "// Handle multi-byte Unicode."
+64 e1
+@30 foldRune(r rune)rune
+0 c20 "// foldRune is returns the smallest rune for all runes in the same fold set."
+0 e1
+
+// File: encoding/json/indent.go
+smol-notes 1
+@2 package json
+0 c00 "// Copyright 2010 The Go Authors. All rights reserved."
+0 c10 "// Use of this source code is governed by a BSD-style"
+0 c10 "// license that can be found in the LICENSE file."
+0 d20
+0 e2
+@32 HTMLEscape(dst,src)
+0 c20 "// HTMLEscape appends to dst the JSON-encoded src with <, >, &, U+2028 and U+2029"
+0 c10 "// characters inside string literals changed to \\u003c, \\u003e, \\u0026, \\u2028, \\u2029"
+0 c10 "// so that the JSON will be safe to embed inside HTML <script> tags."
+0 c10 "// For historical reasons, web browsers don't honor standard HTML"
+0 c10 "// escaping within <script> tags, so an alternative JSON encoding must be used."
+0 e1
+@170 appendHTMLEscape(\dst,src[]byte)
+0 b
+14 c10 "// The characters can only appear in string literals,"
+14 c10 "// so just scan the string one byte at a time."
+14 e1
+79 c10 "// Convert U+2028 and U+2029 (E2 80 A8 and E2 80 A9)."
+79 e1
+@43 Compact(dst,src)!
+0 c20 "// Compact appends to dst the JSON-encoded src with"
+0 c10 "// insignificant space characters elided."
+0 e1
+@283 appendCompact(\dst,src[]byte,
+0 b
+109 c10 "// Convert U+2028 and U+2029 (E2 80 A8 and E2 80 A9)."
+109 e1
+@58 appendNewline(dst[]byte,prefix,indent
+0 b
+@4 const indentGrowthFactor=2
+0 c20 "// indentGrowthFactor specifies the growth factor of indenting JSON input."
+0 c10 "// Empirically, the growth factor was measured to be between 1.4x to 1.8x"
+0 c10 "// for some set of compacted JSON with the indent being a single tab."
+0 c10 "// Specify a growth factor slightly larger than what is observed"
+0 c10 "// to reduce probability of allocation in appendIndent."
+0 c10 "// A factor no higher than 2 ensures that wasted space never exceeds 50%."
+0 e1
+@51 Indent(dst,src,prefix,indent string
+0 c20 "// Indent appends to dst an indented form of the JSON-encoded src."
+0 c10 "// Each element in a JSON object or array begins on a new,"
+0 c10 "// indented line beginning with prefix followed by one or more"
+0 c10 "// copies of indent according to the indentation nesting."
+0 c10 "// The data appended to dst does not begin with the prefix nor"
+0 c10 "// any indentation, to make it easier to embed inside other formatted JSON data."
+0 c10 "// Although leading space characters (space, tab, carriage return, newline)"
+0 c10 "// at the beginning of src are dropped, trailing space characters"
+0 c10 "// at the end of src are preserved and copied to dst."
+0 c10 "// For example, if src has no trailing spaces, neither will dst;"
+0 c10 "// if src ends in a trailing newline, so will dst."
+0 e1
+@227 appendIndent(\dst,src[]byte,
+0 b
+100 c20 "// Emit semantically uninteresting bytes"
+100 c10 "// (in particular, punctuation in strings) unmodified."
+100 e1
+114 c20 "// Add spacing around real punctuation."
+114 e1
+121 c10 "// delay indent so that empty object and array are formatted as {} and []."
+121 e1
+168 c10 "// suppress indent in empty object/array"
+168 e1
+
+// File: encoding/json/scanner.go
+smol-notes 1
+@2 package json
+0 c00 "// Copyright 2010 The Go Authors. All rights reserved."
+0 c10 "// Use of this source code is governed by a BSD-style"
+0 c10 "// license that can be found in the LICENSE file."
+0 d20
+0 e2
+@28 Valid(data[]byte)bool
+0 c20 "// JSON value parser state machine."
+0 c10 "// Just about at the limit of what is reasonable to write by hand."
+0 c10 "// Some parts are a bit tedious, but overall it nicely factors out the"
+0 c10 "// otherwise common code from the multiple scanning functions"
+0 c10 "// in this package (Compact, Indent, checkValid, etc)."
+0 c10 "//"
+0 c10 "// This file starts with two simple examples using the scanner"
+0 c10 "// before diving into the scanner itself."
+0 c20 "// Valid reports whether data is a valid JSON encoding."
+0 e1
+@60 checkValid(data[]byte,scan*scanner
+0 c20 "// checkValid verifies that data is valid JSON-encoded data."
+0 c10 "// scan is passed in for use by checkValid to avoid an allocation."
+0 c10 "// checkValid returns nil or a SyntaxError."
+0 e1
+@9 type SyntaxError struct
+0 c20 "// A SyntaxError is a description of a JSON syntax error."
+0 c10 "// [Unmarshal] will return a SyntaxError if the JSON can't be parsed."
+0 e1
+6 c00 "// description of error"
+6 e1
+8 c00 "// error occurred after reading Offset bytes"
+8 e1
+@13 (e*SyntaxError)Error()string
+0 b
+@24 type scanner struct
+0 c20 "// A scanner is a JSON scanning state machine."
+0 c10 "// Callers call scan.reset and then pass bytes in one at a time"
+0 c10 "// by calling scan.step(&scan, c) for each byte."
+0 c10 "// The return value, referred to as an opcode, tells the"
+0 c10 "// caller about significant parsing events like beginning"
+0 c10 "// and ending literals, objects, and arrays, so that the"
+0 c10 "// caller can follow along if it wishes."
+0 c10 "// The return value scanEnd indicates that a single top-level"
+0 c10 "// JSON value has been completed, *before* the byte that"
+0 c10 "// just got passed in.  (The indication must be delayed in order"
+0 c10 "// to recognize the end of numbers: is 123 a whole value or"
+0 c10 "// the beginning of 12345e+6?)."
+0 e1
+4 c10 "// The step is a func to be called to execute the next transition."
+4 c10 "// Also tried using an integer constant and a single func"
+4 c10 "// with a switch, but using the func directly was 10% faster"
+4 c10 "// on a 64-bit Mac Mini, and it's nicer to read."
+4 e1
+13 c20 "// Reached end of top-level value."
+13 e1
+15 c20 "// Stack of what we're in the middle of - array values, object keys, object values."
+15 e1
+19 c20 "// Error that happened, if any."
+19 e1
+21 c20 "// total bytes consumed, updated by decoder.Decode (and deliberately"
+21 c10 "// not set to zero by scan.reset)"
+21 e1
+@22 var scannerPool=sync.Pool
+0 b
+@31 newScanner()*scanner
+0 b
+18 c10 "// scan.reset by design doesn't set bytes to zero"
+18 e1
+@26 freeScanner(scan*scanner)
+0 b
+7 c10 "// Avoid hanging on to too much memory in extreme cases."
+7 e1
+@17 const(
+0 c20 "// These values are returned by the state transition functions"
+0 c10 "// assigned to scanner.state and the method scanner.eof."
+0 c10 "// They give details about the current state of the scan that"
+0 c10 "// callers might be interested to know about."
+0 c10 "// It is okay to ignore the return value of any particular"
+0 c10 "// call to scanner.state: if one call returns scanError,"
+0 c10 "// every subsequent call will return scanError too."
+0 e1
+2 c10 "// Continue."
+2 e1
+5 c00 "// uninteresting byte"
+5 e1
+6 c00 "// end implied by next result != scanContinue"
+6 e1
+7 c00 "// begin object"
+7 e1
+8 c00 "// just finished object key (string)"
+8 e1
+9 c00 "// just finished non-last object value"
+9 e1
+10 c00 "// end object (implies scanObjectValue if possible)"
+10 e1
+11 c00 "// begin array"
+11 e1
+12 c00 "// just finished array value"
+12 e1
+13 c00 "// end array (implies scanArrayValue if possible)"
+13 e1
+14 c00 "// space byte; can skip; known to be last \"continue\" result"
+14 c20 "// Stop."
+14 e1
+15 c00 "// top-level value ended *before* this byte; known to be first \"stop\" result"
+15 e1
+16 c00 "// hit an error, scanner.err."
+16 e1
+@8 const( #2
+0 c20 "// These values are stored in the parseState stack."
+0 c10 "// They give the current state of a composite value"
+0 c10 "// being scanned. If the parser is inside a nested value"
+0 c10 "// the parseState describes the nested state, outermost at entry 0."
+0 e1
+5 c00 "// parsing object key (before colon)"
+5 e1
+6 c00 "// parsing object value (after colon)"
+6 e1
+7 c00 "// parsing array value"
+7 e1
+@4 const maxNestingDepth=10000
+0 c20 "// This limits the max nesting depth to prevent stack overflow."
+0 c10 "// This is permitted by https://tools.ietf.org/html/rfc7159#section-9"
+0 e1
+@25 (s)reset()
+0 c20 "// reset prepares the scanner for use."
+0 c10 "// It must be called before calling s.step."
+0 e1
+@51 .eof()int
+0 c20 "// eof tells the scanner that the end of input has been reached."
+0 c10 "// It returns a scan status just as s.step does."
+0 e1
+@40 .pushParseState(c,newParseState int,successState int
+0 c20 "// pushParseState pushes a new parse state newParseState onto the parse stack."
+0 c10 "// an error state is returned if maxNestingDepth was exceeded, otherwise successState is returned."
+0 e1
+@40 .popParseState()
+0 c20 "// popParseState pops a parse state (already obtained) off the stack"
+0 c10 "// and updates s.step accordingly."
+0 e1
+@27 isSpace(c)bool=>c<=' '&&
+0 b
+@36 stateBeginValueOrEmpty(s,c)int
+0 c20 "// stateBeginValueOrEmpty is the state after reading `[`."
+0 e1
+@119 stateBeginValue(s,c)int
+0 c20 "// stateBeginValue is the state at the beginning of the input."
+0 e1
+65 c00 "// beginning of 0.123"
+65 e1
+73 c00 "// beginning of true"
+73 e1
+81 c00 "// beginning of false"
+81 e1
+89 c00 "// beginning of null"
+89 e1
+104 c00 "// beginning of 1234.5"
+104 e1
+@50 stateBeginStringOrEmpty(s,c)int
+0 c20 "// stateBeginStringOrEmpty is the state after reading `{`."
+0 e1
+@37 stateBeginString(s,c)int
+0 c20 "// stateBeginString is the state after reading `{\"key\": value,`."
+0 e1
+@169 stateEndValue(s,c)int
+0 c20 "// stateEndValue is the state after completing a value,"
+0 c10 "// such as after reading `{}` or `true` or `[\"x\"`."
+0 e1
+19 c10 "// Completed top-level before the current byte."
+19 e1
+@26 stateEndTop(s,c)int
+0 c20 "// stateEndTop is the state after finishing the top-level value,"
+0 c10 "// such as after reading `{}` or `[1,2,3]`."
+0 c10 "// Only space characters should be seen now."
+0 e1
+15 c10 "// Complain about non-space byte on next call."
+15 e1
+@47 stateInString(s,c)int
+0 c20 "// stateInString is the state after reading `\"`."
+0 e1
+@44 stateInStringEsc(s,c)int
+0 c20 "// stateInStringEsc is the state after reading `\"\\` during a quoted string."
+0 e1
+@48 stateInStringEscU(s,c)int
+0 c20 "// stateInStringEscU is the state after reading `\"\\u` during a quoted string."
+0 e1
+39 c10 "// numbers"
+39 e1
+@48 stateInStringEscU1(s,c)int
+0 c20 "// stateInStringEscU1 is the state after reading `\"\\u1` during a quoted string."
+0 e1
+39 c10 "// numbers"
+39 e1
+@48 stateInStringEscU12(s,c)int
+0 c20 "// stateInStringEscU12 is the state after reading `\"\\u12` during a quoted string."
+0 e1
+39 c10 "// numbers"
+39 e1
+@48 stateInStringEscU123(s,c)int
+0 c20 "// stateInStringEscU123 is the state after reading `\"\\u123` during a quoted string."
+0 e1
+39 c10 "// numbers"
+39 e1
+@43 stateNeg(s,c)int
+0 c20 "// stateNeg is the state after reading `-` during a number."
+0 e1
+@30 state1(s,c)int
+0 c20 "// state1 is the state after reading a non-zero integer during a number,"
+0 c10 "// such as after reading `1` or `100` but not `0`."
+0 e1
+@41 state0(s,c)int
+0 c20 "// state0 is the state after reading `0` during a number."
+0 e1
+@32 stateDot(s,c)int
+0 c20 "// stateDot is the state after reading the integer and decimal point in a number,"
+0 c10 "// such as after reading `1.`."
+0 e1
+@42 stateDot0(s,c)int
+0 c20 "// stateDot0 is the state after reading the integer, decimal point, and subsequent"
+0 c10 "// digits of a number, such as after reading `3.14`."
+0 e1
+@30 stateE(s,c)int
+0 c20 "// stateE is the state after reading the mantissa and e in a number,"
+0 c10 "// such as after reading `314e` or `0.314e`."
+0 e1
+@32 stateESign(s,c)int
+0 c20 "// stateESign is the state after reading the mantissa, e, and sign in a number,"
+0 c10 "// such as after reading `314e-` or `0.314e+`."
+0 e1
+@27 stateE0(s,c)int
+0 c20 "// stateE0 is the state after reading the mantissa, e, optional sign,"
+0 c10 "// and at least one digit of the exponent in a number,"
+0 c10 "// such as after reading `314e-2` or `0.314e+1` or `3.14e0`."
+0 e1
+@28 stateT(s,c)int
+0 c20 "// stateT is the state after reading `t`."
+0 e1
+@28 stateTr(s,c)int
+0 c20 "// stateTr is the state after reading `tr`."
+0 e1
+@28 stateTru(s,c)int
+0 c20 "// stateTru is the state after reading `tru`."
+0 e1
+@28 stateF(s,c)int
+0 c20 "// stateF is the state after reading `f`."
+0 e1
+@28 stateFa(s,c)int
+0 c20 "// stateFa is the state after reading `fa`."
+0 e1
+@28 stateFal(s,c)int
+0 c20 "// stateFal is the state after reading `fal`."
+0 e1
+@28 stateFals(s,c)int
+0 c20 "// stateFals is the state after reading `fals`."
+0 e1
+@28 stateN(s,c)int
+0 c20 "// stateN is the state after reading `n`."
+0 e1
+@28 stateNu(s,c)int
+0 c20 "// stateNu is the state after reading `nu`."
+0 e1
+@28 stateNul(s,c)int
+0 c20 "// stateNul is the state after reading `nul`."
+0 e1
+@9 stateError(s,c)int=>scanError
+0 c20 "// stateError is the state after reaching a syntax error,"
+0 c10 "// such as after reading `[1}` or `5.1.2`."
+0 e1
+@36 .error(c,context string)int
+0 c20 "// error records an error and switches to the error state."
+0 e1
+@50 quoteChar(c)string
+0 c20 "// quoteChar formats c as a quoted character literal."
+0 e1
+6 c10 "// special cases - different from quoted strings"
+6 e1
+22 c20 "// use quoted string with different quotation marks"
+22 e1
+
+// File: encoding/json/stream.go
+smol-notes 1
+@2 package json
+0 c00 "// Copyright 2010 The Go Authors. All rights reserved."
+0 c10 "// Use of this source code is governed by a BSD-style"
+0 c10 "// license that can be found in the LICENSE file."
+0 d20
+0 e2
+@27 type Decoder struct
+0 c20 "// A Decoder reads and decodes JSON values from an input stream."
+0 e1
+14 c00 "// start of unread data in buf"
+14 e1
+16 c00 "// amount of data already scanned"
+16 e1
+20 b
+@15 NewDecoder(r Reader)*Decoder=>&Decoder
+0 c20 "// NewDecoder returns a new decoder that reads from r."
+0 c10 "//"
+0 c10 "// The decoder introduces its own buffering and may"
+0 c10 "// read data from r beyond the JSON values requested."
+0 e1
+@13 (dec)UseNumber()
+0 c20 "// UseNumber causes the Decoder to unmarshal a number into an"
+0 c10 "// interface value as a [Number] instead of as a float64."
+0 e1
+@11 .DisallowUnknownFields()
+0 c20 "// DisallowUnknownFields causes the Decoder to return an error when the destination"
+0 c10 "// is a struct and the input contains object keys which do not match any"
+0 c10 "// non-ignored, exported fields in the destination."
+0 e1
+@77 .Decode(v any)!
+0 c20 "// Decode reads the next JSON-encoded value from its"
+0 c10 "// input and stores it in the value pointed to by v."
+0 c10 "//"
+0 c10 "// See the documentation for [Unmarshal] for details about"
+0 c10 "// the conversion of JSON into a Go value."
+0 e1
+16 b
+20 b
+41 c20 "// Read whole value into buffer."
+41 e1
+63 c20 "// Don't save err from unmarshal into dec.err:"
+63 c10 "// the connection is still usable since we read a complete JSON"
+63 c10 "// object from it before the error happened."
+63 e1
+71 c20 "// fixup token streaming state"
+71 e1
+74 b
+@16 .Buffered()Reader=>bytes.NewReader(
+0 c20 "// Buffered returns a reader of the data remaining in the Decoder's"
+0 c10 "// buffer. The reader is valid until the next call to [Decoder.Decode]."
+0 e1
+@172 .readValue()int!
+0 c20 "// readValue reads a JSON value into dec.buf."
+0 c10 "// It returns the length of the encoding."
+0 e1
+12 b
+20 c10 "// help the compiler see that scanp is never negative, so it can remove"
+20 c10 "// some bounds checks below."
+20 e1
+25 c20 "// Look in the buffer for a new value."
+25 e1
+60 c10 "// scanEnd is delayed one byte so we decrement"
+60 c10 "// the scanner bytes count by 1 to ensure that"
+60 c10 "// this value is correct in the next call of Decode."
+60 e1
+70 c10 "// scanEnd is delayed one byte."
+70 c10 "// We might block trying to get that byte from src,"
+70 c10 "// so instead invent a space byte."
+70 e1
+101 c20 "// Did the last read have an error?"
+101 c10 "// Delayed until now to allow buffer scan."
+101 e1
+145 b
+@123 .refill()!
+0 b
+6 c10 "// Make room to read more into the buffer."
+6 c10 "// First slide down data already consumed."
+6 e1
+39 c20 "// Grow buffer if not large enough."
+39 e1
+86 c20 "// Read. Delay error for next iteration (after scan)."
+86 e1
+120 b
+@28 nonSpace(b[]byte)bool
+0 b
+@19 type Encoder struct
+0 c20 "// An Encoder writes JSON values to an output stream."
+0 e1
+10 b
+@19 NewEncoder(w Writer)*Encoder=>&Encoder
+0 c20 "// NewEncoder returns a new encoder that writes to w."
+0 e1
+@113 (enc*Encoder)Encode(v any)
+0 c20 "// Encode writes the JSON encoding of v to the stream,"
+0 c10 "// with insignificant space characters elided,"
+0 c10 "// followed by a newline character."
+0 c10 "//"
+0 c10 "// See the documentation for [Marshal] for details about the"
+0 c10 "// conversion of Go values to JSON."
+0 e1
+20 b
+32 b
+47 c20 "// Terminate each value with a newline."
+47 c10 "// This makes the output look a little nicer"
+47 c10 "// when debugging, and some kind of space"
+47 c10 "// is required if the encoded value was a number,"
+47 c10 "// so that the reader knows there aren't more"
+47 c10 "// digits coming."
+47 e1
+53 b
+@16 .SetIndent(prefix,indent string)
+0 c20 "// SetIndent instructs the encoder to format each subsequent encoded"
+0 c10 "// value as if indented by the package-level function Indent(dst, src, prefix, indent)."
+0 c10 "// Calling SetIndent(\"\", \"\") disables indentation."
+0 e1
+@11 .SetEscapeHTML(on bool)
+0 c20 "// SetEscapeHTML specifies whether problematic HTML characters"
+0 c10 "// should be escaped inside JSON quoted strings."
+0 c10 "// The default behavior is to escape &, <, and > to \\u0026, \\u003c, and \\u003e"
+0 c10 "// to avoid certain safety problems that can arise when embedding JSON in HTML."
+0 c10 "//"
+0 c10 "// In non-HTML settings where the escaping interferes with the readability"
+0 c10 "// of the output, SetEscapeHTML(false) disables this behavior."
+0 e1
+@5 type RawMessage[]byte
+0 c20 "// RawMessage is a raw encoded JSON value."
+0 c10 "// It implements [Marshaler] and [Unmarshaler] and can"
+0 c10 "// be used to delay JSON decoding or precompute a JSON encoding."
+0 e1
+@28 (m RawMessage)MarshalJSON()[]byte
+0 c20 "// MarshalJSON returns m as the JSON encoding of m."
+0 e1
+@47 (m*RawMessage)UnmarshalJSON(data[]
+0 c20 "// UnmarshalJSON sets *m to a copy of data."
+0 e1
+@11 var _ Marshaler=(*RawMessage)(nil
+0 b
+@3 type Token any
+0 c20 "// A Token holds a value of one of these types:"
+0 c10 "//"
+0 c10 "//   - [Delim], for the four JSON delimiters [ ] { }"
+0 c10 "//   - bool, for JSON booleans"
+0 c10 "//   - float64, for JSON numbers"
+0 c10 "//   - [Number], for JSON numbers"
+0 c10 "//   - string, for JSON string literals"
+0 c10 "//   - nil, for JSON null"
+0 e1
+@14 const(
+0 b
+@92 (dec)tokenPrepareForDecode()!
+0 c20 "// advance tokenstate from a separator state to a value state"
+0 e1
+8 c10 "// Note: Not calling peek before switch, to avoid"
+8 c10 "// putting peek into the standard Decode path."
+8 c10 "// peek is only called when using the Token API."
+8 e1
+@21 .tokenValueAllowed()bool
+0 b
+@23 .tokenValueEnd()
+0 b
+@3 type Delim rune
+0 c20 "// A Delim is a JSON array or object delimiter, one of [ ] { or }."
+0 e1
+@13 (d Delim)String()string=>string
+0 b
+@322 (dec)Token()Token!
+0 c20 "// Token returns the next JSON token in the input stream."
+0 c10 "// At the end of the input stream, Token returns nil, [io.EOF]."
+0 c10 "//"
+0 c10 "// Token guarantees that the delimiters [ ] { } it returns are"
+0 c10 "// properly nested and matched: if Token encounters an unexpected"
+0 c10 "// delimiter in the input, it will return an error."
+0 c10 "//"
+0 c10 "// The input stream consists of basic JSON values—bool, string,"
+0 c10 "// number, and null—along with delimiters [ ] { } of type [Delim]"
+0 c10 "// to mark the start and end of arrays and objects."
+0 c10 "// Commas and colons are elided."
+0 e1
+52 b
+103 b
+135 b
+186 b
+206 b
+238 b
+284 b
+@72 .tokenError(c byte)Token!
+0 b
+@26 .More()bool
+0 c20 "// More reports whether there is another element in the"
+0 c10 "// current array or object being parsed."
+0 e1
+@62 .peek()byte!
+0 b
+47 c10 "// buffer has been scanned, now report any error"
+47 e1
+@12 .InputOffset()int64=>scanned+int64(
+0 c20 "// InputOffset returns the input stream byte offset of the current decoder position."
+0 c10 "// The offset gives the location of the end of the most recently returned token"
+0 c10 "// and the beginning of the next token."
+0 e1
+
+// File: encoding/json/tables.go
+smol-notes 1
+@2 package json
+0 c00 "// Copyright 2016 The Go Authors. All rights reserved."
+0 c10 "// Use of this source code is governed by a BSD-style"
+0 c10 "// license that can be found in the LICENSE file."
+0 d20
+0 e2
+@393 var safeSet=[RuneSelf]bool
+0 c20 "// safeSet holds the value true if the ASCII character with the given array"
+0 c10 "// position can be represented inside a JSON string without any further"
+0 c10 "// escaping."
+0 c10 "//"
+0 c10 "// All values are true except for the ASCII control characters (0-31), the"
+0 c10 "// double quote (\"), and the backslash character (\"\\\")."
+0 e1
+@393 var htmlSafeSet=[RuneSelf]bool
+0 c20 "// htmlSafeSet holds the value true if the ASCII character with the given"
+0 c10 "// array position can be safely represented inside a JSON string, embedded"
+0 c10 "// inside of HTML <script> tags, without any additional escaping."
+0 c10 "//"
+0 c10 "// All values are true except for the ASCII control characters (0-31), the"
+0 c10 "// double quote (\"), the backslash character (\"\\\"), HTML opening and closing"
+0 c10 "// tags (\"<\" and \">\"), and the ampersand (\"&\")."
+0 e1
+
+// File: encoding/json/tags.go
+smol-notes 1
+@2 package json
+0 c00 "// Copyright 2011 The Go Authors. All rights reserved."
+0 c10 "// Use of this source code is governed by a BSD-style"
+0 c10 "// license that can be found in the LICENSE file."
+0 d20
+0 e2
+@3 type tagOptions string
+0 c20 "// tagOptions is the string following a comma in a struct field's \"json\""
+0 c10 "// tag, or the empty string. It does not include the leading comma."
+0 e1
+@30 parseTag(tag string)(string,tagOptions)
+0 c20 "// parseTag splits a struct field's json tag into its name and"
+0 c10 "// comma-separated options."
+0 e1
+@59 (o tagOptions)Contains(optionName string)bool
+0 c20 "// Contains reports whether a comma-separated list of options"
+0 c10 "// contains a particular substr flag. substr must be surrounded by a"
+0 c10 "// string boundary or commas."
+0 e1
+

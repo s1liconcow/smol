@@ -1,0 +1,3324 @@
+{
+  "spec": "SPEC.md v0.2, with approved lossless-expression-boundary clarification in section 6.8",
+  "verdict": "PASS",
+  "scope": "Section 12 corpus gate for go version go1.26.3 darwin/arm64, active files; behavioral test flags and skips are recorded below.",
+  "checks": {
+    "unit_and_cli": true,
+    "mandatory_forms": true,
+    "corpus_L1_L4": true,
+    "lowered_behavior": true,
+    "behavior_covers_corpus": true,
+    "probes": true,
+    "vet": true
+  },
+  "unit_and_cli_cases": {
+    "pass": 128,
+    "fail": 0,
+    "skip": 0
+  },
+  "required_form_cases": [
+    {
+      "section": "6.1",
+      "requirement": "fold",
+      "test": "TestRequiredForms/6.1/fold",
+      "status": "PASS"
+    },
+    {
+      "section": "6.1",
+      "requirement": "near",
+      "test": "TestRequiredForms/6.1/near",
+      "status": "PASS"
+    },
+    {
+      "section": "6.1",
+      "requirement": "comment",
+      "test": "TestRequiredForms/6.1/comment",
+      "status": "PASS"
+    },
+    {
+      "section": "6.2",
+      "requirement": "fold",
+      "test": "TestRequiredForms/6.2/fold",
+      "status": "PASS"
+    },
+    {
+      "section": "6.2",
+      "requirement": "near",
+      "test": "TestRequiredForms/6.2/near",
+      "status": "PASS"
+    },
+    {
+      "section": "6.2",
+      "requirement": "comment",
+      "test": "TestRequiredForms/6.2/comment",
+      "status": "PASS"
+    },
+    {
+      "section": "6.3",
+      "requirement": "fold",
+      "test": "TestRequiredForms/6.3/fold",
+      "status": "PASS"
+    },
+    {
+      "section": "6.3",
+      "requirement": "near",
+      "test": "TestRequiredForms/6.3/near",
+      "status": "PASS"
+    },
+    {
+      "section": "6.3",
+      "requirement": "comment",
+      "test": "TestRequiredForms/6.3/comment",
+      "status": "PASS"
+    },
+    {
+      "section": "6.4",
+      "requirement": "fold",
+      "test": "TestRequiredForms/6.4/fold",
+      "status": "PASS"
+    },
+    {
+      "section": "6.4",
+      "requirement": "near",
+      "test": "TestRequiredForms/6.4/near",
+      "status": "PASS"
+    },
+    {
+      "section": "6.4",
+      "requirement": "comment",
+      "test": "TestRequiredForms/6.4/comment",
+      "status": "PASS"
+    },
+    {
+      "section": "6.5",
+      "requirement": "fold",
+      "test": "TestRequiredForms/6.5/fold",
+      "status": "PASS"
+    },
+    {
+      "section": "6.5",
+      "requirement": "near",
+      "test": "TestRequiredForms/6.5/near",
+      "status": "PASS"
+    },
+    {
+      "section": "6.5",
+      "requirement": "comment",
+      "test": "TestRequiredForms/6.5/comment",
+      "status": "PASS"
+    },
+    {
+      "section": "6.6",
+      "requirement": "fold",
+      "test": "TestRequiredForms/6.6/fold",
+      "status": "PASS"
+    },
+    {
+      "section": "6.6",
+      "requirement": "near",
+      "test": "TestRequiredForms/6.6/near",
+      "status": "PASS"
+    },
+    {
+      "section": "6.6",
+      "requirement": "comment",
+      "test": "TestRequiredForms/6.6/comment",
+      "status": "PASS"
+    },
+    {
+      "section": "6.7",
+      "requirement": "fold",
+      "test": "TestRequiredForms/6.7/fold",
+      "status": "PASS"
+    },
+    {
+      "section": "6.7",
+      "requirement": "near",
+      "test": "TestRequiredForms/6.7/near",
+      "status": "PASS"
+    },
+    {
+      "section": "6.7",
+      "requirement": "comment",
+      "test": "TestRequiredForms/6.7/comment",
+      "status": "PASS"
+    },
+    {
+      "section": "6.8",
+      "requirement": "fold",
+      "test": "TestRequiredForms/6.8/fold",
+      "status": "PASS"
+    },
+    {
+      "section": "6.8",
+      "requirement": "near",
+      "test": "TestRequiredForms/6.8/near",
+      "status": "PASS"
+    },
+    {
+      "section": "6.8",
+      "requirement": "comment",
+      "test": "TestRequiredForms/6.8/comment",
+      "status": "PASS"
+    },
+    {
+      "section": "6.9",
+      "requirement": "fold",
+      "test": "TestRequiredForms/6.9/fold",
+      "status": "PASS"
+    },
+    {
+      "section": "6.9",
+      "requirement": "near",
+      "test": "TestRequiredForms/6.9/near",
+      "status": "PASS"
+    },
+    {
+      "section": "6.9",
+      "requirement": "comment",
+      "test": "TestRequiredForms/6.9/comment",
+      "status": "PASS"
+    },
+    {
+      "section": "6.10",
+      "requirement": "fold",
+      "test": "TestRequiredForms/6.10/fold",
+      "status": "PASS"
+    },
+    {
+      "section": "6.10",
+      "requirement": "near",
+      "test": "TestRequiredForms/6.10/near",
+      "status": "PASS"
+    },
+    {
+      "section": "6.10",
+      "requirement": "comment",
+      "test": "TestRequiredForms/6.10/comment",
+      "status": "PASS"
+    },
+    {
+      "section": "6.11",
+      "requirement": "fold",
+      "test": "TestRequiredForms/6.11/fold",
+      "status": "PASS"
+    },
+    {
+      "section": "6.11",
+      "requirement": "near",
+      "test": "TestRequiredForms/6.11/near",
+      "status": "PASS"
+    },
+    {
+      "section": "6.11",
+      "requirement": "comment",
+      "test": "TestRequiredForms/6.11/comment",
+      "status": "PASS"
+    },
+    {
+      "section": "6.12",
+      "requirement": "fold",
+      "test": "TestRequiredForms/6.12/fold",
+      "status": "PASS"
+    },
+    {
+      "section": "6.12",
+      "requirement": "near",
+      "test": "TestRequiredForms/6.12/near",
+      "status": "PASS"
+    },
+    {
+      "section": "6.12",
+      "requirement": "comment",
+      "test": "TestRequiredForms/6.12/comment",
+      "status": "PASS"
+    },
+    {
+      "section": "6.13",
+      "requirement": "fold",
+      "test": "TestRequiredForms/6.13/fold",
+      "status": "PASS"
+    },
+    {
+      "section": "6.13",
+      "requirement": "near",
+      "test": "TestRequiredForms/6.13/near",
+      "status": "PASS"
+    },
+    {
+      "section": "6.13",
+      "requirement": "comment",
+      "test": "TestRequiredForms/6.13/comment",
+      "status": "PASS"
+    }
+  ],
+  "corpus": {
+    "stdlib": {
+      "go_version": "go version go1.26.3 darwin/arm64",
+      "command": [
+        "bin/smol",
+        "check",
+        "std"
+      ],
+      "exit_code": 0,
+      "passed_files": 2800,
+      "failed_files": 0,
+      "elapsed_seconds": 513.797,
+      "scope": "Host GOOS/GOARCH and build constraints; GoFiles, CgoFiles, TestGoFiles, XTestGoFiles.",
+      "meaning": "L1 byte equality, L2 deterministic lifting, L3 formatter idempotence, and L4 code-only Go token/directive equality. Mandatory folds and package behavior are checked separately."
+    },
+    "module": {
+      "go_version": "go version go1.26.3 darwin/arm64",
+      "command": [
+        "bin/smol",
+        "check",
+        "./..."
+      ],
+      "exit_code": 0,
+      "passed_files": 15,
+      "failed_files": 0,
+      "elapsed_seconds": 5.052,
+      "scope": "Host GOOS/GOARCH and build constraints; GoFiles, CgoFiles, TestGoFiles, XTestGoFiles.",
+      "meaning": "L1 byte equality, L2 deterministic lifting, L3 formatter idempotence, and L4 code-only Go token/directive equality. Mandatory folds and package behavior are checked separately."
+    }
+  },
+  "probes": {
+    "passed": 34,
+    "failed": 0
+  },
+  "lowered_behavior": {
+    "lowered": [
+      {
+        "mode": "with-notes",
+        "command": [
+          "go",
+          "-C",
+          "/private/var/folders/x2/wkd7t15n73dfqqdvkb_542c80000gn/T/smol-go-fixtures-tbzy4v3n/go/src",
+          "test",
+          "-count=1",
+          "-json",
+          "-short",
+          "-overlay",
+          "<overlay>",
+          "std"
+        ],
+        "exit_code": 0,
+        "elapsed_seconds": 81.156,
+        "passed_cases": 64225,
+        "failed_cases": [],
+        "skipped_cases": 521,
+        "packages": [
+          {
+            "package": "bufio",
+            "status": "pass"
+          },
+          {
+            "package": "archive/zip",
+            "status": "pass"
+          },
+          {
+            "package": "archive/tar",
+            "status": "pass"
+          },
+          {
+            "package": "bytes",
+            "status": "pass"
+          },
+          {
+            "package": "cmp",
+            "status": "pass"
+          },
+          {
+            "package": "compress/bzip2",
+            "status": "pass"
+          },
+          {
+            "package": "compress/flate",
+            "status": "pass"
+          },
+          {
+            "package": "compress/lzw",
+            "status": "pass"
+          },
+          {
+            "package": "compress/zlib",
+            "status": "pass"
+          },
+          {
+            "package": "container/heap",
+            "status": "pass"
+          },
+          {
+            "package": "compress/gzip",
+            "status": "pass"
+          },
+          {
+            "package": "container/list",
+            "status": "pass"
+          },
+          {
+            "package": "container/ring",
+            "status": "pass"
+          },
+          {
+            "package": "context",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/internal/boring/bbig",
+            "status": "skip"
+          },
+          {
+            "package": "crypto/aes",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/internal/boring/sig",
+            "status": "skip"
+          },
+          {
+            "package": "crypto/internal/constanttime",
+            "status": "skip"
+          },
+          {
+            "package": "crypto/internal/cryptotest",
+            "status": "skip"
+          },
+          {
+            "package": "crypto/internal/entropy",
+            "status": "skip"
+          },
+          {
+            "package": "crypto/internal/entropy/v1.0.0",
+            "status": "skip"
+          },
+          {
+            "package": "crypto/internal/fips140",
+            "status": "skip"
+          },
+          {
+            "package": "crypto",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/des",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/internal/fips140/alias",
+            "status": "skip"
+          },
+          {
+            "package": "crypto/dsa",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/internal/fips140/check",
+            "status": "skip"
+          },
+          {
+            "package": "crypto/internal/fips140/check/checktest",
+            "status": "skip"
+          },
+          {
+            "package": "crypto/ecdh",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/ecdsa",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/ed25519",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/internal/fips140/ed25519",
+            "status": "skip"
+          },
+          {
+            "package": "crypto/elliptic",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/cipher",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/internal/fips140/hkdf",
+            "status": "skip"
+          },
+          {
+            "package": "crypto/internal/fips140/hmac",
+            "status": "skip"
+          },
+          {
+            "package": "crypto/fips140",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/hkdf",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/hmac",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/internal/boring",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/internal/fips140/pbkdf2",
+            "status": "skip"
+          },
+          {
+            "package": "crypto/internal/boring/bcache",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/internal/fips140/sha256",
+            "status": "skip"
+          },
+          {
+            "package": "crypto/internal/fips140/sha3",
+            "status": "skip"
+          },
+          {
+            "package": "crypto/internal/fips140/sha512",
+            "status": "skip"
+          },
+          {
+            "package": "crypto/internal/fips140/ssh",
+            "status": "skip"
+          },
+          {
+            "package": "crypto/hpke",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/internal/fips140/tls12",
+            "status": "skip"
+          },
+          {
+            "package": "crypto/internal/fips140/tls13",
+            "status": "skip"
+          },
+          {
+            "package": "crypto/internal/fips140/aes",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/internal/fips140/aes/gcm",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/internal/fips140deps/byteorder",
+            "status": "skip"
+          },
+          {
+            "package": "crypto/internal/fips140deps/cpu",
+            "status": "skip"
+          },
+          {
+            "package": "crypto/internal/fips140deps/godebug",
+            "status": "skip"
+          },
+          {
+            "package": "crypto/internal/fips140deps/time",
+            "status": "skip"
+          },
+          {
+            "package": "crypto/internal/fips140hash",
+            "status": "skip"
+          },
+          {
+            "package": "crypto/internal/fips140/bigmod",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/internal/fips140/drbg",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/internal/impl",
+            "status": "skip"
+          },
+          {
+            "package": "crypto/internal/rand",
+            "status": "skip"
+          },
+          {
+            "package": "crypto/internal/randutil",
+            "status": "skip"
+          },
+          {
+            "package": "crypto/internal/fips140/ecdh",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/internal/sysrand/internal/seccomp",
+            "status": "skip"
+          },
+          {
+            "package": "crypto/internal/fips140/ecdsa",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/internal/fips140/edwards25519",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/mlkem/mlkemtest",
+            "status": "skip"
+          },
+          {
+            "package": "crypto/internal/fips140/edwards25519/field",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/internal/fips140/mlkem",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/internal/fips140/mldsa",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/internal/fips140/nistec",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/internal/fips140/nistec/fiat",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/internal/fips140/rsa",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/internal/fips140/subtle",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/internal/fips140cache",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/internal/fips140deps",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/internal/fips140only",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/internal/sysrand",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/tls/internal/fips140tls",
+            "status": "skip"
+          },
+          {
+            "package": "crypto/md5",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/mlkem",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/x509/internal/macos",
+            "status": "skip"
+          },
+          {
+            "package": "crypto/x509/pkix",
+            "status": "skip"
+          },
+          {
+            "package": "crypto/pbkdf2",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/rand",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/rc4",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/rsa",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/sha1",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/sha256",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/sha512",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/subtle",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/sha3",
+            "status": "pass"
+          },
+          {
+            "package": "encoding",
+            "status": "skip"
+          },
+          {
+            "package": "database/sql/driver",
+            "status": "pass"
+          },
+          {
+            "package": "debug/buildinfo",
+            "status": "pass"
+          },
+          {
+            "package": "database/sql",
+            "status": "pass"
+          },
+          {
+            "package": "debug/dwarf",
+            "status": "pass"
+          },
+          {
+            "package": "debug/elf",
+            "status": "pass"
+          },
+          {
+            "package": "debug/gosym",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/tls",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/internal/fips140test",
+            "status": "pass"
+          },
+          {
+            "package": "debug/macho",
+            "status": "pass"
+          },
+          {
+            "package": "debug/pe",
+            "status": "pass"
+          },
+          {
+            "package": "debug/plan9obj",
+            "status": "pass"
+          },
+          {
+            "package": "embed",
+            "status": "pass"
+          },
+          {
+            "package": "embed/internal/embedtest",
+            "status": "pass"
+          },
+          {
+            "package": "encoding/ascii85",
+            "status": "pass"
+          },
+          {
+            "package": "encoding/asn1",
+            "status": "pass"
+          },
+          {
+            "package": "encoding/base32",
+            "status": "pass"
+          },
+          {
+            "package": "encoding/base64",
+            "status": "pass"
+          },
+          {
+            "package": "encoding/binary",
+            "status": "pass"
+          },
+          {
+            "package": "encoding/csv",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/x509",
+            "status": "pass"
+          },
+          {
+            "package": "encoding/hex",
+            "status": "pass"
+          },
+          {
+            "package": "encoding/gob",
+            "status": "pass"
+          },
+          {
+            "package": "encoding/json",
+            "status": "pass"
+          },
+          {
+            "package": "encoding/pem",
+            "status": "pass"
+          },
+          {
+            "package": "encoding/xml",
+            "status": "pass"
+          },
+          {
+            "package": "errors",
+            "status": "pass"
+          },
+          {
+            "package": "go/internal/scannerhooks",
+            "status": "skip"
+          },
+          {
+            "package": "expvar",
+            "status": "pass"
+          },
+          {
+            "package": "flag",
+            "status": "pass"
+          },
+          {
+            "package": "fmt",
+            "status": "pass"
+          },
+          {
+            "package": "go/ast",
+            "status": "pass"
+          },
+          {
+            "package": "go/build/constraint",
+            "status": "pass"
+          },
+          {
+            "package": "go/constant",
+            "status": "pass"
+          },
+          {
+            "package": "go/doc",
+            "status": "pass"
+          },
+          {
+            "package": "go/format",
+            "status": "pass"
+          },
+          {
+            "package": "go/doc/comment",
+            "status": "pass"
+          },
+          {
+            "package": "go/importer",
+            "status": "pass"
+          },
+          {
+            "package": "go/internal/gccgoimporter",
+            "status": "pass"
+          },
+          {
+            "package": "go/build",
+            "status": "pass"
+          },
+          {
+            "package": "go/parser",
+            "status": "pass"
+          },
+          {
+            "package": "go/printer",
+            "status": "pass"
+          },
+          {
+            "package": "go/scanner",
+            "status": "pass"
+          },
+          {
+            "package": "go/token",
+            "status": "pass"
+          },
+          {
+            "package": "go/internal/gcimporter",
+            "status": "pass"
+          },
+          {
+            "package": "image/color/palette",
+            "status": "skip"
+          },
+          {
+            "package": "go/version",
+            "status": "pass"
+          },
+          {
+            "package": "image/internal/imageutil",
+            "status": "skip"
+          },
+          {
+            "package": "hash",
+            "status": "pass"
+          },
+          {
+            "package": "hash/adler32",
+            "status": "pass"
+          },
+          {
+            "package": "hash/crc32",
+            "status": "pass"
+          },
+          {
+            "package": "hash/crc64",
+            "status": "pass"
+          },
+          {
+            "package": "hash/fnv",
+            "status": "pass"
+          },
+          {
+            "package": "hash/maphash",
+            "status": "pass"
+          },
+          {
+            "package": "html",
+            "status": "pass"
+          },
+          {
+            "package": "html/template",
+            "status": "pass"
+          },
+          {
+            "package": "image",
+            "status": "pass"
+          },
+          {
+            "package": "image/color",
+            "status": "pass"
+          },
+          {
+            "package": "internal/asan",
+            "status": "skip"
+          },
+          {
+            "package": "internal/bisect",
+            "status": "skip"
+          },
+          {
+            "package": "internal/bytealg",
+            "status": "skip"
+          },
+          {
+            "package": "internal/byteorder",
+            "status": "skip"
+          },
+          {
+            "package": "internal/cfg",
+            "status": "skip"
+          },
+          {
+            "package": "image/draw",
+            "status": "pass"
+          },
+          {
+            "package": "image/gif",
+            "status": "pass"
+          },
+          {
+            "package": "internal/coverage",
+            "status": "skip"
+          },
+          {
+            "package": "internal/coverage/calloc",
+            "status": "skip"
+          },
+          {
+            "package": "image/png",
+            "status": "pass"
+          },
+          {
+            "package": "internal/coverage/decodecounter",
+            "status": "skip"
+          },
+          {
+            "package": "internal/coverage/decodemeta",
+            "status": "skip"
+          },
+          {
+            "package": "internal/coverage/encodecounter",
+            "status": "skip"
+          },
+          {
+            "package": "internal/coverage/encodemeta",
+            "status": "skip"
+          },
+          {
+            "package": "go/types",
+            "status": "pass"
+          },
+          {
+            "package": "internal/coverage/rtcov",
+            "status": "skip"
+          },
+          {
+            "package": "internal/coverage/stringtab",
+            "status": "skip"
+          },
+          {
+            "package": "internal/coverage/uleb128",
+            "status": "skip"
+          },
+          {
+            "package": "index/suffixarray",
+            "status": "pass"
+          },
+          {
+            "package": "image/jpeg",
+            "status": "pass"
+          },
+          {
+            "package": "go/internal/srcimporter",
+            "status": "pass"
+          },
+          {
+            "package": "internal/abi",
+            "status": "pass"
+          },
+          {
+            "package": "internal/buildcfg",
+            "status": "pass"
+          },
+          {
+            "package": "internal/chacha8rand",
+            "status": "pass"
+          },
+          {
+            "package": "internal/exportdata",
+            "status": "skip"
+          },
+          {
+            "package": "internal/filepathlite",
+            "status": "skip"
+          },
+          {
+            "package": "internal/copyright",
+            "status": "pass"
+          },
+          {
+            "package": "internal/coverage/cformat",
+            "status": "pass"
+          },
+          {
+            "package": "internal/goarch",
+            "status": "skip"
+          },
+          {
+            "package": "internal/goexperiment",
+            "status": "skip"
+          },
+          {
+            "package": "internal/goos",
+            "status": "skip"
+          },
+          {
+            "package": "internal/goroot",
+            "status": "skip"
+          },
+          {
+            "package": "internal/coverage/cmerge",
+            "status": "pass"
+          },
+          {
+            "package": "internal/goversion",
+            "status": "skip"
+          },
+          {
+            "package": "internal/lazyregexp",
+            "status": "skip"
+          },
+          {
+            "package": "internal/lazytemplate",
+            "status": "skip"
+          },
+          {
+            "package": "internal/msan",
+            "status": "skip"
+          },
+          {
+            "package": "internal/nettrace",
+            "status": "skip"
+          },
+          {
+            "package": "internal/obscuretestdata",
+            "status": "skip"
+          },
+          {
+            "package": "internal/oserror",
+            "status": "skip"
+          },
+          {
+            "package": "internal/coverage/pods",
+            "status": "pass"
+          },
+          {
+            "package": "internal/coverage/slicereader",
+            "status": "pass"
+          },
+          {
+            "package": "internal/coverage/slicewriter",
+            "status": "pass"
+          },
+          {
+            "package": "internal/coverage/test",
+            "status": "pass"
+          },
+          {
+            "package": "internal/cpu",
+            "status": "pass"
+          },
+          {
+            "package": "internal/profilerecord",
+            "status": "skip"
+          },
+          {
+            "package": "internal/race",
+            "status": "skip"
+          },
+          {
+            "package": "internal/dag",
+            "status": "pass"
+          },
+          {
+            "package": "internal/diff",
+            "status": "pass"
+          },
+          {
+            "package": "internal/fmtsort",
+            "status": "pass"
+          },
+          {
+            "package": "internal/fuzz",
+            "status": "pass"
+          },
+          {
+            "package": "internal/runtime/exithook",
+            "status": "skip"
+          },
+          {
+            "package": "internal/runtime/gc",
+            "status": "skip"
+          },
+          {
+            "package": "internal/runtime/gc/internal/gen",
+            "status": "skip"
+          },
+          {
+            "package": "internal/gover",
+            "status": "pass"
+          },
+          {
+            "package": "internal/pkgbits",
+            "status": "pass"
+          },
+          {
+            "package": "internal/coverage/cfile",
+            "status": "pass"
+          },
+          {
+            "package": "internal/poll",
+            "status": "pass"
+          },
+          {
+            "package": "internal/runtime/pprof/label",
+            "status": "skip"
+          },
+          {
+            "package": "internal/profile",
+            "status": "pass"
+          },
+          {
+            "package": "internal/reflectlite",
+            "status": "pass"
+          },
+          {
+            "package": "internal/routebsd",
+            "status": "pass"
+          },
+          {
+            "package": "internal/runtime/atomic",
+            "status": "pass"
+          },
+          {
+            "package": "internal/godebug",
+            "status": "pass"
+          },
+          {
+            "package": "internal/runtime/cgobench",
+            "status": "pass"
+          },
+          {
+            "package": "internal/runtime/cgroup",
+            "status": "pass"
+          },
+          {
+            "package": "internal/runtime/gc/scan",
+            "status": "pass"
+          },
+          {
+            "package": "internal/platform",
+            "status": "pass"
+          },
+          {
+            "package": "internal/godebugs",
+            "status": "pass"
+          },
+          {
+            "package": "internal/runtime/math",
+            "status": "pass"
+          },
+          {
+            "package": "internal/runtime/maps",
+            "status": "pass"
+          },
+          {
+            "package": "internal/runtime/sys",
+            "status": "pass"
+          },
+          {
+            "package": "internal/runtime/wasitest",
+            "status": "pass"
+          },
+          {
+            "package": "internal/saferio",
+            "status": "pass"
+          },
+          {
+            "package": "internal/singleflight",
+            "status": "pass"
+          },
+          {
+            "package": "internal/stringslite",
+            "status": "skip"
+          },
+          {
+            "package": "internal/syscall/execenv",
+            "status": "skip"
+          },
+          {
+            "package": "internal/syslist",
+            "status": "skip"
+          },
+          {
+            "package": "internal/testhash",
+            "status": "skip"
+          },
+          {
+            "package": "internal/testlog",
+            "status": "skip"
+          },
+          {
+            "package": "internal/testpty",
+            "status": "skip"
+          },
+          {
+            "package": "internal/trace/internal/testgen",
+            "status": "skip"
+          },
+          {
+            "package": "internal/trace/raw",
+            "status": "skip"
+          },
+          {
+            "package": "internal/trace/traceviewer",
+            "status": "skip"
+          },
+          {
+            "package": "internal/trace/traceviewer/format",
+            "status": "skip"
+          },
+          {
+            "package": "internal/trace/version",
+            "status": "skip"
+          },
+          {
+            "package": "internal/txtar",
+            "status": "skip"
+          },
+          {
+            "package": "internal/strconv",
+            "status": "pass"
+          },
+          {
+            "package": "internal/syscall/unix",
+            "status": "pass"
+          },
+          {
+            "package": "internal/sysinfo",
+            "status": "pass"
+          },
+          {
+            "package": "internal/sync",
+            "status": "pass"
+          },
+          {
+            "package": "internal/synctest",
+            "status": "pass"
+          },
+          {
+            "package": "log/internal",
+            "status": "skip"
+          },
+          {
+            "package": "internal/testenv",
+            "status": "pass"
+          },
+          {
+            "package": "log/slog/internal",
+            "status": "skip"
+          },
+          {
+            "package": "internal/trace/internal/tracev1",
+            "status": "pass"
+          },
+          {
+            "package": "internal/trace/testtrace",
+            "status": "pass"
+          },
+          {
+            "package": "internal/trace/tracev2",
+            "status": "pass"
+          },
+          {
+            "package": "internal/types/errors",
+            "status": "pass"
+          },
+          {
+            "package": "internal/unsafeheader",
+            "status": "pass"
+          },
+          {
+            "package": "internal/xcoff",
+            "status": "pass"
+          },
+          {
+            "package": "internal/zstd",
+            "status": "pass"
+          },
+          {
+            "package": "io",
+            "status": "pass"
+          },
+          {
+            "package": "io/fs",
+            "status": "pass"
+          },
+          {
+            "package": "io/ioutil",
+            "status": "pass"
+          },
+          {
+            "package": "iter",
+            "status": "pass"
+          },
+          {
+            "package": "log",
+            "status": "pass"
+          },
+          {
+            "package": "log/slog",
+            "status": "pass"
+          },
+          {
+            "package": "log/slog/internal/benchmarks",
+            "status": "pass"
+          },
+          {
+            "package": "log/slog/internal/buffer",
+            "status": "pass"
+          },
+          {
+            "package": "maps",
+            "status": "pass"
+          },
+          {
+            "package": "math",
+            "status": "pass"
+          },
+          {
+            "package": "math/big/internal/asmgen",
+            "status": "pass"
+          },
+          {
+            "package": "math/bits",
+            "status": "pass"
+          },
+          {
+            "package": "math/cmplx",
+            "status": "pass"
+          },
+          {
+            "package": "log/syslog",
+            "status": "pass"
+          },
+          {
+            "package": "math/rand",
+            "status": "pass"
+          },
+          {
+            "package": "math/rand/v2",
+            "status": "pass"
+          },
+          {
+            "package": "mime",
+            "status": "pass"
+          },
+          {
+            "package": "net/http/internal/httpcommon",
+            "status": "skip"
+          },
+          {
+            "package": "net/http/internal/testcert",
+            "status": "skip"
+          },
+          {
+            "package": "math/big",
+            "status": "pass"
+          },
+          {
+            "package": "mime/multipart",
+            "status": "pass"
+          },
+          {
+            "package": "mime/quotedprintable",
+            "status": "pass"
+          },
+          {
+            "package": "net/http/cgi",
+            "status": "pass"
+          },
+          {
+            "package": "net/http/cookiejar",
+            "status": "pass"
+          },
+          {
+            "package": "net/http/fcgi",
+            "status": "pass"
+          },
+          {
+            "package": "net/http/httptest",
+            "status": "pass"
+          },
+          {
+            "package": "net/http/httptrace",
+            "status": "pass"
+          },
+          {
+            "package": "net/http/internal",
+            "status": "pass"
+          },
+          {
+            "package": "net/http/internal/ascii",
+            "status": "pass"
+          },
+          {
+            "package": "net",
+            "status": "pass"
+          },
+          {
+            "package": "net/http/httputil",
+            "status": "pass"
+          },
+          {
+            "package": "net/internal/cgotest",
+            "status": "pass"
+          },
+          {
+            "package": "net/internal/socktest",
+            "status": "pass"
+          },
+          {
+            "package": "net/mail",
+            "status": "pass"
+          },
+          {
+            "package": "net/netip",
+            "status": "pass"
+          },
+          {
+            "package": "net/rpc",
+            "status": "pass"
+          },
+          {
+            "package": "net/http",
+            "status": "pass"
+          },
+          {
+            "package": "net/rpc/jsonrpc",
+            "status": "pass"
+          },
+          {
+            "package": "net/smtp",
+            "status": "pass"
+          },
+          {
+            "package": "net/textproto",
+            "status": "pass"
+          },
+          {
+            "package": "net/url",
+            "status": "pass"
+          },
+          {
+            "package": "reflect/internal/example1",
+            "status": "skip"
+          },
+          {
+            "package": "reflect/internal/example2",
+            "status": "skip"
+          },
+          {
+            "package": "os/exec/internal/fdtest",
+            "status": "pass"
+          },
+          {
+            "package": "os/exec",
+            "status": "pass"
+          },
+          {
+            "package": "os/user",
+            "status": "pass"
+          },
+          {
+            "package": "path",
+            "status": "pass"
+          },
+          {
+            "package": "path/filepath",
+            "status": "pass"
+          },
+          {
+            "package": "plugin",
+            "status": "pass"
+          },
+          {
+            "package": "net/http/pprof",
+            "status": "pass"
+          },
+          {
+            "package": "reflect",
+            "status": "pass"
+          },
+          {
+            "package": "regexp",
+            "status": "pass"
+          },
+          {
+            "package": "os",
+            "status": "pass"
+          },
+          {
+            "package": "regexp/syntax",
+            "status": "pass"
+          },
+          {
+            "package": "os/signal",
+            "status": "pass"
+          },
+          {
+            "package": "runtime/coverage",
+            "status": "skip"
+          },
+          {
+            "package": "runtime/race",
+            "status": "skip"
+          },
+          {
+            "package": "structs",
+            "status": "skip"
+          },
+          {
+            "package": "runtime/cgo",
+            "status": "pass"
+          },
+          {
+            "package": "runtime/debug",
+            "status": "pass"
+          },
+          {
+            "package": "runtime/metrics",
+            "status": "pass"
+          },
+          {
+            "package": "testing/internal/testdeps",
+            "status": "skip"
+          },
+          {
+            "package": "slices",
+            "status": "pass"
+          },
+          {
+            "package": "sort",
+            "status": "pass"
+          },
+          {
+            "package": "strconv",
+            "status": "pass"
+          },
+          {
+            "package": "strings",
+            "status": "pass"
+          },
+          {
+            "package": "sync",
+            "status": "pass"
+          },
+          {
+            "package": "syscall",
+            "status": "pass"
+          },
+          {
+            "package": "sync/atomic",
+            "status": "pass"
+          },
+          {
+            "package": "testing/cryptotest",
+            "status": "pass"
+          },
+          {
+            "package": "testing/fstest",
+            "status": "pass"
+          },
+          {
+            "package": "testing/iotest",
+            "status": "pass"
+          },
+          {
+            "package": "time/tzdata",
+            "status": "skip"
+          },
+          {
+            "package": "testing/quick",
+            "status": "pass"
+          },
+          {
+            "package": "testing",
+            "status": "pass"
+          },
+          {
+            "package": "testing/slogtest",
+            "status": "pass"
+          },
+          {
+            "package": "unsafe",
+            "status": "skip"
+          },
+          {
+            "package": "vendor/golang.org/x/crypto/chacha20",
+            "status": "skip"
+          },
+          {
+            "package": "vendor/golang.org/x/crypto/chacha20poly1305",
+            "status": "skip"
+          },
+          {
+            "package": "vendor/golang.org/x/crypto/cryptobyte",
+            "status": "skip"
+          },
+          {
+            "package": "vendor/golang.org/x/crypto/cryptobyte/asn1",
+            "status": "skip"
+          },
+          {
+            "package": "vendor/golang.org/x/crypto/internal/alias",
+            "status": "skip"
+          },
+          {
+            "package": "vendor/golang.org/x/crypto/internal/poly1305",
+            "status": "skip"
+          },
+          {
+            "package": "vendor/golang.org/x/net/dns/dnsmessage",
+            "status": "skip"
+          },
+          {
+            "package": "vendor/golang.org/x/net/http/httpguts",
+            "status": "skip"
+          },
+          {
+            "package": "vendor/golang.org/x/net/http/httpproxy",
+            "status": "skip"
+          },
+          {
+            "package": "vendor/golang.org/x/net/http2/hpack",
+            "status": "skip"
+          },
+          {
+            "package": "vendor/golang.org/x/net/idna",
+            "status": "skip"
+          },
+          {
+            "package": "vendor/golang.org/x/net/nettest",
+            "status": "skip"
+          },
+          {
+            "package": "vendor/golang.org/x/sys/cpu",
+            "status": "skip"
+          },
+          {
+            "package": "vendor/golang.org/x/text/secure/bidirule",
+            "status": "skip"
+          },
+          {
+            "package": "vendor/golang.org/x/text/transform",
+            "status": "skip"
+          },
+          {
+            "package": "vendor/golang.org/x/text/unicode/bidi",
+            "status": "skip"
+          },
+          {
+            "package": "vendor/golang.org/x/text/unicode/norm",
+            "status": "skip"
+          },
+          {
+            "package": "testing/synctest",
+            "status": "pass"
+          },
+          {
+            "package": "text/scanner",
+            "status": "pass"
+          },
+          {
+            "package": "text/tabwriter",
+            "status": "pass"
+          },
+          {
+            "package": "text/template",
+            "status": "pass"
+          },
+          {
+            "package": "text/template/parse",
+            "status": "pass"
+          },
+          {
+            "package": "unicode",
+            "status": "pass"
+          },
+          {
+            "package": "unicode/utf16",
+            "status": "pass"
+          },
+          {
+            "package": "unicode/utf8",
+            "status": "pass"
+          },
+          {
+            "package": "unique",
+            "status": "pass"
+          },
+          {
+            "package": "weak",
+            "status": "pass"
+          },
+          {
+            "package": "runtime/trace",
+            "status": "pass"
+          },
+          {
+            "package": "time",
+            "status": "pass"
+          },
+          {
+            "package": "internal/trace",
+            "status": "pass"
+          },
+          {
+            "package": "runtime/pprof",
+            "status": "pass"
+          },
+          {
+            "package": "runtime",
+            "status": "pass"
+          }
+        ]
+      },
+      {
+        "mode": "without-notes",
+        "command": [
+          "go",
+          "-C",
+          "/private/var/folders/x2/wkd7t15n73dfqqdvkb_542c80000gn/T/smol-go-fixtures-tbzy4v3n/go/src",
+          "test",
+          "-count=1",
+          "-json",
+          "-short",
+          "-overlay",
+          "<overlay>",
+          "std"
+        ],
+        "exit_code": 0,
+        "elapsed_seconds": 78.561,
+        "passed_cases": 64225,
+        "failed_cases": [],
+        "skipped_cases": 521,
+        "packages": [
+          {
+            "package": "archive/zip",
+            "status": "pass"
+          },
+          {
+            "package": "archive/tar",
+            "status": "pass"
+          },
+          {
+            "package": "bufio",
+            "status": "pass"
+          },
+          {
+            "package": "bytes",
+            "status": "pass"
+          },
+          {
+            "package": "cmp",
+            "status": "pass"
+          },
+          {
+            "package": "compress/bzip2",
+            "status": "pass"
+          },
+          {
+            "package": "compress/flate",
+            "status": "pass"
+          },
+          {
+            "package": "compress/lzw",
+            "status": "pass"
+          },
+          {
+            "package": "compress/zlib",
+            "status": "pass"
+          },
+          {
+            "package": "container/heap",
+            "status": "pass"
+          },
+          {
+            "package": "compress/gzip",
+            "status": "pass"
+          },
+          {
+            "package": "container/list",
+            "status": "pass"
+          },
+          {
+            "package": "container/ring",
+            "status": "pass"
+          },
+          {
+            "package": "context",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/internal/boring/bbig",
+            "status": "skip"
+          },
+          {
+            "package": "crypto",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/internal/boring/sig",
+            "status": "skip"
+          },
+          {
+            "package": "crypto/internal/constanttime",
+            "status": "skip"
+          },
+          {
+            "package": "crypto/internal/cryptotest",
+            "status": "skip"
+          },
+          {
+            "package": "crypto/internal/entropy",
+            "status": "skip"
+          },
+          {
+            "package": "crypto/internal/entropy/v1.0.0",
+            "status": "skip"
+          },
+          {
+            "package": "crypto/internal/fips140",
+            "status": "skip"
+          },
+          {
+            "package": "crypto/aes",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/des",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/internal/fips140/alias",
+            "status": "skip"
+          },
+          {
+            "package": "crypto/dsa",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/internal/fips140/check",
+            "status": "skip"
+          },
+          {
+            "package": "crypto/internal/fips140/check/checktest",
+            "status": "skip"
+          },
+          {
+            "package": "crypto/ecdh",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/ecdsa",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/cipher",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/internal/fips140/ed25519",
+            "status": "skip"
+          },
+          {
+            "package": "crypto/ed25519",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/elliptic",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/internal/fips140/hkdf",
+            "status": "skip"
+          },
+          {
+            "package": "crypto/internal/fips140/hmac",
+            "status": "skip"
+          },
+          {
+            "package": "crypto/fips140",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/hkdf",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/hmac",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/internal/boring",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/internal/fips140/pbkdf2",
+            "status": "skip"
+          },
+          {
+            "package": "crypto/internal/boring/bcache",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/internal/fips140/sha256",
+            "status": "skip"
+          },
+          {
+            "package": "crypto/internal/fips140/sha3",
+            "status": "skip"
+          },
+          {
+            "package": "crypto/internal/fips140/sha512",
+            "status": "skip"
+          },
+          {
+            "package": "crypto/internal/fips140/ssh",
+            "status": "skip"
+          },
+          {
+            "package": "crypto/hpke",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/internal/fips140/tls12",
+            "status": "skip"
+          },
+          {
+            "package": "crypto/internal/fips140/tls13",
+            "status": "skip"
+          },
+          {
+            "package": "crypto/internal/fips140/aes",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/internal/fips140/aes/gcm",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/internal/fips140deps/byteorder",
+            "status": "skip"
+          },
+          {
+            "package": "crypto/internal/fips140deps/cpu",
+            "status": "skip"
+          },
+          {
+            "package": "crypto/internal/fips140deps/godebug",
+            "status": "skip"
+          },
+          {
+            "package": "crypto/internal/fips140deps/time",
+            "status": "skip"
+          },
+          {
+            "package": "crypto/internal/fips140hash",
+            "status": "skip"
+          },
+          {
+            "package": "crypto/internal/fips140/bigmod",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/internal/fips140/drbg",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/internal/impl",
+            "status": "skip"
+          },
+          {
+            "package": "crypto/internal/rand",
+            "status": "skip"
+          },
+          {
+            "package": "crypto/internal/randutil",
+            "status": "skip"
+          },
+          {
+            "package": "crypto/internal/fips140/ecdh",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/internal/sysrand/internal/seccomp",
+            "status": "skip"
+          },
+          {
+            "package": "crypto/internal/fips140/ecdsa",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/internal/fips140/edwards25519",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/mlkem/mlkemtest",
+            "status": "skip"
+          },
+          {
+            "package": "crypto/internal/fips140/edwards25519/field",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/internal/fips140/mlkem",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/internal/fips140/mldsa",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/internal/fips140/nistec",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/internal/fips140/nistec/fiat",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/internal/fips140/rsa",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/internal/fips140/subtle",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/internal/fips140cache",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/internal/fips140deps",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/internal/fips140only",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/internal/sysrand",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/tls/internal/fips140tls",
+            "status": "skip"
+          },
+          {
+            "package": "crypto/md5",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/x509/internal/macos",
+            "status": "skip"
+          },
+          {
+            "package": "crypto/x509/pkix",
+            "status": "skip"
+          },
+          {
+            "package": "crypto/mlkem",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/pbkdf2",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/rand",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/rc4",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/rsa",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/sha1",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/sha256",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/sha512",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/subtle",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/sha3",
+            "status": "pass"
+          },
+          {
+            "package": "encoding",
+            "status": "skip"
+          },
+          {
+            "package": "database/sql/driver",
+            "status": "pass"
+          },
+          {
+            "package": "debug/buildinfo",
+            "status": "pass"
+          },
+          {
+            "package": "database/sql",
+            "status": "pass"
+          },
+          {
+            "package": "debug/dwarf",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/internal/fips140test",
+            "status": "pass"
+          },
+          {
+            "package": "debug/elf",
+            "status": "pass"
+          },
+          {
+            "package": "debug/gosym",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/tls",
+            "status": "pass"
+          },
+          {
+            "package": "debug/macho",
+            "status": "pass"
+          },
+          {
+            "package": "debug/pe",
+            "status": "pass"
+          },
+          {
+            "package": "debug/plan9obj",
+            "status": "pass"
+          },
+          {
+            "package": "embed",
+            "status": "pass"
+          },
+          {
+            "package": "embed/internal/embedtest",
+            "status": "pass"
+          },
+          {
+            "package": "encoding/ascii85",
+            "status": "pass"
+          },
+          {
+            "package": "encoding/asn1",
+            "status": "pass"
+          },
+          {
+            "package": "encoding/base32",
+            "status": "pass"
+          },
+          {
+            "package": "encoding/base64",
+            "status": "pass"
+          },
+          {
+            "package": "encoding/binary",
+            "status": "pass"
+          },
+          {
+            "package": "encoding/csv",
+            "status": "pass"
+          },
+          {
+            "package": "crypto/x509",
+            "status": "pass"
+          },
+          {
+            "package": "encoding/hex",
+            "status": "pass"
+          },
+          {
+            "package": "encoding/gob",
+            "status": "pass"
+          },
+          {
+            "package": "encoding/json",
+            "status": "pass"
+          },
+          {
+            "package": "encoding/pem",
+            "status": "pass"
+          },
+          {
+            "package": "encoding/xml",
+            "status": "pass"
+          },
+          {
+            "package": "go/internal/scannerhooks",
+            "status": "skip"
+          },
+          {
+            "package": "errors",
+            "status": "pass"
+          },
+          {
+            "package": "expvar",
+            "status": "pass"
+          },
+          {
+            "package": "flag",
+            "status": "pass"
+          },
+          {
+            "package": "fmt",
+            "status": "pass"
+          },
+          {
+            "package": "go/ast",
+            "status": "pass"
+          },
+          {
+            "package": "go/build/constraint",
+            "status": "pass"
+          },
+          {
+            "package": "go/constant",
+            "status": "pass"
+          },
+          {
+            "package": "go/doc",
+            "status": "pass"
+          },
+          {
+            "package": "go/format",
+            "status": "pass"
+          },
+          {
+            "package": "go/doc/comment",
+            "status": "pass"
+          },
+          {
+            "package": "go/importer",
+            "status": "pass"
+          },
+          {
+            "package": "go/internal/gccgoimporter",
+            "status": "pass"
+          },
+          {
+            "package": "go/parser",
+            "status": "pass"
+          },
+          {
+            "package": "go/build",
+            "status": "pass"
+          },
+          {
+            "package": "go/printer",
+            "status": "pass"
+          },
+          {
+            "package": "go/scanner",
+            "status": "pass"
+          },
+          {
+            "package": "go/token",
+            "status": "pass"
+          },
+          {
+            "package": "go/internal/gcimporter",
+            "status": "pass"
+          },
+          {
+            "package": "image/color/palette",
+            "status": "skip"
+          },
+          {
+            "package": "go/version",
+            "status": "pass"
+          },
+          {
+            "package": "image/internal/imageutil",
+            "status": "skip"
+          },
+          {
+            "package": "hash",
+            "status": "pass"
+          },
+          {
+            "package": "hash/adler32",
+            "status": "pass"
+          },
+          {
+            "package": "hash/crc32",
+            "status": "pass"
+          },
+          {
+            "package": "hash/crc64",
+            "status": "pass"
+          },
+          {
+            "package": "hash/fnv",
+            "status": "pass"
+          },
+          {
+            "package": "hash/maphash",
+            "status": "pass"
+          },
+          {
+            "package": "html",
+            "status": "pass"
+          },
+          {
+            "package": "internal/asan",
+            "status": "skip"
+          },
+          {
+            "package": "internal/bisect",
+            "status": "skip"
+          },
+          {
+            "package": "internal/bytealg",
+            "status": "skip"
+          },
+          {
+            "package": "internal/byteorder",
+            "status": "skip"
+          },
+          {
+            "package": "internal/cfg",
+            "status": "skip"
+          },
+          {
+            "package": "html/template",
+            "status": "pass"
+          },
+          {
+            "package": "image",
+            "status": "pass"
+          },
+          {
+            "package": "image/color",
+            "status": "pass"
+          },
+          {
+            "package": "image/draw",
+            "status": "pass"
+          },
+          {
+            "package": "internal/coverage",
+            "status": "skip"
+          },
+          {
+            "package": "internal/coverage/calloc",
+            "status": "skip"
+          },
+          {
+            "package": "internal/coverage/decodecounter",
+            "status": "skip"
+          },
+          {
+            "package": "internal/coverage/decodemeta",
+            "status": "skip"
+          },
+          {
+            "package": "internal/coverage/encodecounter",
+            "status": "skip"
+          },
+          {
+            "package": "internal/coverage/encodemeta",
+            "status": "skip"
+          },
+          {
+            "package": "image/gif",
+            "status": "pass"
+          },
+          {
+            "package": "internal/coverage/rtcov",
+            "status": "skip"
+          },
+          {
+            "package": "go/types",
+            "status": "pass"
+          },
+          {
+            "package": "internal/coverage/stringtab",
+            "status": "skip"
+          },
+          {
+            "package": "go/internal/srcimporter",
+            "status": "pass"
+          },
+          {
+            "package": "internal/coverage/uleb128",
+            "status": "skip"
+          },
+          {
+            "package": "image/jpeg",
+            "status": "pass"
+          },
+          {
+            "package": "image/png",
+            "status": "pass"
+          },
+          {
+            "package": "index/suffixarray",
+            "status": "pass"
+          },
+          {
+            "package": "internal/abi",
+            "status": "pass"
+          },
+          {
+            "package": "internal/buildcfg",
+            "status": "pass"
+          },
+          {
+            "package": "internal/chacha8rand",
+            "status": "pass"
+          },
+          {
+            "package": "internal/exportdata",
+            "status": "skip"
+          },
+          {
+            "package": "internal/filepathlite",
+            "status": "skip"
+          },
+          {
+            "package": "internal/copyright",
+            "status": "pass"
+          },
+          {
+            "package": "internal/coverage/cfile",
+            "status": "pass"
+          },
+          {
+            "package": "internal/coverage/cformat",
+            "status": "pass"
+          },
+          {
+            "package": "internal/goarch",
+            "status": "skip"
+          },
+          {
+            "package": "internal/goexperiment",
+            "status": "skip"
+          },
+          {
+            "package": "internal/goos",
+            "status": "skip"
+          },
+          {
+            "package": "internal/goroot",
+            "status": "skip"
+          },
+          {
+            "package": "internal/goversion",
+            "status": "skip"
+          },
+          {
+            "package": "internal/lazyregexp",
+            "status": "skip"
+          },
+          {
+            "package": "internal/lazytemplate",
+            "status": "skip"
+          },
+          {
+            "package": "internal/msan",
+            "status": "skip"
+          },
+          {
+            "package": "internal/nettrace",
+            "status": "skip"
+          },
+          {
+            "package": "internal/obscuretestdata",
+            "status": "skip"
+          },
+          {
+            "package": "internal/oserror",
+            "status": "skip"
+          },
+          {
+            "package": "internal/coverage/cmerge",
+            "status": "pass"
+          },
+          {
+            "package": "internal/coverage/pods",
+            "status": "pass"
+          },
+          {
+            "package": "internal/coverage/slicereader",
+            "status": "pass"
+          },
+          {
+            "package": "internal/coverage/slicewriter",
+            "status": "pass"
+          },
+          {
+            "package": "internal/profilerecord",
+            "status": "skip"
+          },
+          {
+            "package": "internal/race",
+            "status": "skip"
+          },
+          {
+            "package": "internal/coverage/test",
+            "status": "pass"
+          },
+          {
+            "package": "internal/cpu",
+            "status": "pass"
+          },
+          {
+            "package": "internal/dag",
+            "status": "pass"
+          },
+          {
+            "package": "internal/diff",
+            "status": "pass"
+          },
+          {
+            "package": "internal/fmtsort",
+            "status": "pass"
+          },
+          {
+            "package": "internal/fuzz",
+            "status": "pass"
+          },
+          {
+            "package": "internal/runtime/exithook",
+            "status": "skip"
+          },
+          {
+            "package": "internal/runtime/gc",
+            "status": "skip"
+          },
+          {
+            "package": "internal/runtime/gc/internal/gen",
+            "status": "skip"
+          },
+          {
+            "package": "internal/gover",
+            "status": "pass"
+          },
+          {
+            "package": "internal/runtime/pprof/label",
+            "status": "skip"
+          },
+          {
+            "package": "internal/pkgbits",
+            "status": "pass"
+          },
+          {
+            "package": "internal/poll",
+            "status": "pass"
+          },
+          {
+            "package": "internal/profile",
+            "status": "pass"
+          },
+          {
+            "package": "internal/reflectlite",
+            "status": "pass"
+          },
+          {
+            "package": "internal/routebsd",
+            "status": "pass"
+          },
+          {
+            "package": "internal/runtime/atomic",
+            "status": "pass"
+          },
+          {
+            "package": "internal/godebug",
+            "status": "pass"
+          },
+          {
+            "package": "internal/runtime/cgobench",
+            "status": "pass"
+          },
+          {
+            "package": "internal/runtime/cgroup",
+            "status": "pass"
+          },
+          {
+            "package": "internal/runtime/gc/scan",
+            "status": "pass"
+          },
+          {
+            "package": "internal/godebugs",
+            "status": "pass"
+          },
+          {
+            "package": "internal/runtime/math",
+            "status": "pass"
+          },
+          {
+            "package": "internal/runtime/maps",
+            "status": "pass"
+          },
+          {
+            "package": "internal/runtime/sys",
+            "status": "pass"
+          },
+          {
+            "package": "internal/runtime/wasitest",
+            "status": "pass"
+          },
+          {
+            "package": "internal/platform",
+            "status": "pass"
+          },
+          {
+            "package": "internal/saferio",
+            "status": "pass"
+          },
+          {
+            "package": "internal/singleflight",
+            "status": "pass"
+          },
+          {
+            "package": "internal/stringslite",
+            "status": "skip"
+          },
+          {
+            "package": "internal/syscall/execenv",
+            "status": "skip"
+          },
+          {
+            "package": "internal/syslist",
+            "status": "skip"
+          },
+          {
+            "package": "internal/testhash",
+            "status": "skip"
+          },
+          {
+            "package": "internal/testlog",
+            "status": "skip"
+          },
+          {
+            "package": "internal/testpty",
+            "status": "skip"
+          },
+          {
+            "package": "internal/trace/internal/testgen",
+            "status": "skip"
+          },
+          {
+            "package": "internal/trace/raw",
+            "status": "skip"
+          },
+          {
+            "package": "internal/trace/traceviewer",
+            "status": "skip"
+          },
+          {
+            "package": "internal/trace/traceviewer/format",
+            "status": "skip"
+          },
+          {
+            "package": "internal/trace/version",
+            "status": "skip"
+          },
+          {
+            "package": "internal/txtar",
+            "status": "skip"
+          },
+          {
+            "package": "internal/strconv",
+            "status": "pass"
+          },
+          {
+            "package": "internal/syscall/unix",
+            "status": "pass"
+          },
+          {
+            "package": "internal/synctest",
+            "status": "pass"
+          },
+          {
+            "package": "internal/sysinfo",
+            "status": "pass"
+          },
+          {
+            "package": "internal/sync",
+            "status": "pass"
+          },
+          {
+            "package": "log/internal",
+            "status": "skip"
+          },
+          {
+            "package": "internal/testenv",
+            "status": "pass"
+          },
+          {
+            "package": "log/slog/internal",
+            "status": "skip"
+          },
+          {
+            "package": "internal/trace/internal/tracev1",
+            "status": "pass"
+          },
+          {
+            "package": "internal/trace/testtrace",
+            "status": "pass"
+          },
+          {
+            "package": "internal/trace/tracev2",
+            "status": "pass"
+          },
+          {
+            "package": "internal/types/errors",
+            "status": "pass"
+          },
+          {
+            "package": "internal/unsafeheader",
+            "status": "pass"
+          },
+          {
+            "package": "internal/xcoff",
+            "status": "pass"
+          },
+          {
+            "package": "internal/zstd",
+            "status": "pass"
+          },
+          {
+            "package": "io",
+            "status": "pass"
+          },
+          {
+            "package": "io/fs",
+            "status": "pass"
+          },
+          {
+            "package": "io/ioutil",
+            "status": "pass"
+          },
+          {
+            "package": "iter",
+            "status": "pass"
+          },
+          {
+            "package": "log",
+            "status": "pass"
+          },
+          {
+            "package": "log/slog",
+            "status": "pass"
+          },
+          {
+            "package": "log/slog/internal/benchmarks",
+            "status": "pass"
+          },
+          {
+            "package": "log/slog/internal/buffer",
+            "status": "pass"
+          },
+          {
+            "package": "maps",
+            "status": "pass"
+          },
+          {
+            "package": "math",
+            "status": "pass"
+          },
+          {
+            "package": "math/big/internal/asmgen",
+            "status": "pass"
+          },
+          {
+            "package": "math/bits",
+            "status": "pass"
+          },
+          {
+            "package": "log/syslog",
+            "status": "pass"
+          },
+          {
+            "package": "math/cmplx",
+            "status": "pass"
+          },
+          {
+            "package": "math/rand",
+            "status": "pass"
+          },
+          {
+            "package": "math/big",
+            "status": "pass"
+          },
+          {
+            "package": "math/rand/v2",
+            "status": "pass"
+          },
+          {
+            "package": "net/http/internal/httpcommon",
+            "status": "skip"
+          },
+          {
+            "package": "net/http/internal/testcert",
+            "status": "skip"
+          },
+          {
+            "package": "mime",
+            "status": "pass"
+          },
+          {
+            "package": "mime/multipart",
+            "status": "pass"
+          },
+          {
+            "package": "mime/quotedprintable",
+            "status": "pass"
+          },
+          {
+            "package": "net/http/cgi",
+            "status": "pass"
+          },
+          {
+            "package": "net/http/cookiejar",
+            "status": "pass"
+          },
+          {
+            "package": "net/http/fcgi",
+            "status": "pass"
+          },
+          {
+            "package": "net/http/httptest",
+            "status": "pass"
+          },
+          {
+            "package": "net/http/httptrace",
+            "status": "pass"
+          },
+          {
+            "package": "net/http/internal",
+            "status": "pass"
+          },
+          {
+            "package": "net",
+            "status": "pass"
+          },
+          {
+            "package": "net/http/internal/ascii",
+            "status": "pass"
+          },
+          {
+            "package": "net/http/httputil",
+            "status": "pass"
+          },
+          {
+            "package": "net/internal/cgotest",
+            "status": "pass"
+          },
+          {
+            "package": "net/internal/socktest",
+            "status": "pass"
+          },
+          {
+            "package": "net/mail",
+            "status": "pass"
+          },
+          {
+            "package": "net/http",
+            "status": "pass"
+          },
+          {
+            "package": "net/netip",
+            "status": "pass"
+          },
+          {
+            "package": "net/rpc",
+            "status": "pass"
+          },
+          {
+            "package": "net/rpc/jsonrpc",
+            "status": "pass"
+          },
+          {
+            "package": "net/smtp",
+            "status": "pass"
+          },
+          {
+            "package": "net/textproto",
+            "status": "pass"
+          },
+          {
+            "package": "net/url",
+            "status": "pass"
+          },
+          {
+            "package": "reflect/internal/example1",
+            "status": "skip"
+          },
+          {
+            "package": "reflect/internal/example2",
+            "status": "skip"
+          },
+          {
+            "package": "os/exec/internal/fdtest",
+            "status": "pass"
+          },
+          {
+            "package": "os/exec",
+            "status": "pass"
+          },
+          {
+            "package": "os/user",
+            "status": "pass"
+          },
+          {
+            "package": "path",
+            "status": "pass"
+          },
+          {
+            "package": "path/filepath",
+            "status": "pass"
+          },
+          {
+            "package": "plugin",
+            "status": "pass"
+          },
+          {
+            "package": "net/http/pprof",
+            "status": "pass"
+          },
+          {
+            "package": "reflect",
+            "status": "pass"
+          },
+          {
+            "package": "regexp",
+            "status": "pass"
+          },
+          {
+            "package": "os",
+            "status": "pass"
+          },
+          {
+            "package": "regexp/syntax",
+            "status": "pass"
+          },
+          {
+            "package": "os/signal",
+            "status": "pass"
+          },
+          {
+            "package": "runtime/coverage",
+            "status": "skip"
+          },
+          {
+            "package": "runtime/race",
+            "status": "skip"
+          },
+          {
+            "package": "structs",
+            "status": "skip"
+          },
+          {
+            "package": "runtime/debug",
+            "status": "pass"
+          },
+          {
+            "package": "runtime/cgo",
+            "status": "pass"
+          },
+          {
+            "package": "runtime/metrics",
+            "status": "pass"
+          },
+          {
+            "package": "testing/internal/testdeps",
+            "status": "skip"
+          },
+          {
+            "package": "sort",
+            "status": "pass"
+          },
+          {
+            "package": "sync/atomic",
+            "status": "pass"
+          },
+          {
+            "package": "slices",
+            "status": "pass"
+          },
+          {
+            "package": "strconv",
+            "status": "pass"
+          },
+          {
+            "package": "sync",
+            "status": "pass"
+          },
+          {
+            "package": "strings",
+            "status": "pass"
+          },
+          {
+            "package": "syscall",
+            "status": "pass"
+          },
+          {
+            "package": "testing/cryptotest",
+            "status": "pass"
+          },
+          {
+            "package": "testing/fstest",
+            "status": "pass"
+          },
+          {
+            "package": "time/tzdata",
+            "status": "skip"
+          },
+          {
+            "package": "testing/iotest",
+            "status": "pass"
+          },
+          {
+            "package": "testing",
+            "status": "pass"
+          },
+          {
+            "package": "testing/quick",
+            "status": "pass"
+          },
+          {
+            "package": "testing/slogtest",
+            "status": "pass"
+          },
+          {
+            "package": "unsafe",
+            "status": "skip"
+          },
+          {
+            "package": "vendor/golang.org/x/crypto/chacha20",
+            "status": "skip"
+          },
+          {
+            "package": "vendor/golang.org/x/crypto/chacha20poly1305",
+            "status": "skip"
+          },
+          {
+            "package": "vendor/golang.org/x/crypto/cryptobyte",
+            "status": "skip"
+          },
+          {
+            "package": "vendor/golang.org/x/crypto/cryptobyte/asn1",
+            "status": "skip"
+          },
+          {
+            "package": "vendor/golang.org/x/crypto/internal/alias",
+            "status": "skip"
+          },
+          {
+            "package": "vendor/golang.org/x/crypto/internal/poly1305",
+            "status": "skip"
+          },
+          {
+            "package": "vendor/golang.org/x/net/dns/dnsmessage",
+            "status": "skip"
+          },
+          {
+            "package": "vendor/golang.org/x/net/http/httpguts",
+            "status": "skip"
+          },
+          {
+            "package": "vendor/golang.org/x/net/http/httpproxy",
+            "status": "skip"
+          },
+          {
+            "package": "vendor/golang.org/x/net/http2/hpack",
+            "status": "skip"
+          },
+          {
+            "package": "vendor/golang.org/x/net/idna",
+            "status": "skip"
+          },
+          {
+            "package": "vendor/golang.org/x/net/nettest",
+            "status": "skip"
+          },
+          {
+            "package": "vendor/golang.org/x/sys/cpu",
+            "status": "skip"
+          },
+          {
+            "package": "vendor/golang.org/x/text/secure/bidirule",
+            "status": "skip"
+          },
+          {
+            "package": "vendor/golang.org/x/text/transform",
+            "status": "skip"
+          },
+          {
+            "package": "vendor/golang.org/x/text/unicode/bidi",
+            "status": "skip"
+          },
+          {
+            "package": "vendor/golang.org/x/text/unicode/norm",
+            "status": "skip"
+          },
+          {
+            "package": "testing/synctest",
+            "status": "pass"
+          },
+          {
+            "package": "text/scanner",
+            "status": "pass"
+          },
+          {
+            "package": "text/tabwriter",
+            "status": "pass"
+          },
+          {
+            "package": "text/template",
+            "status": "pass"
+          },
+          {
+            "package": "text/template/parse",
+            "status": "pass"
+          },
+          {
+            "package": "unicode",
+            "status": "pass"
+          },
+          {
+            "package": "unicode/utf16",
+            "status": "pass"
+          },
+          {
+            "package": "unicode/utf8",
+            "status": "pass"
+          },
+          {
+            "package": "unique",
+            "status": "pass"
+          },
+          {
+            "package": "weak",
+            "status": "pass"
+          },
+          {
+            "package": "runtime/trace",
+            "status": "pass"
+          },
+          {
+            "package": "time",
+            "status": "pass"
+          },
+          {
+            "package": "internal/trace",
+            "status": "pass"
+          },
+          {
+            "package": "runtime/pprof",
+            "status": "pass"
+          },
+          {
+            "package": "runtime",
+            "status": "pass"
+          }
+        ]
+      }
+    ],
+    "lowered-module": [
+      {
+        "mode": "with-notes",
+        "command": [
+          "go",
+          "test",
+          "-count=1",
+          "-json",
+          "-overlay",
+          "<overlay>",
+          "./..."
+        ],
+        "exit_code": 0,
+        "elapsed_seconds": 3.096,
+        "passed_cases": 128,
+        "failed_cases": [],
+        "skipped_cases": 0,
+        "packages": [
+          {
+            "package": "smolang/scripts",
+            "status": "skip"
+          },
+          {
+            "package": "smolang/cmd/smol",
+            "status": "pass"
+          },
+          {
+            "package": "smolang/internal/smol",
+            "status": "pass"
+          }
+        ]
+      },
+      {
+        "mode": "without-notes",
+        "command": [
+          "go",
+          "test",
+          "-count=1",
+          "-json",
+          "-overlay",
+          "<overlay>",
+          "./..."
+        ],
+        "exit_code": 0,
+        "elapsed_seconds": 3.017,
+        "passed_cases": 128,
+        "failed_cases": [],
+        "skipped_cases": 0,
+        "packages": [
+          {
+            "package": "smolang/scripts",
+            "status": "skip"
+          },
+          {
+            "package": "smolang/cmd/smol",
+            "status": "pass"
+          },
+          {
+            "package": "smolang/internal/smol",
+            "status": "pass"
+          }
+        ]
+      }
+    ]
+  },
+  "source_sha256": {
+    "SPEC.md": "8ccb0b9e31e3e4193a3a4b7c2d607092400a6a3dea16a1689eb519d246e8aec4",
+    "cmd/smol/main.go": "852473c3dc0a43110830371125e1eedcf032738526760f526a26dc61ad4daddc",
+    "cmd/smol/main_test.go": "49eb583acba4f897edad2028ad649e4777cb49c6c4f764b82dd815e96ab7e63e",
+    "go.mod": "88d988089a86883d55c2e39fdd6da272d0a1480243c14f47f239b10311b0fc46",
+    "internal/smol/conformance_test.go": "5e83f4d696413316c9f3a9976256983fafc5ae3dbe5fdbcb53a038ce82e995d0",
+    "internal/smol/imports.go": "d591f91c0f7c013d34e9c91f0e15054aa2dee113fa7a171f5583ffd757b81dd1",
+    "internal/smol/lift.go": "628bf839dea76d808d7f2f98d2889bd49ace578b42f585678dc2ac40d2811783",
+    "internal/smol/lower.go": "7933885a9053e9b060b2573b4978fd8d2f5d1788db82e94fcb80869d3ca1129a",
+    "internal/smol/pack.go": "d47e2b5c0ab8e5269bcfad8dda4615298b81b60b3aadacf8df971ffdac3bb479",
+    "internal/smol/pack_test.go": "fd8cff0eb305d131c2c71597a29a272b7d5c5c1d1867d2511f13ef9b7adb4b40",
+    "internal/smol/package.go": "b0d807cc02cfacf72ac9cd80bc0f3daac0794529ee647c6ebde6030494e9a497",
+    "internal/smol/print.go": "b66d5e8b2b5b4c2d54fd6dc4271dc71f9be95617c578b298d55768b2e5886e8e",
+    "internal/smol/scope.go": "0a07612fb8fe6ae231877d92022f8f106cd3abeaf01cfff18c499ccd32a38dcf",
+    "internal/smol/source.go": "9576465608b1147a2f557c203b34466c82ea7baec1c821ddb386dce2515c823a",
+    "internal/smol/v02_test.go": "9442a95319d8690266cc964ef29e66c0be06216e2feb7528a9ff790d6e877fd1",
+    "internal/smol/zero.go": "a102fe876d214a1c266a13487007f4d108f36bc8dc68c7ea4dcd7fe45c33eb18",
+    "scripts/check_corpus.py": "538173916b0d39d9a6ed6c9455e84375c984abe48fb8f764ecd8d8a3152eb8e7",
+    "scripts/measure_uplift.py": "8db1922f0b2abcc13cc3b6a7bbf4dd909ee3fe5c7996c874c85c341f91f33355",
+    "scripts/measure_usage.py": "1b9cd9197f896103a2f1eec134bac08544835259c8980db28c2234149cf034e9",
+    "scripts/prepare_package.py": "b102eae31c1053dad5e721b03d74d1c9fa828eccf30720b5927184d1d73a7867",
+    "scripts/report_conformance.py": "1af86dd437ce0bca057d28d9a6d0b2c0094d5b5a78d69199968893bc669d1e9b",
+    "scripts/validate_lowered.py": "100177d8881b90e235965142b13e033aa5aa06d2b138b9914681b96551005b76",
+    "scripts/validate_v02.go": "0a8b6d4d505827a76282f8b411ff0235388c42c69c3e86a2b44a6e69a7d71257"
+  },
+  "uplift": {
+    "extra_tokens_saved_vs_v0.1": 12521,
+    "source_reduction_vs_v0.1_percent": 43.32825801093501,
+    "source_reduction_vs_go_percent": 50.23549788811571,
+    "v0.1_source_reduction_vs_go_percent": 12.188155215898387,
+    "source_reduction_gain_percentage_points": 38.047342672217326,
+    "source_capacity_multiplier_vs_go": 2.009464492886365,
+    "request_reduction_vs_v0.1_percent": 28.87218391864782,
+    "request_reduction_vs_go_percent": 34.893832580522606,
+    "code_only_reduction_vs_comment_free_go_percent": 26.64606288632088,
+    "both_channels_reduction_vs_go_percent": -3.597799993922635
+  },
+  "limits": [
+    "This is a corpus-based gate, not a proof for every Go program or every normative clause.",
+    "Inactive build variants, historical toolchains, and tests skipped by the recorded -short profile are not validated.",
+    "Test notes remain in both behavioral modes so Example output assertions run; production notes are removed in without-notes mode.",
+    "Token measurements cover encoding/json and the spec example; no model-accuracy or latency claim."
+  ]
+}

@@ -45,20 +45,23 @@ def measure(args):
         path = root / usage / "report.json"
         report = json.loads(path.read_text())
         assert report["stable"], str(path)
-        for source, payload in (("go", texts["go"]), ("smol", texts[key])):
+        archived = {"go": (root / "package.go.txt").read_text(),
+                    "smol": (root / ("package." + ("smol" if key == "v0.1" else key) + ".txt")).read_text()}
+        for source, payload in archived.items():
             assert sha(payload.encode()) == report["sources"][source]["sha256"], (path, source, "payload mismatch")
         for record in report["records"]:
             stem = str(record["repeat"]) + "-" + record["kind"]
             raw = [json.loads(line) for line in (path.parent / (stem + ".jsonl")).read_text().splitlines()]
             turns = [e for e in raw if e.get("type") == "turn.completed"]
             assert len(turns) == 1 and turns[0]["usage"] == record["usage"], (path, stem)
-            payload = "" if record["kind"] == "baseline" else texts["go"] if record["kind"] == "go" else texts[key]
+            payload = "" if record["kind"] == "baseline" else archived[record["kind"]]
             assert sha((prefix + payload + suffix).encode()) == record["prompt_sha256"], (path, stem, "prompt mismatch")
         for comparison in report["comparisons"]:
-            assert comparison["go_source_tokens"] == counts["go"], path
-            assert comparison["smol_source_tokens"] == counts[key], path
+            assert comparison["go_source_tokens"] == count(archived["go"]), path
+            assert comparison["smol_source_tokens"] == count(archived["smol"]), path
         evidence.append({"input": label, "report": str(path), "repetitions": len(report["comparisons"]),
                          "payload_hashes_match": True, "raw_usage_matches": True, "local_token_delta_matches": True,
+                         "fresh_payload_matches": archived["go"] == texts["go"] and archived["smol"] == texts[key],
                          "comparison": report["comparisons"][0]})
 
     g, old_count, new_count = counts["go"], counts["v0.1"], counts["smol"]
@@ -82,7 +85,7 @@ def measure(args):
         "payloads": {k: {"sha256": sha(v.encode()), "bytes": len(v.encode()), "raw_text_tokens": len(enc.encode(v))} for k,v in texts.items()},
         "verified_historical_evidence": evidence,
         "limitations": ["Source savings apply to code-only loading. Notes are necessary for byte-exact reconstruction.",
-                        "Outlines omit bodies and are not complete programs; current outline conformance defects are reported separately.",
+                        "Outlines omit bodies and are not complete programs. Changed outlines have fresh local counts only, not new API measurements.",
                         "One package and one example; no task-accuracy, latency, dollar-cost, or cross-tokenizer claim.",
                         "Request percentages use the recorded 14,469-token harness; a different harness changes them.",
                         "Go-without-notes is the actual code-only lowered Go, with identical production file selection and bundle markers."]}
@@ -92,5 +95,5 @@ def measure(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--output", type=Path, default=Path("measurements/spec-v0.2-validation"))
+    parser.add_argument("--output", type=Path, default=Path("measurements/spec-v0.2-conformance"))
     measure(parser.parse_args())

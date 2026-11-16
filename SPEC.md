@@ -330,6 +330,10 @@ sort.Slice(xs, func(i, j int) bool => xs[i].Age < xs[j].Age)
 
 The other layout of each (a one-line declaration, a multi-line literal) is written with braces as in Go.
 
+Braces are also required when removing them would lose the boundary between a literal's return expressions and its surrounding expression. In particular, keep braces on a literal immediately followed by a call, index, selector, type assertion or binary operator. Keep them on a tuple-returning literal followed by an outer comma when its return statement has fewer expressions than its result count (for example, `return pair()`). Parentheses around the whole literal delimit it and allow an arrow inside them.
+
+Thus `func() any { return g }()` keeps its braces, while `func() any { return g() }` becomes `func()any=>g()`. These must remain distinct: the former invokes the literal and the latter denotes a function value. All unambiguous bodies satisfying the rules above use `=>`.
+
 ### 6.9 Struct tag directives: `@key`
 
 One or more `@key` directives between `struct` and `{` give every exported, single-name field the tag `key:"snake_name"`, with multiple keys joined by one space in directive order.

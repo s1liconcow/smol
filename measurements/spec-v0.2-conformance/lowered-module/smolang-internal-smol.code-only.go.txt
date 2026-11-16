@@ -1,0 +1,3851 @@
+// File: smolang/internal/smol/imports.go
+package smol
+
+import (
+	"fmt"
+	"go/ast"
+	"go/importer"
+	"go/token"
+	"go/types"
+	"io"
+	"os"
+	"os/exec"
+	"path"
+	"sort"
+	"strconv"
+	"strings"
+	"sync"
+)
+
+type Import struct {
+	Path  string
+	Alias bool
+}
+type Options struct {
+	Context      *PackageContext
+	Imports      map[string]Import
+	PackageFiles map[string]string
+	Lines        bool
+	NoScope      bool
+	LineSource   string
+	Filename     string
+}
+
+var stdOnce sync.Once
+var stdTable map[string]Import
+var stdPaths map[string]bool
+var stdNames map[string]string
+
+func standard() map[string]Import {
+	stdOnce.Do(func() {
+		stdTable = map[string]Import{}
+		stdPaths = map[string]bool{}
+		stdNames = map[string]string{}
+		counts := map[string]int{}
+		b, err := exec.Command("go", "list", "-f", "{{.ImportPath}} {{.Name}}", "std").Output()
+		if err != nil {
+			return
+		}
+		for _, line := range strings.Split(string(b), "\n") {
+			f := strings.Fields(line)
+			if len(f) != 2 {
+				continue
+			}
+			p, n := f[0], f[1]
+			stdPaths[p] = true
+			stdNames[p] = n
+			if !strings.HasPrefix(p, "internal/") && !strings.Contains(p, "/internal/") && !strings.HasPrefix(p, "vendor/") {
+				counts[n]++
+			}
+		}
+		for p, n := range stdNames {
+			if counts[n] == 1 && !strings.HasPrefix(p, "internal/") && !strings.Contains(p, "/internal/") && !strings.HasPrefix(p, "vendor/") {
+				stdTable[n] = Import{Path: p}
+			}
+		}
+	})
+	return stdTable
+}
+func table(o Options) map[string]Import {
+	m := map[string]Import{}
+	for k, v := range standard() {
+		m[k] = v
+	}
+	for k, v := range o.Imports {
+		m[k] = v
+	}
+	return m
+}
+func packageName(p string) string {
+	if stdPaths[p] {
+		return stdNames[p]
+	}
+	b, e := exec.Command("go", "list", "-f", "{{.Name}}", p).Output()
+	if e == nil {
+		return strings.TrimSpace(string(b))
+	}
+	n := path.Base(p)
+	if i := strings.IndexByte(n, '.'); i >= 0 {
+		n = n[:i]
+	}
+	return n
+}
+func ReadMod(text string) (map[string]Import, error) {
+	m := map[string]Import{}
+	for i, l := range strings.Split(text, "\n") {
+		l = strings.TrimSpace(l)
+		if l == "" || strings.HasPrefix(l, "//") {
+			continue
+		}
+		f := strings.Fields(l)
+		if len(f) == 3 && f[0] == "use" {
+			m[f[1]] = Import{Path: f[2]}
+		} else if len(f) == 4 && f[0] == "use" && f[2] == "=" {
+			m[f[1]] = Import{Path: f[3], Alias: true}
+		} else {
+			return nil, fmt.Errorf("smol.mod:%d: expected use name [=] path", i+1)
+		}
+	}
+	return m, nil
+}
+func WriteMod(m map[string]Import) string {
+	keys := make([]string, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	var b strings.Builder
+	for _, k := range keys {
+		v := m[k]
+		b.WriteString("use " + k + " ")
+		if v.Alias {
+			b.WriteString("= ")
+		}
+		b.WriteString(v.Path + "\n")
+	}
+	return b.String()
+}
+func Normalize(text string) (string, error) {
+	text, err := norm(text)
+	if err != nil {
+		return "", err
+	}
+	s, err := parse(text)
+	if err != nil {
+		return "", err
+	}
+	standard()
+	var specs []*ast.ImportSpec
+	var decls []*ast.GenDecl
+	for _, d := range s.file.Decls {
+		g, ok := d.(*ast.GenDecl)
+		if !ok || g.Tok != token.IMPORT {
+			continue
+		}
+		safe := g.Doc == nil
+		for _, sp := range g.Specs {
+			im := sp.(*ast.ImportSpec)
+			if im.Path.Value == `"C"` || im.Doc != nil || im.Comment != nil {
+				safe = false
+			}
+		}
+		if !s.clean(s.off(g.Pos()), s.off(g.End())) {
+			safe = false
+		}
+		if safe {
+			decls = append(decls, g)
+			for _, sp := range g.Specs {
+				specs = append(specs, sp.(*ast.ImportSpec))
+			}
+		}
+	}
+	if len(decls) == 0 {
+		return text, nil
+	}
+	sort.SliceStable(specs, func(i, j int) bool {
+		a, _ := strconv.Unquote(specs[i].Path.Value)
+		b, _ := strconv.Unquote(specs[j].Path.Value)
+		if stdPaths[a] != stdPaths[b] {
+			return stdPaths[a]
+		}
+		return a < b
+	})
+	var lines []string
+	lastStd := true
+	seen := map[string]bool{}
+	for _, sp := range specs {
+		p, _ := strconv.Unquote(sp.Path.Value)
+		if seen[s.raw(sp)] {
+			continue
+		}
+		seen[s.raw(sp)] = true
+		if lastStd && !stdPaths[p] && len(lines) > 0 {
+			lines = append(lines, "")
+		}
+		lastStd = stdPaths[p]
+		lines = append(lines, s.raw(sp))
+	}
+	im := "import "
+	if len(lines) == 1 {
+		im += lines[0]
+	} else {
+		im += "(\n" + strings.Join(lines, "\n") + "\n)"
+	}
+	remove := decls[1:]
+	between := s.text[s.packageEnd():s.off(decls[0].Pos())]
+	if strings.TrimSpace(between) != "" {
+		s.put(s.packageEnd(), s.packageEnd(), "\n\n"+im)
+		remove = decls
+	} else {
+		s.replace(decls[0], im)
+		s.put(s.packageEnd(), s.off(decls[0].Pos()), "\n\n")
+	}
+	for _, d := range remove {
+		a := s.off(d.Pos())
+		b := s.off(d.End())
+		if b < len(text) && text[b] == '\n' {
+			b++
+		}
+		if b < len(text) && text[b] == '\n' {
+			b++
+		}
+		s.put(a, b, "")
+	}
+	return norm(s.render(0, len(text)))
+}
+func (s *source) liftImports(o Options) {
+	m := table(o)
+	used := map[string]bool{}
+	if facts, err := newScopeFacts(s.text, o); err == nil {
+		ast.Inspect(facts.file, func(n ast.Node) bool {
+			if sel, ok := n.(*ast.SelectorExpr); ok {
+				if id, ok := sel.X.(*ast.Ident); ok && id.Obj == nil && !facts.ctx.names[id.Name] {
+					used[id.Name] = true
+				}
+			}
+			return true
+		})
+	}
+	for _, d := range s.file.Decls {
+		g, ok := d.(*ast.GenDecl)
+		if !ok || g.Tok != token.IMPORT {
+			continue
+		}
+		if g.Doc != nil {
+			continue
+		}
+		partial := g.Lparen.IsValid()
+		if !s.clean(s.off(g.Pos()), s.off(g.End())) {
+			if !g.Lparen.IsValid() || !s.specComments(g) {
+				continue
+			}
+			partial = true
+		}
+		var keep []string
+		cgo := false
+		for _, sp := range g.Specs {
+			im := sp.(*ast.ImportSpec)
+			p, _ := strconv.Unquote(im.Path.Value)
+			name := packageName(p)
+			if im.Name != nil {
+				name = im.Name.Name
+			}
+			cgo = cgo || p == "C"
+			binding, ok := m[name]
+			if !used[name] || name == "_" || name == "." || p == "C" || im.Doc != nil || im.Comment != nil || !ok || binding.Path != p || binding.Alias != (im.Name != nil) {
+				a, b := im.Pos(), im.End()
+				if im.Doc != nil {
+					a = im.Doc.Pos()
+				}
+				if im.Comment != nil {
+					b = im.Comment.End()
+				}
+				keep = append(keep, s.text[s.off(a):s.off(b)])
+			}
+		}
+		if len(keep) == len(g.Specs) || (partial && cgo) {
+			continue
+		}
+		if partial && len(keep) > 0 {
+			s.replace(g, "import (\n...\n"+strings.Join(keep, "\n")+"\n)")
+			continue
+		}
+		if len(keep) == 0 {
+			a, b := s.off(g.Pos()), s.off(g.End())
+			if b < len(s.text) && s.text[b] == '\n' {
+				b++
+			}
+			if b < len(s.text) && s.text[b] == '\n' {
+				b++
+			}
+			s.put(a, b, "")
+		} else {
+			s.replace(g, "import (\n"+strings.Join(keep, "\n")+"\n)")
+		}
+	}
+}
+
+var importerOnce sync.Once
+var sharedImporter types.Importer
+
+func exportImporter(fs *token.FileSet) types.Importer {
+	importerOnce.Do(func() { sharedImporter = makeExportImporter(token.NewFileSet()) })
+	return sharedImporter
+}
+func makeExportImporter(fs *token.FileSet) types.Importer {
+	return importer.ForCompiler(fs, "gc", func(p string) (io.ReadCloser, error) {
+		b, e := exec.Command("go", "list", "-export", "-f", "{{.Export}}", p).Output()
+		if e != nil {
+			return nil, e
+		}
+		return os.Open(strings.TrimSpace(string(b)))
+	})
+}
+func (s *source) inferImports(o Options, prefix string) (string, error) {
+	info := &types.Info{Uses: map[*ast.Ident]types.Object{}, Scopes: map[ast.Node]*types.Scope{}}
+	files := []*ast.File{s.file}
+	ctx := o.Context
+	if ctx == nil {
+		ctx = NewPackageContext(o.PackageFiles)
+	}
+	rootContext := ctx
+	ctx = ctx.forPackage(s.file.Name.Name)
+	conf := types.Config{Importer: exportImporter(s.fs), Error: func(error) {}, DisableUnusedImportCheck: true}
+	pkg, _ := conf.Check(s.file.Name.Name, s.fs, files, info)
+	explicit := map[string]bool{}
+	dotNames := map[string]bool{}
+	for _, im := range s.file.Imports {
+		p, _ := strconv.Unquote(im.Path.Value)
+		n := packageName(p)
+		if im.Name != nil {
+			if im.Name.Name == "." {
+				for name := range rootContext.forPackage(n).names {
+					if ast.IsExported(name) {
+						dotNames[name] = true
+					}
+				}
+			}
+			n = im.Name.Name
+		}
+		explicit[n] = true
+	}
+	refs := map[string]bool{}
+	ast.Inspect(s.file, func(n ast.Node) bool {
+		sel, ok := n.(*ast.SelectorExpr)
+		if !ok {
+			return true
+		}
+		id, ok := sel.X.(*ast.Ident)
+		if !ok || explicit[id.Name] || dotNames[id.Name] || info.Uses[id] != nil || types.Universe.Lookup(id.Name) != nil {
+			return true
+		}
+		if (pkg != nil && pkg.Scope().Lookup(id.Name) != nil) || ctx.names[id.Name] {
+			return true
+		}
+		for _, scope := range info.Scopes {
+			if scope.Contains(id.Pos()) {
+				_, obj := scope.LookupParent(id.Name, id.Pos())
+				if obj != nil {
+					return true
+				}
+			}
+		}
+		refs[id.Name] = true
+		return true
+	})
+	var imports []string
+	m := table(o)
+	for q := range refs {
+		im, ok := m[q]
+		if !ok {
+			return "", fmt.Errorf("unresolved package qualifier %q (add an import or smol.mod entry)", q)
+		}
+		l := strconv.Quote(im.Path)
+		if im.Alias {
+			l = q + " " + l
+		}
+		imports = append(imports, l)
+	}
+	sort.Strings(imports)
+	for _, im := range s.file.Imports {
+		if im.Name == nil || im.Name.Name != prefix+"imports" || im.Path.Value != strconv.Quote(importsMarkerPath) {
+			continue
+		}
+		i, j := s.off(im.Pos()), s.off(im.End())
+		lines := strings.Join(imports, "\n")
+		if lines == "" && j < len(s.text) && s.text[j] == '\n' {
+			j++
+		}
+		for _, d := range s.file.Decls {
+			g, ok := d.(*ast.GenDecl)
+			if !ok || g.Tok != token.IMPORT || im.Pos() < g.Pos() || im.End() > g.End() {
+				continue
+			}
+			a, b := s.off(g.Pos()), s.off(g.End())
+			block := s.text[a:i] + lines + s.text[j:b]
+			formatted, err := formatPreservingComments("package p\n\n"+block+"\n", true)
+			if err != nil {
+				return "", err
+			}
+			block = strings.TrimSpace(strings.TrimPrefix(formatted, "package p"))
+			return s.text[:a] + block + s.text[b:], nil
+		}
+	}
+	if len(imports) == 0 {
+		return s.text, nil
+	}
+	p := s.packageEnd()
+	generated, err := Normalize("package p\n\nimport (\n" + strings.Join(imports, "\n") + "\n)\n")
+	if err != nil {
+		return "", err
+	}
+	decl := strings.TrimRight(strings.TrimPrefix(generated, "package p"), "\n")
+	return s.text[:p] + decl + s.text[p:], nil
+}
+
+const importsMarkerPath = "smol.invalid/inferred-imports"
+
+func (s *source) specComments(g *ast.GenDecl) bool {
+	own := map[*ast.CommentGroup]bool{}
+	for _, sp := range g.Specs {
+		im := sp.(*ast.ImportSpec)
+		own[im.Doc], own[im.Comment] = true, true
+	}
+	a, b := s.off(g.Pos()), s.off(g.End())
+	for _, c := range s.file.Comments {
+		if s.off(c.Pos()) < b && s.off(c.End()) > a && !own[c] {
+			return false
+		}
+	}
+	return !strings.Contains(strings.ReplaceAll(s.text[a:b], "\t", ""), "\n\n")
+}
+func lowerImportMarker(text, prefix string) (string, error) {
+	ts := significant(lex(text))
+	var es []edit
+	for i := 0; i+2 < len(ts); i++ {
+		if ts[i].lit == "import" && ts[i+1].lit == "(" && ts[i+2].lit == "..." {
+			es = append(es, edit{ts[i+2].a, ts[i+2].b, prefix + "imports " + strconv.Quote(importsMarkerPath)})
+		}
+	}
+	return apply(text, es)
+}
+
+// File: smolang/internal/smol/lift.go
+package smol
+
+import (
+	"fmt"
+	"go/ast"
+	"go/token"
+	"os"
+	"reflect"
+	"strconv"
+	"strings"
+	"unicode"
+)
+
+var conventions = map[string]string{"ctx": "context.Context", "w": "http.ResponseWriter", "r": "*http.Request", "t": "*testing.T"}
+
+func Lift(text string, o Options) (string, error) {
+	text, err := Normalize(text)
+	if err != nil {
+		return "", err
+	}
+	if !o.NoScope {
+		out, err := lift(text, o)
+		var back string
+		if err == nil {
+			if back, err = Lower(out, o); err == nil && back == text {
+				return out, nil
+			}
+		}
+		if os.Getenv("SMOL_TRACE") != "" {
+			reason := "differs at " + difference(text, back)
+			if err != nil {
+				reason = err.Error()
+			}
+			fmt.Fprintf(os.Stderr, "smol: %s: scope elision disabled: %s\n", o.Filename, reason)
+		}
+		o.NoScope = true
+	}
+	return lift(text, o)
+}
+func lift(text string, o Options) (string, error) {
+	s, err := parse(text)
+	if err != nil {
+		return "", err
+	}
+	z := newZeros(s, o)
+	s.conv = map[string]string{}
+	for k, v := range conventions {
+		s.conv[k] = v
+	}
+	if !o.NoScope {
+		if header := s.liftScopes(o); header != "" {
+			s.put(s.packageEnd(), s.packageEnd(), header)
+		}
+		s.liftCommas()
+	}
+	s.liftImports(o)
+	var prev string
+	for _, d := range s.file.Decls {
+		f, ok := d.(*ast.FuncDecl)
+		if !ok {
+			continue
+		}
+		if s.clean(s.off(f.Pos()), s.off(f.Name.Pos())) {
+			s.put(s.off(f.Pos()), s.off(f.Pos())+5, "")
+		}
+		if f.Recv != nil {
+			s.liftParams(f.Recv)
+			recv := s.raw(f.Recv)
+			if recv == prev && s.clean(s.off(f.Recv.Pos()), s.off(f.Recv.End())) {
+				s.replace(f.Recv, ".")
+				s.put(s.off(f.Recv.End()), s.off(f.Name.Pos()), "")
+			}
+			prev = recv
+		}
+	}
+	var nodes []ast.Node
+	parents := map[ast.Node]ast.Node{}
+	var stack []ast.Node
+	ast.Inspect(s.file, func(n ast.Node) bool {
+		if n == nil {
+			stack = stack[:len(stack)-1]
+			return false
+		}
+		if len(stack) > 0 {
+			parents[n] = stack[len(stack)-1]
+		}
+		stack = append(stack, n)
+		nodes = append(nodes, n)
+		return true
+	})
+	enclosing := func(n ast.Node) *ast.FuncType {
+		for p := parents[n]; p != nil; p = parents[p] {
+			switch f := p.(type) {
+			case *ast.FuncDecl:
+				return f.Type
+			case *ast.FuncLit:
+				return f.Type
+			}
+		}
+		return nil
+	}
+	for i := len(nodes) - 1; i >= 0; i-- {
+		n := nodes[i]
+		switch t := n.(type) {
+		case *ast.FuncType:
+			s.liftSignature(t)
+		case *ast.StructType:
+			s.liftTags(t)
+		case *ast.ReturnStmt:
+			ft := enclosing(t)
+			if ft == nil || !fallible(ft) || len(t.Results) != len(results(ft)) || !s.clean(s.off(t.Pos()), s.off(t.End())) {
+				continue
+			}
+			var vals []string
+			for _, e := range t.Results {
+				vals = append(vals, s.node(e))
+			}
+			if vals[len(vals)-1] == "nil" {
+				s.replace(t, "^"+strings.Join(vals[:len(vals)-1], ", "))
+			} else if zs, ok := z.list(ft); ok && len(zs) > 0 && reflect.DeepEqual(vals[:len(vals)-1], zs) {
+				s.replace(t, "!"+vals[len(vals)-1])
+			}
+		case *ast.RangeStmt:
+			if t.Tok != token.DEFINE || t.Value == nil || t.Key == nil {
+				continue
+			}
+			a, b := s.off(t.Key.Pos()), s.off(t.X.Pos())
+			if !s.clean(a, b) {
+				continue
+			}
+			key := s.node(t.Key)
+			v := s.node(t.Value)
+			if key == "_" {
+				key = v
+			} else {
+				key += ", " + v
+			}
+			s.put(a, b, key+" in ")
+		case *ast.BlockStmt:
+			ft := enclosing(t)
+			s.liftTries(t, ft, z)
+			if len(t.List) == 1 && s.clean(s.off(t.Pos()), s.off(t.End())) {
+				if r, ok := t.List[0].(*ast.ReturnStmt); ok && len(r.Results) > 0 {
+					multi := strings.Contains(s.raw(t), "\n")
+					decl := false
+					switch parents[t].(type) {
+					case *ast.FuncDecl:
+						decl = true
+					case *ast.FuncLit:
+					default:
+						goto inline
+					}
+					ambiguous := false
+					if !decl && len(r.Results) < len(results(ft)) {
+						for _, next := range lex(s.text[s.off(t.End()):]) {
+							if next.k != token.COMMENT {
+								ambiguous = next.lit == ","
+								break
+							}
+						}
+					}
+					if !decl {
+						if literal, ok := parents[t].(*ast.FuncLit); ok {
+							switch outer := parents[literal].(type) {
+							case *ast.CallExpr:
+								ambiguous = ambiguous || outer.Fun == literal
+							case *ast.IndexExpr:
+								ambiguous = ambiguous || outer.X == literal
+							case *ast.IndexListExpr:
+								ambiguous = ambiguous || outer.X == literal
+							case *ast.SelectorExpr:
+								ambiguous = ambiguous || outer.X == literal
+							case *ast.TypeAssertExpr:
+								ambiguous = ambiguous || outer.X == literal
+							case *ast.BinaryExpr:
+								ambiguous = ambiguous || outer.X == literal
+							}
+						}
+					}
+					if multi == decl && !ambiguous {
+						var vals []string
+						for _, e := range r.Results {
+							vals = append(vals, s.node(e))
+						}
+						s.replace(t, "=> "+strings.Join(vals, ", "))
+						continue
+					}
+				}
+			}
+		inline:
+			switch parents[t].(type) {
+			case *ast.IfStmt, *ast.ForStmt, *ast.RangeStmt:
+				if len(t.List) == 1 && s.clean(s.off(t.Pos()), s.off(t.End())) && !hasBlock(t.List[0]) {
+					s.replace(t, "{ "+s.node(t.List[0])+" }")
+				}
+			}
+		}
+	}
+	return compact(s.render(0, len(text))), nil
+}
+func hasBlock(n ast.Node) bool {
+	found := false
+	ast.Inspect(n, func(n ast.Node) bool {
+		if _, ok := n.(*ast.BlockStmt); ok {
+			found = true
+			return false
+		}
+		return true
+	})
+	return found
+}
+func (s *source) liftParams(fl *ast.FieldList) {
+	if fl == nil {
+		return
+	}
+	conventions := s.conv
+	for _, f := range fl.List {
+		if len(f.Names) == 1 && conventions[f.Names[0].Name] == s.raw(f.Type) && s.clean(s.off(f.Pos()), s.off(f.End())) {
+			s.replace(f, f.Names[0].Name)
+			continue
+		}
+		for index, n := range f.Names {
+			if index < len(f.Names)-1 && conventions[n.Name] != "" {
+				s.replace(n, "\\"+n.Name)
+			}
+		}
+		if len(f.Names) == 0 {
+			if id, ok := f.Type.(*ast.Ident); ok && conventions[id.Name] != "" {
+				s.replace(id, "\\"+id.Name)
+			}
+		}
+	}
+}
+func (s *source) liftSignature(ft *ast.FuncType) {
+	s.liftParams(ft.Params)
+	r := ft.Results
+	if r == nil || len(r.List) == 0 {
+		return
+	}
+	if len(r.List) == 1 && r.Opening.IsValid() {
+		return
+	}
+	last := r.List[len(r.List)-1]
+	id, ok := last.Type.(*ast.Ident)
+	if !ok || id.Name != "error" || len(last.Names) > 0 || !s.clean(s.off(ft.Params.End()), s.off(r.End())) {
+		return
+	}
+	for _, f := range r.List {
+		if len(f.Names) > 0 {
+			return
+		}
+	}
+	var vals []string
+	for _, f := range r.List[:len(r.List)-1] {
+		vals = append(vals, s.node(f))
+	}
+	v := ""
+	if len(vals) == 1 {
+		v = vals[0]
+		if strings.HasSuffix(v, "!") || endsInFunction(r.List[0].Type) {
+			v = "(" + v + ")"
+		}
+	} else if len(vals) > 1 {
+		v = "(" + strings.Join(vals, ", ") + ")"
+	}
+	s.replace(r, v+"!")
+	if len(vals) == 0 {
+		s.put(s.off(ft.Params.End()), s.off(r.Pos()), "")
+	}
+}
+func snake(name string) string {
+	rs := []rune(name)
+	var b strings.Builder
+	for i, r := range rs {
+		if i > 0 && unicode.IsUpper(r) && (unicode.IsLower(rs[i-1]) || unicode.IsDigit(rs[i-1]) || (unicode.IsUpper(rs[i-1]) && i+1 < len(rs) && unicode.IsLower(rs[i+1]))) {
+			b.WriteByte('_')
+		}
+		b.WriteRune(unicode.ToLower(r))
+	}
+	return b.String()
+}
+func implied(keys []string, name string) string {
+	var vals []string
+	for _, k := range keys {
+		vals = append(vals, k+":"+strconv.Quote(snake(name)))
+	}
+	return "`" + strings.Join(vals, " ") + "`"
+}
+func tagKeys(tag, name string) []string {
+	if !strings.HasPrefix(tag, "`") {
+		return nil
+	}
+	body := strings.Trim(tag, "`")
+	var keys []string
+	for _, part := range strings.Split(body, " ") {
+		i := strings.IndexByte(part, ':')
+		if i <= 0 || !token.IsIdentifier(part[:i]) || part[i+1:] != strconv.Quote(snake(name)) {
+			return nil
+		}
+		keys = append(keys, part[:i])
+	}
+	if implied(keys, name) != tag {
+		return nil
+	}
+	return keys
+}
+func exported(f *ast.Field) bool { return len(f.Names) == 1 && ast.IsExported(f.Names[0].Name) }
+func (s *source) liftTags(t *ast.StructType) {
+	if !s.clean(s.off(t.Struct), s.off(t.Fields.Opening)) {
+		return
+	}
+	var keys []string
+	for _, f := range t.Fields.List {
+		if !exported(f) || f.Tag == nil {
+			continue
+		}
+		keys = tagKeys(s.raw(f.Tag), f.Names[0].Name)
+		if len(keys) > 0 {
+			break
+		}
+	}
+	if len(keys) == 0 {
+		return
+	}
+	count := 0
+	for _, f := range t.Fields.List {
+		if exported(f) && f.Tag != nil && s.raw(f.Tag) == implied(keys, f.Names[0].Name) && s.clean(s.off(f.Pos()), s.off(f.End())) {
+			count++
+		}
+	}
+	if count < 2 {
+		return
+	}
+	s.put(s.off(t.Struct)+6, s.off(t.Fields.Opening), " @"+strings.Join(keys, " @")+" ")
+	for _, f := range t.Fields.List {
+		if !exported(f) {
+			continue
+		}
+		if f.Tag == nil {
+			s.put(s.off(f.End()), s.off(f.End()), " ~")
+		} else if s.raw(f.Tag) == implied(keys, f.Names[0].Name) && s.clean(s.off(f.Pos()), s.off(f.End())) {
+			s.put(s.off(f.Type.End()), s.off(f.Tag.End()), "")
+		}
+	}
+}
+func errorIf(i *ast.IfStmt) bool { return i.Else == nil && isErrCond(i.Cond) }
+func isErrCond(e ast.Expr) bool {
+	b, ok := e.(*ast.BinaryExpr)
+	return ok && b.Op == token.NEQ && exprText(b.X) == "err" && exprText(b.Y) == "nil"
+}
+func (s *source) handler(b *ast.BlockStmt, ft *ast.FuncType, z *zeros) string {
+	if ft != nil && len(b.List) == 1 {
+		if r, ok := b.List[0].(*ast.ReturnStmt); ok && len(r.Results) == len(results(ft)) {
+			zs, ok := z.list(ft)
+			if ok {
+				vals := []string{}
+				for _, e := range r.Results[:len(r.Results)-1] {
+					vals = append(vals, s.raw(e))
+				}
+				if reflect.DeepEqual(vals, zs) || (len(vals) == 0 && len(zs) == 0) {
+					e := r.Results[len(r.Results)-1]
+					if s.raw(e) == "err" {
+						return "?"
+					}
+					if c, ok := e.(*ast.CallExpr); ok && s.raw(c.Fun) == "fmt.Errorf" && len(c.Args) >= 2 && s.raw(c.Args[len(c.Args)-1]) == "err" && c.Ellipsis == token.NoPos {
+						lit, ok := c.Args[0].(*ast.BasicLit)
+						if ok && lit.Kind == token.STRING && strings.HasPrefix(lit.Value, `"`) && strings.HasSuffix(lit.Value, `: %w"`) {
+							format := strings.TrimSuffix(lit.Value, `: %w"`) + `"`
+							args := []string{format}
+							for _, e := range c.Args[1 : len(c.Args)-1] {
+								args = append(args, s.node(e))
+							}
+							return "? " + strings.Join(args, ", ")
+						}
+					}
+				}
+			}
+		}
+	}
+	body := s.node(b)
+	body = body[1 : len(body)-1]
+	if len(b.List) == 1 && !hasBlock(b.List[0]) {
+		return "? { " + strings.TrimSpace(body) + " }"
+	}
+	return "? {" + body + "}"
+}
+func (s *source) liftTries(b *ast.BlockStmt, ft *ast.FuncType, z *zeros) {
+	for i := len(b.List) - 1; i >= 0; i-- {
+		cur, ok := b.List[i].(*ast.IfStmt)
+		if !ok || !errorIf(cur) || (len(cur.Body.List) == 0 && !strings.Contains(s.raw(cur.Body), "\n")) {
+			continue
+		}
+		if cur.Init != nil {
+			a, ok := cur.Init.(*ast.AssignStmt)
+			if !ok || a.Tok != token.DEFINE || len(a.Lhs) != 1 || s.raw(a.Lhs[0]) != "err" || len(a.Rhs) != 1 || !s.clean(s.off(cur.Pos()), s.off(cur.End())) {
+				continue
+			}
+			s.replace(cur, s.node(a.Rhs[0])+" "+s.handler(cur.Body, ft, z))
+			continue
+		}
+		if i == 0 {
+			continue
+		}
+		a, ok := b.List[i-1].(*ast.AssignStmt)
+		if !ok || (a.Tok != token.DEFINE && a.Tok != token.ASSIGN) || len(a.Lhs) == 0 || len(a.Rhs) != 1 || s.raw(a.Lhs[len(a.Lhs)-1]) != "err" || !s.clean(s.off(a.Pos()), s.off(cur.End())) {
+			continue
+		}
+		var lhs []string
+		for _, e := range a.Lhs[:len(a.Lhs)-1] {
+			lhs = append(lhs, s.node(e))
+		}
+		if len(lhs) == 0 {
+			lhs = []string{"err"}
+		}
+		handler := s.handler(cur.Body, ft, z)
+		space := " "
+		if handler == "?" {
+			space = ""
+		}
+		s.put(s.off(a.Pos()), s.off(cur.End()), strings.Join(lhs, ", ")+" "+a.Tok.String()+" "+s.node(a.Rhs[0])+space+handler)
+	}
+}
+func endsInFunction(e ast.Expr) bool {
+	switch t := e.(type) {
+	case *ast.FuncType:
+		return true
+	case *ast.StarExpr:
+		return endsInFunction(t.X)
+	case *ast.ArrayType:
+		return endsInFunction(t.Elt)
+	case *ast.MapType:
+		return endsInFunction(t.Value)
+	case *ast.ChanType:
+		return endsInFunction(t.Value)
+	}
+	return false
+}
+
+// File: smolang/internal/smol/lower.go
+package smol
+
+import (
+	"fmt"
+	"go/ast"
+	"go/parser"
+	"go/token"
+	"sort"
+	"strconv"
+	"strings"
+)
+
+func Lower(text string, o Options) (string, error) {
+	original := text
+	if o.LineSource != "" {
+		original = o.LineSource
+	}
+	text, _, err := Unpack(text, "")
+	if err != nil {
+		return "", err
+	}
+	prefix := "__smol_internal_"
+	for strings.Contains(text, prefix) {
+		prefix += "x"
+	}
+	var uses []string
+	text, uses, _, err = desugar(text, prefix)
+	if err != nil {
+		return "", err
+	}
+	if text, err = completeNames(text, o, uses); err != nil {
+		return "", err
+	}
+	s, err := parse(text)
+	if err != nil {
+		return "", fmt.Errorf("lower: %w", err)
+	}
+	z := newZeros(s, o)
+	var contexts []*ast.FuncType
+	var walkErr error
+	ast.Inspect(s.file, func(n ast.Node) bool {
+		if n == nil {
+			return true
+		}
+		switch f := n.(type) {
+		case *ast.FuncDecl:
+			contexts = append(contexts, f.Type)
+			lowerBody(s, f.Body, f.Type, z, prefix, &walkErr)
+			return false
+		case *ast.FuncLit:
+			contexts = append(contexts, f.Type)
+			lowerBody(s, f.Body, f.Type, z, prefix, &walkErr)
+			return false
+		}
+		return true
+	})
+	_ = contexts
+	if walkErr != nil {
+		return "", walkErr
+	}
+	text = s.render(0, len(text))
+	s, err = parse(text)
+	if err != nil {
+		return "", err
+	}
+	text, err = s.inferImports(o, prefix)
+	if err != nil {
+		return "", err
+	}
+	text, err = normalizePreservingComments(text)
+	if err != nil {
+		return "", err
+	}
+	if o.Lines {
+		name := o.Filename
+		if name == "" {
+			name = "source.smol"
+		}
+		text = lineDirectives(text, original, name)
+	}
+	return text, nil
+}
+func lowerDecls(text string) (string, error) {
+	ts := lex(text)
+	var es []edit
+	depth := 0
+	start := true
+	prev := ""
+	bangLine := 0
+	for i := 0; i < len(ts); i++ {
+		t := ts[i]
+		if depth == 0 && bangLine > 0 && t.line > bangLine {
+			start = true
+			bangLine = 0
+		}
+		if depth == 0 && bangLine > 0 && t.lit != "!" && t.k != token.COMMENT && t.k != token.SEMICOLON {
+			bangLine = 0
+		}
+		if depth == 0 && t.lit == "!" {
+			bangLine = t.line
+		}
+		if t.k == token.COMMENT {
+			continue
+		}
+		if depth == 0 && start {
+			if t.lit == "." {
+				if prev == "" {
+					return "", fmt.Errorf("line %d: receiver inheritance has no preceding receiver", t.line)
+				}
+				es = append(es, edit{t.a, t.b, "func " + prev + " "})
+				start = false
+			} else if t.lit == "(" {
+				j := matching(ts, i)
+				if j < 0 {
+					return "", fmt.Errorf("unclosed receiver")
+				}
+				prev = text[t.a:ts[j].b]
+				es = append(es, edit{t.a, t.a, "func "})
+				start = false
+			} else if t.k == token.IDENT && i+1 < len(ts) && (ts[i+1].lit == "(" || ts[i+1].lit == "[") {
+				es = append(es, edit{t.a, t.a, "func "})
+				start = false
+			} else if t.lit == "func" {
+				if i+1 < len(ts) && ts[i+1].lit == "(" {
+					j := matching(ts, i+1)
+					if j >= 0 {
+						prev = text[ts[i+1].a:ts[j].b]
+					}
+				}
+				start = false
+			} else if t.k != token.SEMICOLON {
+				start = false
+			}
+		}
+		switch t.lit {
+		case "{", "(", "[":
+			depth++
+		case "}", ")", "]":
+			depth--
+		}
+		if depth == 0 && t.k == token.SEMICOLON {
+			start = true
+		}
+	}
+	return apply(text, es)
+}
+func consumeType(ts []tok, i int) int {
+	if i >= len(ts) {
+		return i
+	}
+	switch ts[i].lit {
+	case "*", "...", "~":
+		return consumeType(ts, i+1)
+	case "<-":
+		return consumeType(ts, i+2)
+	case "chan":
+		if i+1 < len(ts) && ts[i+1].lit == "<-" {
+			return consumeType(ts, i+2)
+		}
+		return consumeType(ts, i+1)
+	case "[":
+		j := matching(ts, i)
+		if j < 0 {
+			return i
+		}
+		return consumeType(ts, j+1)
+	case "map":
+		if i+1 < len(ts) && ts[i+1].lit == "[" {
+			j := matching(ts, i+1)
+			if j >= 0 {
+				return consumeType(ts, j+1)
+			}
+		}
+	case "struct", "interface":
+		j := i + 1
+		for j < len(ts) && ts[j].lit != "{" {
+			j++
+		}
+		if j < len(ts) {
+			k := matching(ts, j)
+			if k >= 0 {
+				return k + 1
+			}
+		}
+	case "func":
+		if i+1 < len(ts) && ts[i+1].lit == "(" {
+			j := matching(ts, i+1)
+			if j >= 0 {
+				return consumeResult(ts, j+1)
+			}
+		}
+	case "(":
+		j := matching(ts, i)
+		if j >= 0 {
+			return j + 1
+		}
+	default:
+		if ts[i].k == token.IDENT {
+			i++
+			if i+1 < len(ts) && ts[i].lit == "." {
+				i += 2
+			}
+			if i < len(ts) && ts[i].lit == "[" {
+				j := matching(ts, i)
+				if j >= 0 {
+					i = j + 1
+				}
+			}
+			return i
+		}
+	}
+	return i
+}
+func consumeResult(ts []tok, i int) int {
+	if i >= len(ts) {
+		return i
+	}
+	if ts[i].lit == "(" {
+		j := matching(ts, i)
+		if j >= 0 {
+			return j + 1
+		}
+	}
+	return consumeType(ts, i)
+}
+
+type signature struct{ open, close, end int }
+
+func signatures(ts []tok) []signature {
+	var out []signature
+	seen := map[int]bool{}
+	add := func(i int) {
+		if i < 0 || i >= len(ts) || ts[i].lit != "(" || seen[i] {
+			return
+		}
+		j := matching(ts, i)
+		if j < 0 {
+			return
+		}
+		seen[i] = true
+		out = append(out, signature{i, j, consumeResult(ts, j+1)})
+	}
+	for i, t := range ts {
+		if t.lit == "func" {
+			j := i + 1
+			if j >= len(ts) {
+				continue
+			}
+			if ts[j].lit == "(" {
+				k := matching(ts, j)
+				if k >= 0 && k+2 < len(ts) && ts[k+1].k == token.IDENT && (ts[k+2].lit == "(" || ts[k+2].lit == "[") {
+					j = k + 2
+				} else {
+					add(j)
+					continue
+				}
+			} else {
+				j++
+			}
+			if j < len(ts) && ts[j].lit == "[" {
+				k := matching(ts, j)
+				if k < 0 {
+					continue
+				}
+				j = k + 1
+			}
+			add(j)
+		}
+		if t.lit == "interface" && i+1 < len(ts) && ts[i+1].lit == "{" {
+			end := matching(ts, i+1)
+			for j := i + 2; j < end; j++ {
+				if ts[j].k == token.IDENT && j+1 < end && ts[j+1].lit == "(" {
+					add(j + 1)
+					k := matching(ts, j+1)
+					if k >= 0 {
+						j = k
+					}
+				} else if ts[j].lit == "{" || ts[j].lit == "[" || ts[j].lit == "(" {
+					k := matching(ts, j)
+					if k >= 0 {
+						j = k
+					}
+				}
+			}
+		}
+	}
+	return out
+}
+func lowerSignatures(text string, conventions map[string]string) (string, error) {
+	ts := lex(text)
+	var es []edit
+	for _, sig := range signatures(ts) {
+		op, cl := sig.open, sig.close
+		var groups [][]tok
+		start := op + 1
+		for i := start; i < cl; i++ {
+			if ts[i].lit == "(" || ts[i].lit == "[" || ts[i].lit == "{" {
+				j := matching(ts, i)
+				if j >= 0 {
+					i = j
+				}
+				continue
+			}
+			if ts[i].lit == "," {
+				groups = append(groups, ts[start:i])
+				start = i + 1
+			}
+		}
+		if start < cl {
+			groups = append(groups, ts[start:cl])
+		}
+		allBare := true
+		allConventional := true
+		for _, g := range groups {
+			g = significant(g)
+			if len(g) != 1 || g[0].k != token.IDENT {
+				allBare = false
+			}
+			if len(g) != 1 || conventions[g[0].lit] == "" {
+				allConventional = false
+			}
+		}
+		for _, g := range groups {
+			g = significant(g)
+			if len(g) == 0 {
+				continue
+			}
+			if g[0].lit == "\\" {
+				es = append(es, edit{g[0].a, g[0].b, ""})
+				continue
+			}
+			if g[0].k != token.IDENT || conventions[g[0].lit] == "" {
+				continue
+			}
+			if len(g) == 1 && (!allBare || allConventional) {
+				es = append(es, edit{g[0].b, g[0].b, " " + conventions[g[0].lit]})
+			}
+		}
+	}
+	text, err := apply(text, es)
+	if err != nil {
+		return "", err
+	}
+	for {
+		ts = lex(text)
+		sigs := signatures(ts)
+		found := false
+		sort.Slice(sigs, func(i, j int) bool { return sigs[i].open > sigs[j].open })
+		for _, sig := range sigs {
+			end := sig.end
+			cl := sig.close
+			if end >= len(ts) || ts[end].lit != "!" {
+				continue
+			}
+			a, b := ts[cl].b, ts[end].b
+			result := strings.TrimSpace(text[a:ts[end].a])
+			v := "error"
+			if result != "" {
+				if strings.HasPrefix(result, "(") && strings.HasSuffix(result, ")") {
+					result = strings.TrimSpace(result[1 : len(result)-1])
+					result = strings.TrimSuffix(result, ",")
+				}
+				v = "(" + result + ", error)"
+			}
+			text = text[:a] + " " + v + text[b:]
+			found = true
+			break
+		}
+		if !found {
+			return text, nil
+		}
+	}
+}
+func lowerTags(text string) (string, error) {
+	ts := lex(text)
+	var es []edit
+	for i, t := range ts {
+		if t.lit != "struct" {
+			continue
+		}
+		j := i + 1
+		var keys []string
+		for j+1 < len(ts) && ts[j].lit == "@" {
+			keys = append(keys, ts[j+1].lit)
+			j += 2
+		}
+		if len(keys) == 0 {
+			continue
+		}
+		if j >= len(ts) || ts[j].lit != "{" {
+			return "", fmt.Errorf("line %d: expected struct body", t.line)
+		}
+		end := matching(ts, j)
+		if end < 0 {
+			return "", fmt.Errorf("unclosed struct")
+		}
+		es = append(es, edit{t.b, ts[j].a, " "})
+		start := j + 1
+		for k := start; k < end; k++ {
+			if ts[k].lit == "(" || ts[k].lit == "[" || ts[k].lit == "{" {
+				m := matching(ts, k)
+				if m >= 0 {
+					k = m
+				}
+				continue
+			}
+			if ts[k].k == token.SEMICOLON || k == end-1 {
+				stop := k
+				if k == end-1 && ts[k].k != token.SEMICOLON {
+					stop = k + 1
+				}
+				g := significant(ts[start:stop])
+				start = k + 1
+				if len(g) < 2 || g[0].k != token.IDENT || !ast.IsExported(g[0].lit) || g[1].lit == "," || g[1].lit == "." {
+					continue
+				}
+				last := g[len(g)-1]
+				if last.lit == "~" {
+					es = append(es, edit{last.a, last.b, ""})
+					continue
+				}
+				if last.k == token.STRING {
+					continue
+				}
+				if consumeType(g, 1) != len(g) {
+					continue
+				}
+				es = append(es, edit{last.b, last.b, " " + implied(keys, g[0].lit)})
+			}
+		}
+	}
+	return apply(text, es)
+}
+func lowerRanges(text string) (string, error) {
+	ts := lex(text)
+	var es []edit
+	for i, t := range ts {
+		if t.lit != "for" || i+2 >= len(ts) {
+			continue
+		}
+		j := i + 1
+		if ts[j].k != token.IDENT {
+			continue
+		}
+		first := ts[j]
+		j++
+		count := 1
+		if j < len(ts) && ts[j].lit == "," {
+			j++
+			if j >= len(ts) || ts[j].k != token.IDENT {
+				continue
+			}
+			j++
+			count = 2
+		}
+		if j >= len(ts) || ts[j].lit != "in" {
+			continue
+		}
+		if count == 1 {
+			es = append(es, edit{first.a, first.a, "_, "})
+		}
+		es = append(es, edit{ts[j].a, ts[j].b, ":= range"})
+	}
+	return apply(text, es)
+}
+func expressionEnd(ts []tok, i int) int {
+	for j := i; j < len(ts); j++ {
+		switch ts[j].lit {
+		case "(", "[", "{":
+			k := matching(ts, j)
+			if k < 0 {
+				return j
+			}
+			j = k
+		case ")", "]", "}", ";", "\n":
+			return j
+		case ",":
+			return j
+		}
+	}
+	return len(ts)
+}
+func lowerArrows(text string) (string, error) {
+	for {
+		ts := lex(text)
+		idx := -1
+		for i := 0; i+1 < len(ts); i++ {
+			if ts[i].lit == "=" && ts[i+1].lit == ">" {
+				idx = i
+			}
+		}
+		if idx < 0 {
+			return text, nil
+		}
+		end := expressionEnd(ts, idx+2)
+		literal := false
+		resultCount := 1
+		for _, sig := range signatures(ts) {
+			if sig.end == idx {
+				if sig.close+1 < sig.end && ts[sig.close+1].lit == "(" {
+					for j := sig.close + 2; j < sig.end-1; j++ {
+						if ts[j].lit == "(" || ts[j].lit == "[" || ts[j].lit == "{" {
+							k := matching(ts, j)
+							if k >= 0 {
+								j = k
+							}
+							continue
+						}
+						if ts[j].lit == "," {
+							resultCount++
+						}
+					}
+				}
+				for j := sig.open - 1; j >= 0; j-- {
+					if ts[j].lit == "func" {
+						literal = j+1 == sig.open
+						break
+					}
+					if ts[j].k == token.SEMICOLON || ts[j].lit == "{" {
+						break
+					}
+				}
+				break
+			}
+		}
+		if !literal {
+			resultCount = len(ts)
+		}
+		for consumed := 1; consumed < resultCount && end < len(ts) && ts[end].lit == ","; consumed++ {
+			end = expressionEnd(ts, end+1)
+		}
+		b := len(text)
+		if end < len(ts) {
+			b = ts[end].a
+		}
+		expr := strings.TrimSpace(text[ts[idx+1].b:b])
+		if expr == "" {
+			return "", fmt.Errorf("line %d: empty expression body", ts[idx].line)
+		}
+		body := "{ return " + expr + " }"
+		if !literal {
+			body = "{\nreturn " + expr + "\n}"
+		}
+		text = text[:ts[idx].a] + body + text[b:]
+	}
+}
+func statementEnd(ts []tok, i int) int {
+	for j := i; j < len(ts); j++ {
+		switch ts[j].lit {
+		case "(", "[", "{":
+			k := matching(ts, j)
+			if k >= 0 {
+				j = k
+			}
+		case "}", ";", "\n":
+			return j
+		default:
+			if ts[j].k == token.COMMENT && strings.HasPrefix(ts[j].lit, "//") {
+				return j
+			}
+		}
+	}
+	return len(ts)
+}
+func statementStart(ts []tok, i int) int {
+	for j := i - 1; j >= 0; j-- {
+		switch ts[j].lit {
+		case ")", "]", "}":
+			close := ts[j].lit
+			open := map[string]string{")": "(", "]": "[", "}": "{"}[close]
+			d := 1
+			for j--; j >= 0; j-- {
+				if ts[j].lit == close {
+					d++
+				}
+				if ts[j].lit == open {
+					d--
+					if d == 0 {
+						break
+					}
+				}
+			}
+		case "{", ";", "\n", ":":
+			return j + 1
+		}
+	}
+	return 0
+}
+func lowerStatements(text, prefix string) (string, error) {
+	for {
+		ts := lex(text)
+		idx := -1
+		for i, t := range ts {
+			if t.lit == "?" {
+				idx = i
+			}
+		}
+		if idx < 0 {
+			break
+		}
+		start := statementStart(ts, idx)
+		for start < idx && (ts[start].k == token.COMMENT || ts[start].k == token.SEMICOLON) {
+			start++
+		}
+		if start >= idx {
+			return "", fmt.Errorf("line %d: ? requires a statement", ts[idx].line)
+		}
+		end := idx + 1
+		body := "return " + prefix + "try()"
+		if end < len(ts) && ts[end].lit == "{" {
+			k := matching(ts, end)
+			if k < 0 {
+				return "", fmt.Errorf("unclosed ? handler")
+			}
+			body = strings.TrimSpace(text[ts[end].b:ts[k].a])
+			end = k + 1
+		} else if end < len(ts) && ts[end].k == token.STRING && ts[end].line == ts[idx].line {
+			if !strings.HasPrefix(ts[end].lit, `"`) {
+				return "", fmt.Errorf("line %d: ? format must be interpreted string", ts[end].line)
+			}
+			stop := statementEnd(ts, end)
+			b := len(text)
+			if stop < len(ts) {
+				b = ts[stop].a
+			}
+			format := ts[end].lit
+			args := text[ts[end].b:b]
+			body = "return " + prefix + "wrap(" + strings.TrimSuffix(format, `"`) + `: %w"` + args + ", err)"
+			end = stop
+		}
+		a := ts[start].a
+		b := ts[idx].a
+		stmt := strings.TrimSpace(text[a:b])
+		g := significant(ts[start:idx])
+		assign := -1
+		for j := 0; j < len(g); j++ {
+			if g[j].lit == "(" || g[j].lit == "[" || g[j].lit == "{" {
+				k := matching(g, j)
+				if k >= 0 {
+					j = k
+				}
+				continue
+			}
+			if g[j].lit == ":=" || g[j].lit == "=" {
+				assign = j
+				break
+			}
+		}
+		block := "{\n" + body + "\n}"
+		if body == "" {
+			block = "{\n}"
+		}
+		expansion := ""
+		if assign >= 0 {
+			lhs := strings.TrimSpace(text[a:g[assign].a])
+			if g[assign-1].lit != "err" {
+				lhs += ", err"
+			}
+			rhs := strings.TrimSpace(text[g[assign].b:b])
+			expansion = lhs + " " + g[assign].lit + " " + rhs + "\nif err != nil " + block
+		} else {
+			expansion = "if err := " + stmt + "; err != nil " + block
+		}
+		stop := ts[idx].b
+		if end > idx+1 {
+			stop = ts[end-1].b
+		}
+		text = text[:a] + expansion + text[stop:]
+	}
+	ts := lex(text)
+	blockBraces := map[int]bool{}
+	for _, sig := range signatures(ts) {
+		if sig.end < len(ts) && ts[sig.end].lit == "{" {
+			blockBraces[ts[sig.end].a] = true
+		}
+	}
+	for i, t := range ts {
+		if t.lit != "if" && t.lit != "for" && t.lit != "switch" && t.lit != "select" && t.lit != "else" {
+			continue
+		}
+		for j := i + 1; j < len(ts); j++ {
+			if ts[j].lit == "(" || ts[j].lit == "[" {
+				k := matching(ts, j)
+				if k >= 0 {
+					j = k
+				}
+				continue
+			}
+			if ts[j].lit == "{" {
+				if j >= 2 && ts[j-1].k == token.IDENT && ts[j-2].lit == "]" {
+					k := matching(ts, j)
+					if k >= 0 {
+						j = k
+						continue
+					}
+				}
+				blockBraces[ts[j].a] = true
+				break
+			}
+			if ts[j].lit == "}" {
+				break
+			}
+		}
+	}
+	literalBraces := map[int]bool{}
+	fs := token.NewFileSet()
+	tree, _ := parser.ParseFile(fs, "", text, parser.AllErrors|parser.SkipObjectResolution)
+	if tree != nil {
+		ast.Inspect(tree, func(n ast.Node) bool {
+			if c, ok := n.(*ast.CompositeLit); ok && !blockBraces[fs.PositionFor(c.Lbrace, false).Offset] {
+				a, b := fs.PositionFor(c.Pos(), false).Offset, fs.PositionFor(c.End(), false).Offset
+				if a >= 0 && b >= a && b <= len(text) {
+					expr := text[a:b]
+					if c.Type == nil {
+						expr = "T" + expr
+					}
+					if _, err := parser.ParseExpr(expr); err == nil {
+						literalBraces[fs.PositionFor(c.Lbrace, false).Offset] = true
+					}
+				}
+			}
+			return true
+		})
+	}
+	enclosing := make([]int, len(ts))
+	var braces []int
+	for i, t := range ts {
+		enclosing[i] = -1
+		if len(braces) > 0 {
+			enclosing[i] = braces[len(braces)-1]
+		}
+		if t.lit == "{" {
+			braces = append(braces, t.a)
+		}
+		if t.lit == "}" && len(braces) > 0 {
+			braces = braces[:len(braces)-1]
+		}
+	}
+	var es []edit
+	for i, t := range ts {
+		if literalBraces[enclosing[i]] {
+			continue
+		}
+		if t.lit != "^" && t.lit != "!" {
+			continue
+		}
+		prev := i - 1
+		for prev >= 0 && ts[prev].k == token.COMMENT {
+			prev--
+		}
+		start := prev < 0 || (ts[prev].k == token.SEMICOLON && ts[prev].lit == "\n") || ts[prev].lit == "{" || ts[prev].lit == ":" || ts[prev].lit == "}"
+		if !start {
+			continue
+		}
+		end := statementEnd(ts, i+1)
+		if t.lit == "^" && i+1 < len(ts) && (ts[i+1].line > t.line || ts[i+1].k == token.COMMENT) {
+			end = i + 1
+		}
+		b := len(text)
+		if end < len(ts) {
+			b = ts[end].a
+		}
+		if t.lit == "^" && end == i+1 {
+			b = t.b
+		}
+		args := strings.TrimSpace(text[t.b:b])
+		kind := "ok"
+		if t.lit == "!" {
+			kind = "fail"
+			if args == "" {
+				return "", fmt.Errorf("line %d: ! requires an error expression", t.line)
+			}
+		}
+		es = append(es, edit{t.a, b, "return " + prefix + kind + "(" + args + ")"})
+	}
+	rewrites := &source{text: text}
+	for i := len(es) - 1; i >= 0; i-- {
+		e := es[i]
+		kind := "ok"
+		if text[e.a] == '!' {
+			kind = "fail"
+		}
+		args := strings.TrimSpace(rewrites.render(e.a+1, e.b))
+		rewrites.put(e.a, e.b, "return "+prefix+kind+"("+args+")")
+	}
+	return rewrites.render(0, len(text)), nil
+}
+func lowerBody(s *source, body *ast.BlockStmt, ft *ast.FuncType, z *zeros, prefix string, errp *error) {
+	if body == nil {
+		return
+	}
+	rewrite := func(n ast.Node) bool {
+		if lit, ok := n.(*ast.FuncLit); ok {
+			lowerBody(s, lit.Body, lit.Type, z, prefix, errp)
+			return false
+		}
+		r, ok := n.(*ast.ReturnStmt)
+		if !ok || len(r.Results) != 1 {
+			return true
+		}
+		call, ok := r.Results[0].(*ast.CallExpr)
+		if !ok {
+			return true
+		}
+		id, ok := call.Fun.(*ast.Ident)
+		if !ok || !strings.HasPrefix(id.Name, prefix) {
+			return true
+		}
+		kind := strings.TrimPrefix(id.Name, prefix)
+		if !fallible(ft) {
+			*errp = fmt.Errorf("%s is only valid in a fallible function at line %d (%s)", kind, s.fs.PositionFor(n.Pos(), false).Line, s.raw(ft))
+			return true
+		}
+		var values []string
+		switch kind {
+		case "ok":
+			for _, a := range call.Args {
+				values = append(values, s.node(a))
+			}
+			if len(values) != len(results(ft))-1 {
+				*errp = fmt.Errorf("^ has %d values, expected %d", len(values), len(results(ft))-1)
+				return true
+			}
+			values = append(values, "nil")
+		case "fail", "try", "wrap":
+			zs, ok := z.list(ft)
+			if !ok {
+				*errp = fmt.Errorf("no canonical zero value for function results")
+				return true
+			}
+			if kind == "fail" && (len(zs) == 0 || len(call.Args) != 1) {
+				*errp = fmt.Errorf("! requires at least two function results and one error expression")
+				return true
+			}
+			values = append(values, zs...)
+			switch kind {
+			case "try":
+				values = append(values, "err")
+			case "fail":
+				values = append(values, s.node(call.Args[0]))
+			case "wrap":
+				var args []string
+				for _, a := range call.Args {
+					args = append(args, s.node(a))
+				}
+				values = append(values, "fmt.Errorf("+strings.Join(args, ", ")+")")
+			}
+		default:
+			return true
+		}
+		s.replace(r, "return "+strings.Join(values, ", "))
+		return true
+	}
+	var nodes []ast.Node
+	ast.Inspect(body, func(n ast.Node) bool {
+		if lit, ok := n.(*ast.FuncLit); ok {
+			lowerBody(s, lit.Body, lit.Type, z, prefix, errp)
+			return false
+		}
+		if _, ok := n.(*ast.ReturnStmt); ok {
+			nodes = append(nodes, n)
+		}
+		return true
+	})
+	for i := len(nodes) - 1; i >= 0; i-- {
+		rewrite(nodes[i])
+	}
+}
+func lineDirectives(goText, smolText, name string) string {
+	st := significant(lex(smolText))
+	gt := lex(goText)
+	lineMap := map[int]int{}
+	cursor := 0
+	last := 1
+	for _, t := range gt {
+		for j := cursor; j < len(st) && j < cursor+32; j++ {
+			if st[j].lit == t.lit {
+				last = st[j].line
+				cursor = j + 1
+				break
+			}
+		}
+		if _, ok := lineMap[t.line]; !ok {
+			lineMap[t.line] = last
+		}
+	}
+	var out strings.Builder
+	for i, l := range strings.SplitAfter(goText, "\n") {
+		if l == "" {
+			continue
+		}
+		if n, ok := lineMap[i+1]; ok && strings.TrimSpace(l) != "" {
+			out.WriteString("//line " + name + ":" + strconv.Itoa(n) + "\n")
+		}
+		out.WriteString(l)
+	}
+	return out.String()
+}
+func Format(text string, o Options) (string, error) {
+	g, e := Lower(text, o)
+	if e != nil {
+		return "", e
+	}
+	return Lift(g, o)
+}
+
+// File: smolang/internal/smol/pack.go
+package smol
+
+import (
+	"fmt"
+	"go/ast"
+	"go/scanner"
+	"go/token"
+	"strconv"
+	"strings"
+)
+
+type lexeme struct {
+	lit     string
+	comment bool
+	keep    bool
+	nl      int
+	tab     bool
+	items   []note
+	total   int
+	inner   bool
+}
+type note struct {
+	nl   int
+	tab  bool
+	text string
+	keep bool
+}
+
+func directive(text string) bool {
+	for _, p := range []string{"//go:", "//line ", "/*line ", "//export ", "//extern ", "// +build"} {
+		if strings.HasPrefix(text, p) {
+			return true
+		}
+	}
+	return false
+}
+func directiveAt(text string, offset int, comment string) bool {
+	if strings.HasPrefix(comment, "//line ") && offset != strings.LastIndex(text[:offset], "\n")+1 {
+		return false
+	}
+	return directive(comment)
+}
+
+const notesHeader = "smol-notes 1"
+
+func scanLexemes(text string) []lexeme {
+	fs := token.NewFileSet()
+	f := fs.AddFile("", -1, len(text))
+	var sc scanner.Scanner
+	sc.Init(f, []byte(text), func(token.Position, string) {}, scanner.ScanComments)
+	var out []lexeme
+	p := 0
+	for {
+		pos, k, l := sc.Scan()
+		if k == token.EOF {
+			break
+		}
+		if k == token.SEMICOLON && l == "\n" {
+			continue
+		}
+		if l == "" {
+			l = k.String()
+		}
+		a := f.Offset(pos)
+		if a < p {
+			continue
+		}
+		gap := text[p:a]
+		if k == token.COMMENT || k == token.STRING {
+			if end := a + len(l); end <= len(text) && text[a:end] != l {
+				l = sourceLiteral(text, a, l)
+			}
+		}
+		p = a + len(l)
+		if gap == "" && l == ">" && len(out) > 0 && out[len(out)-1].lit == "=" && !out[len(out)-1].comment {
+			out[len(out)-1].lit = "=>"
+			continue
+		}
+		out = append(out, lexeme{lit: l, comment: k == token.COMMENT, keep: k == token.COMMENT && directiveAt(text, a, l), nl: strings.Count(gap, "\n"), tab: strings.HasSuffix(gap, "\t") && strings.Contains(gap, "\n")})
+	}
+	return out
+}
+func sourceLiteral(text string, a int, lit string) string {
+	i, j := a, 0
+	for j < len(lit) && i < len(text) {
+		if text[i] == lit[j] {
+			i++
+			j++
+		} else if text[i] == '\r' {
+			i++
+		} else {
+			return lit
+		}
+	}
+	return text[a:i]
+}
+
+var spaceCache = map[string]bool{}
+
+func needSpace(a, b string) bool {
+	key := a + "\x00" + b
+	if v, ok := spaceCache[key]; ok {
+		return v
+	}
+	ls := scanLexemes(a + b)
+	v := len(ls) != 2 || ls[0].lit != a || ls[1].lit != b
+	if len(key) < 64 {
+		spaceCache[key] = v
+	}
+	return v
+}
+func codeLexemes(text string) []lexeme {
+	var out []lexeme
+	var items []note
+	total, depth := 0, 0
+	all := scanLexemes(text)
+	for n, x := range all {
+		cgoNext := false
+		for m := n + 1; m < len(all) && m <= n+2; m++ {
+			if !all[m].comment {
+				cgoNext = all[m].lit == `"C"`
+				break
+			}
+		}
+		total += x.nl
+		if x.comment {
+			total += strings.Count(x.lit, "\n")
+			items = append(items, note{nl: x.nl, tab: x.tab, text: x.lit, keep: x.keep})
+			continue
+		}
+		for j := range items {
+			items[j].keep = items[j].keep || (x.lit == "import" && cgoNext)
+		}
+		x.items, x.total = items, total
+		x.inner = depth > 0
+		switch x.lit {
+		case "(", "[", "{":
+			depth++
+		case ")", "]", "}":
+			depth--
+		}
+		out = append(out, x)
+		items, total = nil, 0
+	}
+	if len(items) > 0 {
+		tail := strings.Count(text[strings.LastIndex(text, items[len(items)-1].text):], "\n") - strings.Count(items[len(items)-1].text, "\n")
+		out = append(out, lexeme{items: items, nl: tail, total: total + tail})
+	}
+	return out
+}
+
+type segment struct {
+	head       string
+	start, end int
+}
+
+func segments(ls []lexeme) []segment {
+	var out []segment
+	depth := 0
+	for i, x := range ls {
+		if x.lit == "" {
+			break
+		}
+		if i == 0 || (depth == 0 && (x.total > 0 || impliedBreak(ls, i))) {
+			if len(out) > 0 {
+				out[len(out)-1].end = i
+			}
+			out = append(out, segment{start: i})
+		}
+		switch x.lit {
+		case "(", "[", "{":
+			depth++
+		case ")", "]", "}":
+			depth--
+		}
+	}
+	n := len(ls)
+	if n > 0 && ls[n-1].lit == "" {
+		n--
+	}
+	if len(out) > 0 {
+		out[len(out)-1].end = n
+	}
+	seen := map[string]int{}
+	for i := range out {
+		var b strings.Builder
+		for j := out[i].start; j < out[i].end && j < out[i].start+10; j++ {
+			if j > out[i].start && (ls[j].total > 0 || impliedBreak(ls, j) || ls[j].lit == "{") {
+				break
+			}
+			if j > out[i].start && needSpace(ls[j-1].lit, ls[j].lit) {
+				b.WriteByte(' ')
+			}
+			b.WriteString(ls[j].lit)
+		}
+		h := strings.ReplaceAll(b.String(), "\n", " ")
+		seen[h]++
+		if seen[h] > 1 {
+			h += " #" + strconv.Itoa(seen[h])
+		}
+		out[i].head = h
+	}
+	return out
+}
+
+var joinable = map[string]bool{"if": true, "for": true, "switch": true, "select": true, "return": true, "var": true,
+	"go": true, "defer": true, "break": true, "continue": true, "goto": true, "fallthrough": true}
+
+func wordy(l string) bool {
+	if l == "" {
+		return false
+	}
+	c := l[len(l)-1]
+	return c == '_' || c >= 0x80 || (c >= '0' && c <= '9') || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '"' || c == '\'' || c == '`'
+}
+func impliedBreak(ls []lexeme, i int) bool {
+	if i == 0 || !joinable[ls[i].lit] || !ls[i].inner {
+		return false
+	}
+	p := ls[i-1].lit
+	return wordy(p) && p != "else" && !joinable[p] && p != "case"
+}
+func operandGap(a, b string) bool {
+	if !wordy(a) || b == "" {
+		return false
+	}
+	quote := func(c byte) bool { return c == '"' || c == '\'' || c == '`' }
+	return quote(b[0]) || (quote(a[len(a)-1]) && wordy(b[:1]))
+}
+func Pack(text string) (code, notes string) {
+	return pack(text, false)
+}
+func pack(text string, keepComments bool) (code, notes string) {
+	ls := codeLexemes(text)
+	if keepComments {
+		for i := range ls {
+			for j := range ls[i].items {
+				ls[i].items[j].keep = true
+			}
+		}
+	}
+	segs := segments(ls)
+	var cb, nb strings.Builder
+	si := 0
+	for i, x := range ls {
+		for si+1 < len(segs) && i >= segs[si+1].start {
+			si++
+		}
+		kept := false
+		for _, it := range x.items {
+			if !it.keep {
+				continue
+			}
+			if cb.Len() > 0 {
+				cb.WriteByte('\n')
+			}
+			if it.tab {
+				cb.WriteByte('\t')
+			}
+			cb.WriteString(it.text)
+			kept = true
+		}
+		if x.lit != "" {
+			switch {
+			case kept:
+				cb.WriteByte('\n')
+			case i == 0:
+			case x.total > 0 && impliedBreak(ls, i):
+				cb.WriteByte(' ')
+			case x.total > 0:
+				cb.WriteByte('\n')
+			case needSpace(ls[i-1].lit, x.lit) || operandGap(ls[i-1].lit, x.lit):
+				cb.WriteByte(' ')
+			}
+			cb.WriteString(x.lit)
+		}
+	}
+	if cb.Len() > 0 {
+		cb.WriteByte('\n')
+	}
+	for n, sg := range segs {
+		end := sg.end
+		if n == len(segs)-1 {
+			end = len(ls)
+		}
+		var b strings.Builder
+		for i := sg.start; i < end; i++ {
+			x := ls[i]
+			k := i - sg.start
+			if len(x.items) == 0 {
+				if x.total > 1 && i > 0 {
+					fmt.Fprintf(&b, "%d b\n", k)
+				}
+				continue
+			}
+			for _, it := range x.items {
+				t := 0
+				if it.tab {
+					t = 1
+				}
+				if it.keep {
+					fmt.Fprintf(&b, "%d d%d%d\n", k, min(it.nl, 2), t)
+					continue
+				}
+				fmt.Fprintf(&b, "%d c%d%d %s\n", k, min(it.nl, 2), t, strconv.Quote(it.text))
+			}
+			fmt.Fprintf(&b, "%d e%d\n", k, min(x.nl, 2))
+		}
+		if b.Len() > 0 {
+			fmt.Fprintf(&nb, "@%d %s\n", sg.end-sg.start, sg.head)
+			nb.WriteString(b.String())
+		}
+	}
+	if nb.Len() > 0 {
+		notes = notesHeader + "\n" + nb.String()
+	}
+	return cb.String(), notes
+}
+
+type segNotes struct {
+	count   int
+	entries map[int][]string
+	order   []int
+}
+
+func parseNotes(notes string) (map[string]*segNotes, error) {
+	out := map[string]*segNotes{}
+	if strings.TrimSpace(notes) == "" {
+		return out, nil
+	}
+	lines := strings.Split(strings.TrimRight(notes, "\n"), "\n")
+	if lines[0] != notesHeader {
+		return nil, fmt.Errorf("notes: expected %q header", notesHeader)
+	}
+	var cur *segNotes
+	for i, l := range lines[1:] {
+		if strings.HasPrefix(l, "@") {
+			sp := strings.IndexByte(l, ' ')
+			if sp < 0 {
+				return nil, fmt.Errorf("notes:%d: malformed segment", i+2)
+			}
+			n, e := strconv.Atoi(l[1:sp])
+			if e != nil {
+				return nil, fmt.Errorf("notes:%d: malformed segment", i+2)
+			}
+			cur = &segNotes{count: n, entries: map[int][]string{}}
+			out[l[sp+1:]] = cur
+			continue
+		}
+		sp := strings.IndexByte(l, ' ')
+		if cur == nil || sp < 0 {
+			return nil, fmt.Errorf("notes:%d: malformed entry", i+2)
+		}
+		k, e := strconv.Atoi(l[:sp])
+		if e != nil {
+			return nil, fmt.Errorf("notes:%d: malformed entry", i+2)
+		}
+		if _, ok := cur.entries[k]; !ok {
+			cur.order = append(cur.order, k)
+		}
+		cur.entries[k] = append(cur.entries[k], l[sp+1:])
+	}
+	return out, nil
+}
+func Unpack(code, notes string) (string, []string, error) {
+	table, err := parseNotes(notes)
+	if err != nil {
+		return "", nil, err
+	}
+	ls := codeLexemes(code)
+	if n := len(ls); n > 0 && ls[n-1].lit != "" {
+		ls = append(ls, lexeme{})
+	}
+	segs := segments(ls)
+	var warnings []string
+	var b strings.Builder
+	used := map[string]bool{}
+	writeEntries := func(es []string, first bool, inCode []note) error {
+		for _, e := range es {
+			switch {
+			case e == "b":
+				b.WriteString("\n\n")
+			case strings.HasPrefix(e, "d") && len(e) == 3:
+				if len(inCode) == 0 {
+					continue
+				}
+				b.WriteString(strings.Repeat("\n", int(e[1]-'0')))
+				if e[2] == '1' {
+					b.WriteByte('\t')
+				}
+				b.WriteString(inCode[0].text)
+				inCode = inCode[1:]
+				first = false
+			case strings.HasPrefix(e, "c") && len(e) > 4:
+				text, err := strconv.Unquote(e[4:])
+				if err != nil {
+					return fmt.Errorf("notes: malformed comment %q", e)
+				}
+				n := int(e[1] - '0')
+				if n == 0 && !first {
+					b.WriteByte(' ')
+				}
+				b.WriteString(strings.Repeat("\n", n))
+				if e[2] == '1' {
+					b.WriteByte('\t')
+				}
+				b.WriteString(text)
+				first = false
+			case strings.HasPrefix(e, "e") && len(e) == 2:
+				n := int(e[1] - '0')
+				for _, it := range inCode {
+					b.WriteString("\n" + it.text)
+					n = max(n, 1)
+				}
+				if n == 0 {
+					b.WriteByte(' ')
+				}
+				b.WriteString(strings.Repeat("\n", n))
+			default:
+				return fmt.Errorf("notes: malformed entry %q", e)
+			}
+		}
+		return nil
+	}
+	plain := func(i int) {
+		x := ls[i]
+		for j, it := range x.items {
+			if it.nl == 0 && (i > 0 || j > 0) {
+				b.WriteByte(' ')
+			}
+			b.WriteString(strings.Repeat("\n", it.nl))
+			if it.tab {
+				b.WriteByte('\t')
+			}
+			b.WriteString(it.text)
+		}
+		switch {
+		case (i == 0 || x.lit == "") && len(x.items) == 0:
+		case len(x.items) > 0:
+			if x.nl == 0 {
+				b.WriteByte(' ')
+			}
+			nl := x.nl
+			if last := x.items[len(x.items)-1].text; x.lit == "package" && nl == 1 && (strings.HasPrefix(last, "//go:build") || strings.HasPrefix(last, "// +build")) {
+				nl = 2
+			}
+			b.WriteString(strings.Repeat("\n", nl))
+		case x.total > 0:
+			b.WriteString(strings.Repeat("\n", min(x.total, 2)))
+		case impliedBreak(ls, i):
+			b.WriteByte('\n')
+		case needSpace(ls[i-1].lit, x.lit) || operandGap(ls[i-1].lit, x.lit):
+			b.WriteByte(' ')
+		}
+	}
+	for n, sg := range segs {
+		sn := table[sg.head]
+		used[sg.head] = true
+		end := sg.end
+		if n == len(segs)-1 {
+			end = len(ls)
+		}
+		intact := sn != nil && sn.count == sg.end-sg.start
+		if sn != nil && !intact {
+			warnings = append(warnings, "notes: "+sg.head+" changed; its interior comments were moved above it")
+			var doc, rest []string
+			for _, k := range sn.order {
+				for _, e := range sn.entries[k] {
+					if k == 0 {
+						doc = append(doc, e)
+					} else if strings.HasPrefix(e, "c") && len(e) > 4 {
+						rest = append(rest, "c10"+e[3:])
+					}
+				}
+			}
+			if len(rest) > 0 {
+				lead := []string{}
+				if n > 0 {
+					lead = append(lead, "c1"+rest[0][2:])
+				} else {
+					lead = append(lead, "c0"+rest[0][2:])
+				}
+				lead = append(lead, rest[1:]...)
+				if len(doc) == 0 {
+					doc = append(lead, "e1")
+				} else {
+					doc = append(lead, doc...)
+				}
+			}
+			sn = &segNotes{count: sg.end - sg.start, entries: map[int][]string{0: doc}}
+			if len(doc) == 0 {
+				sn = nil
+			}
+		}
+		for i := sg.start; i < end; i++ {
+			var es []string
+			if sn != nil {
+				es = sn.entries[i-sg.start]
+			}
+			if len(es) == 0 {
+				plain(i)
+			} else if err := writeEntries(es, i == 0, ls[i].items); err != nil {
+				return "", nil, err
+			}
+			b.WriteString(ls[i].lit)
+		}
+	}
+	for h := range table {
+		if !used[h] {
+			warnings = append(warnings, "notes: no declaration matches "+strconv.Quote(h)+"; its comments were dropped")
+		}
+	}
+	out := b.String()
+	if out != "" && !strings.HasSuffix(out, "\n") {
+		out += "\n"
+	}
+	return out, warnings, nil
+}
+func Outline(text string, o Options, docs bool) (string, error) {
+	text, err := Normalize(text)
+	if err != nil {
+		return "", err
+	}
+	s, err := parse(text)
+	if err != nil {
+		return "", err
+	}
+	keep := map[*ast.Comment]bool{}
+	remember := func(g *ast.CommentGroup) {
+		if g != nil {
+			for _, c := range g.List {
+				keep[c] = true
+			}
+		}
+	}
+	if docs {
+		ast.Inspect(s.file, func(n ast.Node) bool {
+			switch n := n.(type) {
+			case *ast.File:
+				remember(n.Doc)
+			case *ast.GenDecl:
+				remember(n.Doc)
+			case *ast.FuncDecl:
+				remember(n.Doc)
+			case *ast.TypeSpec:
+				remember(n.Doc)
+			case *ast.ValueSpec:
+				remember(n.Doc)
+			case *ast.ImportSpec:
+				remember(n.Doc)
+			case *ast.Field:
+				remember(n.Doc)
+			}
+			return true
+		})
+	}
+	for _, d := range s.file.Decls {
+		if g, ok := d.(*ast.GenDecl); ok && g.Tok == token.IMPORT {
+			for _, sp := range g.Specs {
+				im := sp.(*ast.ImportSpec)
+				if im.Path.Value == `"C"` {
+					remember(g.Doc)
+					remember(im.Doc)
+				}
+			}
+		}
+	}
+	for _, g := range s.file.Comments {
+		for _, c := range g.List {
+			if !keep[c] && !directiveAt(text, s.off(c.Pos()), c.Text) {
+				s.replace(c, "")
+			}
+		}
+	}
+	placeholder := "__smol_outline_body"
+	for strings.Contains(text, placeholder) {
+		placeholder += "x"
+	}
+	ast.Inspect(s.file, func(n ast.Node) bool {
+		switch f := n.(type) {
+		case *ast.FuncDecl:
+			if f.Body != nil {
+				s.put(s.off(f.Type.End()), s.off(f.Body.End()), "")
+			}
+			return false
+		case *ast.FuncLit:
+			s.replace(f.Body, "{"+placeholder+"()}")
+			return false
+		}
+		return true
+	})
+	wide, err := Lift(s.render(0, len(text)), o)
+	if err != nil {
+		return "", err
+	}
+	ts := significant(lex(wide))
+	var cuts []edit
+	for i, t := range ts {
+		if t.lit == placeholder && i > 0 && i+3 < len(ts) && ts[i-1].lit == "{" && ts[i+1].lit == "(" && ts[i+2].lit == ")" && ts[i+3].lit == "}" {
+			cuts = append(cuts, edit{ts[i-1].a, ts[i+3].b, ""})
+		}
+	}
+	wide, err = apply(wide, cuts)
+	if err != nil {
+		return "", err
+	}
+	code, _ := pack(wide, docs)
+	return code, nil
+}
+
+// File: smolang/internal/smol/package.go
+package smol
+
+import (
+	"fmt"
+	"go/ast"
+	"go/token"
+	"sort"
+	"strconv"
+	"strings"
+)
+
+func DiscoverImports(files map[string]string, imports map[string]Import) error {
+	standard()
+	names := make([]string, 0, len(files))
+	for name := range files {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+	for _, name := range names {
+		text := files[name]
+		s, e := parse(text)
+		if e != nil {
+			return e
+		}
+		for _, im := range s.file.Imports {
+			p, _ := strconv.Unquote(im.Path.Value)
+			if stdPaths[p] {
+				continue
+			}
+			n := packageName(p)
+			alias := false
+			if im.Name != nil {
+				n = im.Name.Name
+				alias = true
+			}
+			if n == "_" || n == "." || p == "C" {
+				continue
+			}
+			if _, ok := imports[n]; !ok {
+				imports[n] = Import{Path: p, Alias: alias}
+			}
+		}
+	}
+	return nil
+}
+func Prepare(text string) (string, error) {
+	prefix := "__smol_internal_"
+	for strings.Contains(text, prefix) {
+		prefix += "x"
+	}
+	text, _, err := Unpack(text, "")
+	if err != nil {
+		return "", err
+	}
+	text, _, _, err = desugar(text, prefix)
+	return text, err
+}
+func desugar(text, prefix string) (string, []string, map[string]string, error) {
+	text, uses, conv, err := splitHeader(text)
+	if err != nil {
+		return "", nil, nil, err
+	}
+	for _, phase := range []func(string) (string, error){func(t string) (string, error) { return lowerImportMarker(t, prefix) },
+		func(t string) (string, error) { return lowerReceivers(t, conv) }, lowerDecls, lowerCommas,
+		func(t string) (string, error) { return lowerSignatures(t, conv) }, lowerTags, lowerRanges, lowerArrows,
+		func(t string) (string, error) { return lowerStatements(t, prefix) }} {
+		text, err = phase(text)
+		if err != nil {
+			return "", nil, nil, err
+		}
+	}
+	return text, uses, conv, nil
+}
+func Check(text string, o Options) error {
+	n, e := Normalize(text)
+	if e != nil {
+		return e
+	}
+	s, e := Lift(n, o)
+	if e != nil {
+		return e
+	}
+	g, e := Lower(s, o)
+	if e != nil {
+		return fmt.Errorf("L1 lower: %w", e)
+	}
+	if n != g {
+		return fmt.Errorf("L1 differs at %s", difference(n, g))
+	}
+	f, e := Format(s, o)
+	if e != nil {
+		return fmt.Errorf("L2 format: %w", e)
+	}
+	if f != s {
+		return fmt.Errorf("L2 differs at %s", difference(s, f))
+	}
+	f2, e := Format(f, o)
+	if e != nil {
+		return e
+	}
+	if f2 != f {
+		return fmt.Errorf("L3 differs at %s", difference(f, f2))
+	}
+	code, notes := Pack(s)
+	wide, warnings, e := Unpack(code, notes)
+	if e != nil || len(warnings) > 0 {
+		return fmt.Errorf("unpack: %v %v", e, warnings)
+	}
+	g, e = Lower(wide, o)
+	if e != nil {
+		return fmt.Errorf("L1 lower (packed): %w", e)
+	}
+	if n != g {
+		return fmt.Errorf("L1 (packed) differs at %s", difference(n, g))
+	}
+	if c2, n2 := Pack(wide); c2 != code || n2 != notes {
+		return fmt.Errorf("L3 (packed): packing is not stable")
+	}
+	bare, e := Lower(code, o)
+	if e != nil {
+		return fmt.Errorf("L4 lower: %w", e)
+	}
+	want, e := programTokens(n)
+	if e != nil {
+		return e
+	}
+	got, e := programTokens(bare)
+	if e != nil {
+		return e
+	}
+	if want != got {
+		return fmt.Errorf("L4 Go tokens/directives differ at %s", difference(want, got))
+	}
+	return nil
+}
+func programTokens(text string) (string, error) {
+	s, err := parse(text)
+	if err != nil {
+		return "", err
+	}
+	preamble := map[int]bool{}
+	for _, d := range s.file.Decls {
+		if g, ok := d.(*ast.GenDecl); ok && g.Tok == token.IMPORT {
+			for _, sp := range g.Specs {
+				im := sp.(*ast.ImportSpec)
+				if im.Path.Value == `"C"` {
+					for _, cg := range []*ast.CommentGroup{g.Doc, im.Doc} {
+						if cg != nil {
+							for _, c := range cg.List {
+								preamble[s.off(c.Pos())] = true
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	var b strings.Builder
+	for _, t := range lex(text) {
+		if t.k == token.COMMENT && !directiveAt(text, t.a, t.lit) && !preamble[t.a] {
+			continue
+		}
+		fmt.Fprintf(&b, "%s %q\n", t.k, t.lit)
+	}
+	return b.String(), nil
+}
+func difference(a, b string) string {
+	line := 1
+	for i := 0; i < len(a) && i < len(b); i++ {
+		if a[i] != b[i] {
+			return fmt.Sprintf("line %d: want %q, got %q", line, excerpt(a[i:]), excerpt(b[i:]))
+		}
+		if a[i] == '\n' {
+			line++
+		}
+	}
+	return fmt.Sprintf("line %d (length %d vs %d)", line, len(a), len(b))
+}
+func excerpt(t string) string {
+	if len(t) > 120 {
+		return t[:120]
+	}
+	return t
+}
+func DeclaredNames(text string) []string {
+	s, e := parse(text)
+	if e != nil {
+		return nil
+	}
+	var names []string
+	for _, d := range s.file.Decls {
+		if f, ok := d.(*ast.FuncDecl); ok && f.Recv == nil {
+			names = append(names, f.Name.Name)
+		}
+	}
+	return names
+}
+
+type PackageContext struct {
+	packages map[string]*PackageContext
+	names    map[string]bool
+	types    map[string]ast.Expr
+	methods  map[string]map[string]bool
+}
+
+func NewPackageContext(files map[string]string) *PackageContext {
+	root := &PackageContext{packages: map[string]*PackageContext{}}
+	keys := make([]string, 0, len(files))
+	for k := range files {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	for _, k := range keys {
+		s, e := parse(files[k])
+		if e != nil {
+			continue
+		}
+		c := root.packages[s.file.Name.Name]
+		if c == nil {
+			c = &PackageContext{names: map[string]bool{}, types: map[string]ast.Expr{}}
+			root.packages[s.file.Name.Name] = c
+		}
+		for _, d := range s.file.Decls {
+			switch d := d.(type) {
+			case *ast.FuncDecl:
+				if d.Recv == nil {
+					c.names[d.Name.Name] = true
+				} else if len(d.Recv.List) == 1 {
+					if c.methods == nil {
+						c.methods = map[string]map[string]bool{}
+					}
+					base := recvBase(d.Recv.List[0].Type)
+					if c.methods[base] == nil {
+						c.methods[base] = map[string]bool{}
+					}
+					c.methods[base][d.Name.Name] = true
+				}
+			case *ast.GenDecl:
+				for _, sp := range d.Specs {
+					switch sp := sp.(type) {
+					case *ast.TypeSpec:
+						c.names[sp.Name.Name] = true
+						c.types[sp.Name.Name] = sp.Type
+					case *ast.ValueSpec:
+						for _, n := range sp.Names {
+							c.names[n.Name] = true
+						}
+					}
+				}
+			}
+		}
+	}
+	return root
+}
+func (c *PackageContext) forPackage(name string) *PackageContext {
+	if c.packages == nil {
+		return c
+	}
+	if p := c.packages[name]; p != nil {
+		return p
+	}
+	return &PackageContext{names: map[string]bool{}, types: map[string]ast.Expr{}}
+}
+
+// File: smolang/internal/smol/print.go
+package smol
+
+import (
+	"go/ast"
+	"go/format"
+	"go/token"
+	"io"
+)
+
+func printerNode(w io.Writer, n ast.Node) error { return format.Node(w, token.NewFileSet(), n) }
+
+// File: smolang/internal/smol/scope.go
+package smol
+
+import (
+	"fmt"
+	"go/ast"
+	"go/parser"
+	"go/token"
+	"go/types"
+	"sort"
+	"strconv"
+	"strings"
+)
+
+var reservedBare = map[string]bool{"in": true, "use": true, "let": true, "_": true}
+
+func recvBase(e ast.Expr) string {
+	for {
+		switch t := e.(type) {
+		case *ast.StarExpr:
+			e = t.X
+		case *ast.ParenExpr:
+			e = t.X
+		case *ast.IndexExpr:
+			e = t.X
+		case *ast.IndexListExpr:
+			e = t.X
+		case *ast.Ident:
+			return t.Name
+		default:
+			return ""
+		}
+	}
+}
+func fieldNames(t ast.Expr, into map[string]bool) {
+	st, ok := t.(*ast.StructType)
+	if !ok || st.Fields == nil {
+		return
+	}
+	for _, f := range st.Fields.List {
+		for _, n := range f.Names {
+			into[n.Name] = true
+		}
+		if len(f.Names) == 0 {
+			e := f.Type
+			if p, ok := e.(*ast.StarExpr); ok {
+				e = p.X
+			}
+			switch t := e.(type) {
+			case *ast.IndexExpr:
+				e = t.X
+			case *ast.IndexListExpr:
+				e = t.X
+			}
+			if sel, ok := e.(*ast.SelectorExpr); ok {
+				into[sel.Sel.Name] = true
+			} else if n := recvBase(e); n != "" {
+				into[n] = true
+			}
+		}
+	}
+}
+func (c *PackageContext) members(file *ast.File, typ string) map[string]bool {
+	m := map[string]bool{}
+	if typ == "" {
+		return m
+	}
+	if c != nil {
+		if t := c.types[typ]; t != nil {
+			fieldNames(t, m)
+		}
+		for n := range c.methods[typ] {
+			m[n] = true
+		}
+	}
+	for _, d := range file.Decls {
+		switch d := d.(type) {
+		case *ast.FuncDecl:
+			if d.Recv != nil && len(d.Recv.List) == 1 && recvBase(d.Recv.List[0].Type) == typ {
+				m[d.Name.Name] = true
+			}
+		case *ast.GenDecl:
+			for _, sp := range d.Specs {
+				if t, ok := sp.(*ast.TypeSpec); ok && t.Name.Name == typ {
+					fieldNames(t.Type, m)
+				}
+			}
+		}
+	}
+	return m
+}
+
+type scopeFacts struct {
+	file     *ast.File
+	fs       *token.FileSet
+	imports  map[string]string
+	dot      bool
+	ctx      *PackageContext
+	pkgNames map[string]bool
+}
+
+func (f *scopeFacts) off(p token.Pos) int { return f.fs.PositionFor(p, false).Offset }
+func newScopeFacts(text string, o Options) (*scopeFacts, error) {
+	fs := token.NewFileSet()
+	file, err := parser.ParseFile(fs, "source.go", text, 0)
+	if err != nil {
+		return nil, err
+	}
+	ctx := o.Context
+	if ctx == nil {
+		ctx = NewPackageContext(o.PackageFiles)
+	}
+	ctx = ctx.forPackage(file.Name.Name)
+	f := &scopeFacts{file: file, fs: fs, imports: map[string]string{}, ctx: ctx, pkgNames: map[string]bool{}}
+	for n := range table(o) {
+		f.pkgNames[n] = true
+	}
+	for _, im := range file.Imports {
+		p, _ := strconv.Unquote(im.Path.Value)
+		n := packageName(p)
+		if im.Name != nil {
+			n = im.Name.Name
+		}
+		if n == "." {
+			f.dot = true
+		}
+		f.imports[n] = p
+		f.pkgNames[n] = true
+	}
+	return f, nil
+}
+func (f *scopeFacts) taken(name string) bool {
+	return reservedBare[name] || f.pkgNames[name] || f.ctx.names[name] || types.Universe.Lookup(name) != nil || token.IsKeyword(name)
+}
+
+type method struct {
+	a, b    int
+	recv    string
+	members map[string]bool
+}
+
+func (f *scopeFacts) methods() []method {
+	var out []method
+	for _, d := range f.file.Decls {
+		fd, ok := d.(*ast.FuncDecl)
+		if !ok || fd.Body == nil {
+			continue
+		}
+		list := fd.Recv
+		if list == nil {
+			list = fd.Type.Params
+		}
+		if list == nil || len(list.List) == 0 || len(list.List[0].Names) == 0 {
+			continue
+		}
+		r := list.List[0].Names[0].Name
+		base := recvBase(list.List[0].Type)
+		if _, ok := list.List[0].Type.(*ast.Ellipsis); ok || r == "_" || base == "" {
+			continue
+		}
+		mem := f.ctx.members(f.file, base)
+		if len(mem) == 0 {
+			continue
+		}
+		out = append(out, method{f.off(fd.Body.Pos()), f.off(fd.Body.End()), r, mem})
+	}
+	return out
+}
+func enclosing(ms []method, off int) *method {
+	for i := range ms {
+		if off >= ms[i].a && off < ms[i].b {
+			return &ms[i]
+		}
+	}
+	return nil
+}
+func (f *scopeFacts) declared() map[string]bool {
+	d := map[string]bool{}
+	add := func(ids ...*ast.Ident) {
+		for _, id := range ids {
+			if id != nil {
+				d[id.Name] = true
+			}
+		}
+	}
+	fields := func(fl *ast.FieldList) {
+		if fl == nil {
+			return
+		}
+		for _, x := range fl.List {
+			add(x.Names...)
+		}
+	}
+	ast.Inspect(f.file, func(n ast.Node) bool {
+		switch t := n.(type) {
+		case *ast.FuncDecl:
+			if t.Recv == nil {
+				add(t.Name)
+			} else {
+				fields(t.Recv)
+				for _, x := range t.Recv.List {
+					ast.Inspect(x.Type, func(n ast.Node) bool {
+						if id, ok := n.(*ast.Ident); ok {
+							add(id)
+						}
+						return true
+					})
+				}
+			}
+		case *ast.FuncType:
+			fields(t.TypeParams)
+			fields(t.Params)
+			fields(t.Results)
+		case *ast.TypeSpec:
+			add(t.Name)
+			fields(t.TypeParams)
+		case *ast.ValueSpec:
+			add(t.Names...)
+		case *ast.AssignStmt:
+			if t.Tok == token.DEFINE {
+				for _, e := range t.Lhs {
+					if id, ok := e.(*ast.Ident); ok {
+						add(id)
+					}
+				}
+			}
+		case *ast.RangeStmt:
+			if t.Tok == token.DEFINE {
+				for _, e := range []ast.Expr{t.Key, t.Value} {
+					if id, ok := e.(*ast.Ident); ok {
+						add(id)
+					}
+				}
+			}
+		case *ast.LabeledStmt:
+			add(t.Label)
+		}
+		return true
+	})
+	return d
+}
+func exportsOf(path string) *types.Package {
+	defer func() { _ = recover() }()
+	p, err := exportImporter(nil).Import(path)
+	if err != nil {
+		return nil
+	}
+	return p
+}
+func exported2(p *types.Package, name string) bool {
+	return p != nil && ast.IsExported(name) && p.Scope().Lookup(name) != nil
+}
+func (s *source) liftScopes(o Options) string {
+	f, err := newScopeFacts(s.text, o)
+	if err != nil {
+		return ""
+	}
+	header := ""
+	if !f.dot {
+		keys := map[ast.Expr]bool{}
+		ast.Inspect(f.file, func(n ast.Node) bool {
+			if c, ok := n.(*ast.CompositeLit); ok {
+				for _, e := range c.Elts {
+					if kv, ok := e.(*ast.KeyValueExpr); ok {
+						keys[kv.Key] = true
+					}
+				}
+			}
+			return true
+		})
+		ms := f.methods()
+		type site struct {
+			sel *ast.SelectorExpr
+			pkg string
+		}
+		var all []site
+		ast.Inspect(f.file, func(n ast.Node) bool {
+			sel, ok := n.(*ast.SelectorExpr)
+			if !ok || keys[sel] {
+				return true
+			}
+			id, ok := sel.X.(*ast.Ident)
+			if !ok || f.taken(sel.Sel.Name) || !s.clean(f.off(sel.Pos()), f.off(sel.End())) {
+				return true
+			}
+			m := enclosing(ms, f.off(sel.Pos()))
+			if id.Obj != nil {
+				if m != nil && id.Name == m.recv && m.members[sel.Sel.Name] {
+					if fld, ok := id.Obj.Decl.(*ast.Field); ok && f.off(fld.Pos()) < m.a {
+						all = append(all, site{sel, ""})
+					}
+				}
+				return true
+			}
+			if path := f.imports[id.Name]; path != "" && path != "C" && !f.ctx.names[id.Name] && (m == nil || !m.members[sel.Sel.Name]) {
+				all = append(all, site{sel, id.Name})
+			}
+			return true
+		})
+		var trial []edit
+		for _, st := range all {
+			trial = append(trial, edit{f.off(st.sel.Pos()), f.off(st.sel.Sel.Pos()), ""})
+		}
+		unresolved := map[int]bool{}
+		if t, err := apply(s.text, trial); err == nil {
+			tf := token.NewFileSet()
+			if file, err := parser.ParseFile(tf, "trial.go", t, 0); err == nil {
+				for _, id := range file.Unresolved {
+					unresolved[tf.PositionFor(id.Pos(), false).Offset] = true
+				}
+			}
+		}
+		var sites []site
+		counts := map[string]int{}
+		shift := 0
+		for _, st := range all {
+			_ = st
+		}
+		sort.SliceStable(all, func(i, j int) bool { return f.off(all[i].sel.Pos()) < f.off(all[j].sel.Pos()) })
+		for _, st := range all {
+			a, b := f.off(st.sel.Pos()), f.off(st.sel.Sel.Pos())
+			shift += b - a
+			if !unresolved[b-shift] {
+				continue
+			}
+			if st.pkg == "" {
+				s.put(a, b, "")
+				continue
+			}
+			sites = append(sites, st)
+			counts[st.pkg]++
+		}
+		var opened []string
+		exports := map[string]*types.Package{}
+		for name, c := range counts {
+			if c < 2 {
+				continue
+			}
+			if p := exportsOf(f.imports[name]); p != nil {
+				exports[name] = p
+				opened = append(opened, name)
+			}
+		}
+		sort.Strings(opened)
+		used := map[string]bool{}
+		for _, st := range sites {
+			if exports[st.pkg] == nil {
+				continue
+			}
+			n := 0
+			for _, name := range opened {
+				if exported2(exports[name], st.sel.Sel.Name) {
+					n++
+				}
+			}
+			if n == 1 {
+				s.put(f.off(st.sel.Pos()), f.off(st.sel.Sel.Pos()), "")
+				used[st.pkg] = true
+			}
+		}
+		var names []string
+		for _, name := range opened {
+			if used[name] {
+				names = append(names, name)
+			}
+		}
+		if len(names) > 0 {
+			header += "\nuse " + strings.Join(names, " ")
+		}
+	}
+	count := map[string]map[string]int{}
+	prevRecv := ""
+	ast.Inspect(s.file, func(n ast.Node) bool {
+		var lists []*ast.FieldList
+		switch t := n.(type) {
+		case *ast.FuncDecl:
+			if t.Recv != nil && s.raw(t.Recv) != prevRecv {
+				lists = append(lists, t.Recv)
+			}
+			if t.Recv != nil {
+				prevRecv = s.raw(t.Recv)
+			}
+		case *ast.FuncType:
+			lists = append(lists, t.Params)
+		}
+		for _, l := range lists {
+			if l == nil {
+				continue
+			}
+			for _, fl := range l.List {
+				if len(fl.Names) != 1 || fl.Names[0].Name == "_" || !s.clean(s.off(fl.Pos()), s.off(fl.End())) || strings.Contains(s.raw(fl.Type), "\n") {
+					continue
+				}
+				if _, ok := fl.Type.(*ast.Ellipsis); ok {
+					continue
+				}
+				if count[fl.Names[0].Name] == nil {
+					count[fl.Names[0].Name] = map[string]int{}
+				}
+				count[fl.Names[0].Name][s.raw(fl.Type)]++
+			}
+		}
+		return true
+	})
+	var lets []string
+	for name, types := range count {
+		best, n := "", 0
+		for t, c := range types {
+			if c > n || (c == n && t < best) {
+				best, n = t, c
+			}
+		}
+		if n >= 3 && conventions[name] != best {
+			s.conv[name] = best
+			lets = append(lets, name+" "+best)
+		}
+	}
+	sort.Strings(lets)
+	if len(lets) > 0 {
+		header += "\nlet " + strings.Join(lets, ", ")
+	}
+	return header
+}
+func splitHeader(text string) (rest string, uses []string, conv map[string]string, err error) {
+	conv = map[string]string{}
+	for k, v := range conventions {
+		conv[k] = v
+	}
+	ts := lex(text)
+	i := 0
+	for i < len(ts) && ts[i].lit != "package" {
+		i++
+	}
+	i += 2
+	if i > len(ts) {
+		return text, nil, conv, nil
+	}
+	prevEnd := ts[i-1].b
+	var cuts []edit
+	for i < len(ts) {
+		t := ts[i]
+		if t.k == token.COMMENT {
+			prevEnd = t.b
+			i++
+			continue
+		}
+		if t.k == token.SEMICOLON {
+			i++
+			continue
+		}
+		if t.k != token.IDENT || (t.lit != "use" && t.lit != "let") || i+1 >= len(ts) || ts[i+1].k != token.IDENT || ts[i+1].line != t.line {
+			break
+		}
+		j := i + 1
+		if t.lit == "use" {
+			for j < len(ts) && ts[j].k == token.IDENT && ts[j].line == t.line {
+				uses = append(uses, ts[j].lit)
+				j++
+			}
+		} else {
+			for j < len(ts) && ts[j].k == token.IDENT {
+				name := ts[j]
+				k := j + 1
+				for k < len(ts) && ts[k].lit != "," && ts[k].k != token.SEMICOLON {
+					if ts[k].lit == "(" || ts[k].lit == "[" || ts[k].lit == "{" {
+						m := matching(ts, k)
+						if m < 0 {
+							return "", nil, nil, fmt.Errorf("line %d: unclosed type in let", t.line)
+						}
+						k = m
+					}
+					k++
+				}
+				if k == j+1 {
+					return "", nil, nil, fmt.Errorf("line %d: let %s has no type", t.line, name.lit)
+				}
+				conv[name.lit] = strings.TrimSpace(text[ts[j+1].a:ts[k-1].b])
+				j = k
+				if j < len(ts) && ts[j].lit == "," {
+					j++
+				}
+			}
+		}
+		if j >= len(ts) || j == i+1 {
+			break
+		}
+		cuts = append(cuts, edit{prevEnd, ts[j-1].b, ""})
+		prevEnd = ts[j-1].b
+		i = j
+	}
+	rest, err = apply(text, cuts)
+	return rest, uses, conv, err
+}
+func lowerReceivers(text string, conv map[string]string) (string, error) {
+	ts := significant(lex(text))
+	var es []edit
+	depth := 0
+	for i := 0; i < len(ts); i++ {
+		t := ts[i]
+		if depth == 0 && t.lit == "(" && (i == 0 || ts[i-1].line < t.line || ts[i-1].lit == "func") {
+			j := matching(ts, i)
+			if j > 0 && j+2 < len(ts) && ts[j+1].k == token.IDENT && (ts[j+2].lit == "(" || ts[j+2].lit == "[") {
+				if j == i+2 && ts[i+1].k == token.IDENT && conv[ts[i+1].lit] != "" {
+					es = append(es, edit{ts[i+1].b, ts[i+1].b, " " + conv[ts[i+1].lit]})
+				} else if j == i+3 && ts[i+1].lit == "\\" {
+					es = append(es, edit{ts[i+1].a, ts[i+1].b, ""})
+				}
+			}
+		}
+		switch t.lit {
+		case "{", "(", "[":
+			depth++
+		case "}", ")", "]":
+			depth--
+		}
+	}
+	return apply(text, es)
+}
+func completeNames(text string, o Options, uses []string) (string, error) {
+	f, err := newScopeFacts(text, o)
+	if err != nil {
+		return "", fmt.Errorf("lower: %w", err)
+	}
+	if f.dot {
+		return text, nil
+	}
+	ms := f.methods()
+	tab := table(o)
+	exports := map[string]*types.Package{}
+	for _, u := range uses {
+		path := f.imports[u]
+		if path == "" {
+			path = tab[u].Path
+		}
+		if path == "" {
+			return "", fmt.Errorf("use %s: unknown package (add an import or smol.mod entry)", u)
+		}
+		p := exportsOf(path)
+		if p == nil {
+			return "", fmt.Errorf("use %s: cannot load %s", u, path)
+		}
+		exports[u] = p
+	}
+	var es []edit
+	for _, id := range f.file.Unresolved {
+		if f.taken(id.Name) {
+			continue
+		}
+		at := f.off(id.Pos())
+		if m := enclosing(ms, at); m != nil && m.members[id.Name] {
+			es = append(es, edit{at, at, m.recv + "."})
+			continue
+		}
+		var found []string
+		for _, u := range uses {
+			if exported2(exports[u], id.Name) {
+				found = append(found, u)
+			}
+		}
+		if len(found) > 1 {
+			return "", fmt.Errorf("%s is exported by more than one opened package: %s", id.Name, strings.Join(found, ", "))
+		}
+		if len(found) == 1 {
+			es = append(es, edit{at, at, found[0] + "."})
+		}
+	}
+	if len(es) == 0 {
+		return text, nil
+	}
+	return apply(text, es)
+}
+func operandEdge(t tok) bool {
+	switch t.k {
+	case token.IDENT, token.INT, token.FLOAT, token.IMAG, token.CHAR, token.STRING:
+		return true
+	}
+	return false
+}
+func (s *source) liftCommas() {
+	ast.Inspect(s.file, func(n ast.Node) bool {
+		var list []ast.Expr
+		switch c := n.(type) {
+		case *ast.CallExpr:
+			list = c.Args
+		case *ast.CaseClause:
+			list = c.List
+		}
+		c := struct{ Args []ast.Expr }{list}
+		for i := 0; i+1 < len(c.Args); i++ {
+			a, b := s.off(c.Args[i].End()), s.off(c.Args[i+1].Pos())
+			if s.text[a:b] != ", " {
+				continue
+			}
+			left, right := lex(s.raw(c.Args[i])), lex(s.raw(c.Args[i+1]))
+			left = significant(left)
+			right = significant(right)
+			if len(left) == 0 || len(right) == 0 || !operandEdge(left[len(left)-1]) || !operandEdge(right[0]) {
+				continue
+			}
+			s.put(a, b, " ")
+		}
+		return true
+	})
+}
+func lowerCommas(text string) (string, error) {
+	ts := significant(lex(text))
+	skip := map[int]bool{}
+	for _, sig := range signatures(ts) {
+		skip[sig.open] = true
+		if sig.close+1 < len(ts) && ts[sig.close+1].lit == "(" {
+			skip[sig.close+1] = true
+		}
+	}
+	var es []edit
+	var stack []bool
+	caseAt := -1
+	for i, t := range ts {
+		switch t.lit {
+		case "case":
+			caseAt = len(stack)
+			continue
+		case ":":
+			if caseAt == len(stack) {
+				caseAt = -1
+			}
+			continue
+		}
+		if caseAt == len(stack) && i > 0 && operandEdge(t) && operandEdge(ts[i-1]) {
+			es = append(es, edit{ts[i-1].b, ts[i-1].b, ","})
+			continue
+		}
+		switch t.lit {
+		case "(", "[", "{":
+			call := false
+			if t.lit == "(" && i > 0 && !skip[i] {
+				p := ts[i-1]
+				call = p.k == token.IDENT || p.lit == ")" || p.lit == "]" || p.lit == "}"
+			}
+			stack = append(stack, call)
+			continue
+		case ")", "]", "}":
+			if len(stack) > 0 {
+				stack = stack[:len(stack)-1]
+			}
+			continue
+		}
+		if len(stack) > 0 && stack[len(stack)-1] && i > 0 && operandEdge(t) && operandEdge(ts[i-1]) {
+			es = append(es, edit{ts[i-1].b, ts[i-1].b, ","})
+		}
+	}
+	return apply(text, es)
+}
+
+// File: smolang/internal/smol/source.go
+package smol
+
+import (
+	"fmt"
+	"go/ast"
+	"go/format"
+	"go/parser"
+	"go/printer"
+	"go/scanner"
+	"go/token"
+	"sort"
+	"strings"
+)
+
+type edit struct {
+	a, b int
+	text string
+}
+type source struct {
+	text  string
+	fs    *token.FileSet
+	file  *ast.File
+	edits []edit
+	conv  map[string]string
+}
+
+func parse(text string) (*source, error) {
+	fs := token.NewFileSet()
+	f, err := parser.ParseFile(fs, "source.go", text, parser.ParseComments|parser.SkipObjectResolution)
+	if err != nil {
+		return nil, err
+	}
+	return &source{text: text, fs: fs, file: f}, nil
+}
+func (s *source) off(p token.Pos) int   { return s.fs.PositionFor(p, false).Offset }
+func (s *source) raw(n ast.Node) string { return s.text[s.off(n.Pos()):s.off(n.End())] }
+func (s *source) put(a, b int, t string) {
+	es := s.edits[:0]
+	for _, e := range s.edits {
+		if e.a >= a && e.b <= b {
+			continue
+		}
+		es = append(es, e)
+	}
+	s.edits = append(es, edit{a, b, t})
+}
+func (s *source) replace(n ast.Node, t string) { s.put(s.off(n.Pos()), s.off(n.End()), t) }
+func (s *source) render(a, b int) string {
+	es := append([]edit(nil), s.edits...)
+	sort.SliceStable(es, func(i, j int) bool { return es[i].a < es[j].a })
+	var out strings.Builder
+	p := a
+	for _, e := range es {
+		if e.a < a || e.b > b {
+			continue
+		}
+		if e.a < p {
+			continue
+		}
+		out.WriteString(s.text[p:e.a])
+		out.WriteString(e.text)
+		p = e.b
+	}
+	out.WriteString(s.text[p:b])
+	return out.String()
+}
+func (s *source) node(n ast.Node) string { return s.render(s.off(n.Pos()), s.off(n.End())) }
+func (s *source) clean(a, b int) bool {
+	for _, c := range s.file.Comments {
+		if s.off(c.Pos()) < b && s.off(c.End()) > a {
+			return false
+		}
+	}
+	ts := lex(s.text[a:b])
+	end := 0
+	for _, t := range ts {
+		if strings.Contains(strings.ReplaceAll(s.text[a+end:a+t.a], "\t", ""), "\n\n") {
+			return false
+		}
+		end = t.b
+	}
+	return true
+}
+func norm(text string) (string, error) { b, e := format.Source([]byte(text)); return string(b), e }
+
+type tok struct {
+	k    token.Token
+	lit  string
+	a, b int
+	line int
+}
+
+func lex(text string) []tok {
+	fs := token.NewFileSet()
+	f := fs.AddFile("", -1, len(text))
+	var sc scanner.Scanner
+	sc.Init(f, []byte(text), func(token.Position, string) {}, scanner.ScanComments)
+	var out []tok
+	for {
+		p, k, l := sc.Scan()
+		if k == token.EOF {
+			break
+		}
+		if l == "" {
+			l = k.String()
+		}
+		a := f.Offset(p)
+		b := a + len(l)
+		if k == token.SEMICOLON && l == "\n" {
+			b = a
+		}
+		out = append(out, tok{k, l, a, b, f.Line(p)})
+	}
+	var fixed []tok
+	for _, t := range out {
+		if len(fixed) > 0 {
+			p := fixed[len(fixed)-1]
+			if (p.lit == "?" || p.lit == "~") && t.line > p.line && t.k != token.SEMICOLON {
+				fixed = append(fixed, tok{k: token.SEMICOLON, lit: "\n", a: p.b, b: p.b, line: p.line})
+			}
+		}
+		fixed = append(fixed, t)
+	}
+	return fixed
+}
+func matching(ts []tok, i int) int {
+	pairs := map[string]string{"(": ")", "[": "]", "{": "}"}
+	end := pairs[ts[i].lit]
+	d := 0
+	for j := i; j < len(ts); j++ {
+		if ts[j].lit == ts[i].lit {
+			d++
+		}
+		if ts[j].lit == end {
+			d--
+			if d == 0 {
+				return j
+			}
+		}
+	}
+	return -1
+}
+func significant(ts []tok) []tok {
+	var out []tok
+	for _, t := range ts {
+		if t.k != token.COMMENT && t.k != token.SEMICOLON {
+			out = append(out, t)
+		}
+	}
+	return out
+}
+func apply(text string, es []edit) (string, error) {
+	sort.SliceStable(es, func(i, j int) bool { return es[i].a < es[j].a })
+	var b strings.Builder
+	p := 0
+	for _, e := range es {
+		if e.a < p || e.b < e.a || e.b > len(text) {
+			return "", fmt.Errorf("overlapping rewrite at %d near %q", e.a, excerpt(text[max(0, e.a-50):min(len(text), max(e.a, e.b)+50)]))
+		}
+		b.WriteString(text[p:e.a])
+		b.WriteString(e.text)
+		p = e.b
+	}
+	b.WriteString(text[p:])
+	return b.String(), nil
+}
+func compact(text string) string {
+	ts := lex(text)
+	bodyComments := map[int]bool{}
+	column := func(pos int) int { return pos - strings.LastIndex(text[:pos], "\n") - 1 }
+	for i, t := range ts {
+		if t.k != token.COMMENT {
+			continue
+		}
+		if strings.HasPrefix(t.lit, "//line ") && column(t.a) > 0 {
+			bodyComments[t.a] = true
+		}
+		j := i + 1
+		for j < len(ts) && (ts[j].k == token.COMMENT || ts[j].k == token.SEMICOLON) {
+			j++
+		}
+		if j < len(ts) && (ts[j].lit == "case" || ts[j].lit == "default" || ts[j].lit == ")" || ts[j].lit == "}" || ts[j].lit == "]") && column(t.a) > column(ts[j].a) {
+			bodyComments[t.a] = true
+		}
+	}
+	var b strings.Builder
+	p := 0
+	for _, t := range ts {
+		if t.b == t.a {
+			continue
+		}
+		ws := text[p:t.a]
+		if strings.Contains(ws, "\n") {
+			n := strings.Count(ws, "\n")
+			b.WriteString(strings.Repeat("\n", n))
+			if bodyComments[t.a] {
+				b.WriteByte('\t')
+			}
+		} else if len(ws) > 0 {
+			b.WriteByte(' ')
+		}
+		b.WriteString(text[t.a:t.b])
+		p = t.b
+	}
+	b.WriteString(strings.TrimRight(text[p:], " \t"))
+	return b.String()
+}
+func normalizePreservingComments(text string) (string, error) {
+	return formatPreservingComments(text, false)
+}
+func formatPreservingComments(text string, sortImports bool) (string, error) {
+	prefix := "SMOL_PRESERVED_COMMENT_"
+	for strings.Contains(text, prefix) {
+		prefix += "X"
+	}
+	originals := map[string]string{}
+	var es []edit
+	for _, t := range lex(text) {
+		if t.k != token.COMMENT {
+			continue
+		}
+		if strings.HasPrefix(t.lit, "/*") && !strings.Contains(t.lit, "\n") {
+			continue
+		}
+		key := fmt.Sprintf("%s%08d_END", prefix, len(originals))
+		replacement := "//" + key
+		if strings.HasPrefix(t.lit, "/*") {
+			replacement = "/*" + key + strings.Repeat("\n", strings.Count(t.lit, "\n")) + "*/"
+		}
+		originals[key] = t.lit
+		es = append(es, edit{t.a, t.b, replacement})
+	}
+	protected, e := apply(text, es)
+	if e != nil {
+		return "", e
+	}
+	parsed, e := parse(protected)
+	if e != nil {
+		return "", e
+	}
+	var output strings.Builder
+	if sortImports {
+		ast.SortImports(parsed.fs, parsed.file)
+	}
+	cfg := printer.Config{Mode: printer.UseSpaces | printer.TabIndent, Tabwidth: 8}
+	if e := cfg.Fprint(&output, parsed.fs, parsed.file); e != nil {
+		return "", e
+	}
+	formatted := output.String()
+	var restore []edit
+	for _, t := range lex(formatted) {
+		if t.k != token.COMMENT {
+			continue
+		}
+		for key, original := range originals {
+			if strings.Contains(t.lit, key) {
+				restore = append(restore, edit{t.a, t.b, original})
+				break
+			}
+		}
+	}
+	return apply(formatted, restore)
+}
+func (s *source) packageEnd() int {
+	p := s.off(s.file.Name.End())
+	line := s.fs.PositionFor(s.file.Name.End(), false).Line
+	for _, c := range s.file.Comments {
+		if s.fs.PositionFor(c.Pos(), false).Line == line && s.off(c.Pos()) >= p {
+			p = s.off(c.End())
+		}
+	}
+	return p
+}
+
+// File: smolang/internal/smol/zero.go
+package smol
+
+import (
+	"go/ast"
+	"go/parser"
+	"go/token"
+	"go/types"
+	"strings"
+)
+
+func parserFile(fs *token.FileSet, name, text string) (*ast.File, error) {
+	return parser.ParseFile(fs, name, text, parser.ParseComments|parser.SkipObjectResolution)
+}
+
+type zeros struct {
+	s        *source
+	decls    map[string]ast.Expr
+	params   map[string]bool
+	imports  map[string]string
+	cache    map[string]*types.Package
+	locals   []localType
+	position token.Pos
+}
+type localType struct {
+	name       string
+	expr       ast.Expr
+	start, end token.Pos
+}
+
+func newZeros(s *source, o Options) *zeros {
+	z := &zeros{s: s, decls: map[string]ast.Expr{}, params: map[string]bool{}, imports: map[string]string{}, cache: map[string]*types.Package{}}
+	ctx := o.Context
+	if ctx == nil {
+		ctx = NewPackageContext(o.PackageFiles)
+	}
+	ctx = ctx.forPackage(s.file.Name.Name)
+	for n, t := range ctx.types {
+		z.decls[n] = t
+	}
+	for _, d := range s.file.Decls {
+		if g, ok := d.(*ast.GenDecl); ok {
+			for _, sp := range g.Specs {
+				if t, ok := sp.(*ast.TypeSpec); ok {
+					z.decls[t.Name.Name] = t.Type
+				}
+			}
+		}
+	}
+	var scopes []*ast.BlockStmt
+	var nodes []ast.Node
+	ast.Inspect(s.file, func(n ast.Node) bool {
+		if n == nil {
+			if _, ok := nodes[len(nodes)-1].(*ast.BlockStmt); ok {
+				scopes = scopes[:len(scopes)-1]
+			}
+			nodes = nodes[:len(nodes)-1]
+			return false
+		}
+		nodes = append(nodes, n)
+		if b, ok := n.(*ast.BlockStmt); ok {
+			scopes = append(scopes, b)
+		}
+		if t, ok := n.(*ast.TypeSpec); ok && len(scopes) > 0 {
+			z.locals = append(z.locals, localType{t.Name.Name, t.Type, t.Pos(), scopes[len(scopes)-1].End()})
+		}
+		return true
+	})
+	for n, im := range table(o) {
+		z.imports[n] = im.Path
+	}
+	for _, im := range s.file.Imports {
+		p := strings.Trim(im.Path.Value, `"`)
+		n := packageName(p)
+		if im.Name != nil {
+			n = im.Name.Name
+		}
+		z.imports[n] = p
+	}
+	return z
+}
+func (z *zeros) zero(e ast.Expr, spelling string, seen map[string]bool) (string, bool) {
+	switch t := e.(type) {
+	case *ast.ParenExpr:
+		return z.zero(t.X, spelling, seen)
+	case *ast.StarExpr, *ast.MapType, *ast.ChanType, *ast.FuncType, *ast.InterfaceType:
+		return "nil", true
+	case *ast.ArrayType:
+		if t.Len == nil {
+			return "nil", true
+		}
+		return spelling + "{}", true
+	case *ast.StructType:
+		return spelling + "{}", true
+	case *ast.Ident:
+		if z.params[t.Name] {
+			return "", false
+		}
+		if seen[t.Name] {
+			return "", false
+		}
+		d := z.decls[t.Name]
+		var nearest token.Pos
+		for _, local := range z.locals {
+			if local.name == t.Name && local.start <= z.position && z.position < local.end && local.start > nearest {
+				d = local.expr
+				nearest = local.start
+			}
+		}
+		if d != nil {
+			seen[t.Name] = true
+			return z.zero(d, spelling, seen)
+		}
+		switch t.Name {
+		case "any", "error":
+			return "nil", true
+		case "bool":
+			return "false", true
+		case "string":
+			return `""`, true
+		case "int", "int8", "int16", "int32", "int64", "uint", "uint8", "uint16", "uint32", "uint64", "uintptr", "byte", "rune", "float32", "float64", "complex64", "complex128":
+			return "0", true
+		}
+	case *ast.SelectorExpr:
+		id, ok := t.X.(*ast.Ident)
+		if !ok {
+			return "", false
+		}
+		p := z.imports[id.Name]
+		if p == "" {
+			return "", false
+		}
+		pkg, ok := z.cache[p]
+		if !ok {
+			pkg, _ = exportImporter(z.s.fs).Import(p)
+			z.cache[p] = pkg
+		}
+		if pkg == nil {
+			return "", false
+		}
+		obj := pkg.Scope().Lookup(t.Sel.Name)
+		if obj == nil {
+			return "", false
+		}
+		return zeroUnderlying(obj.Type().Underlying(), spelling)
+	case *ast.IndexExpr, *ast.IndexListExpr:
+		var base ast.Expr
+		if t, ok := e.(*ast.IndexExpr); ok {
+			base = t.X
+		} else {
+			base = e.(*ast.IndexListExpr).X
+		}
+		return z.zero(base, spelling, seen)
+	}
+	return "", false
+}
+func zeroUnderlying(t types.Type, name string) (string, bool) {
+	switch u := t.(type) {
+	case *types.Basic:
+		if u.Info()&types.IsBoolean != 0 {
+			return "false", true
+		}
+		if u.Info()&types.IsString != 0 {
+			return `""`, true
+		}
+		if u.Info()&types.IsNumeric != 0 {
+			return "0", true
+		}
+	case *types.Array, *types.Struct:
+		return name + "{}", true
+	case *types.Pointer, *types.Slice, *types.Map, *types.Chan, *types.Signature, *types.Interface:
+		return "nil", true
+	}
+	return "", false
+}
+func results(ft *ast.FuncType) []ast.Expr {
+	var out []ast.Expr
+	if ft.Results != nil {
+		for _, f := range ft.Results.List {
+			n := len(f.Names)
+			if n == 0 {
+				n = 1
+			}
+			for i := 0; i < n; i++ {
+				out = append(out, f.Type)
+			}
+		}
+	}
+	return out
+}
+func fallible(ft *ast.FuncType) bool {
+	r := results(ft)
+	if len(r) == 0 {
+		return false
+	}
+	id, ok := r[len(r)-1].(*ast.Ident)
+	return ok && id.Name == "error"
+}
+func (z *zeros) list(ft *ast.FuncType) ([]string, bool) {
+	z.position = ft.Pos()
+	z.params = map[string]bool{}
+	ast.Inspect(z.s.file, func(n ast.Node) bool {
+		if n == nil {
+			return true
+		}
+		if n.Pos() > ft.Pos() || n.End() < ft.End() {
+			return false
+		}
+		var signature *ast.FuncType
+		switch n := n.(type) {
+		case *ast.FuncDecl:
+			signature = n.Type
+			if n.Recv != nil {
+				ast.Inspect(n.Recv, func(e ast.Node) bool {
+					switch e := e.(type) {
+					case *ast.IndexExpr:
+						if id, ok := e.Index.(*ast.Ident); ok {
+							z.params[id.Name] = true
+						}
+					case *ast.IndexListExpr:
+						for _, arg := range e.Indices {
+							if id, ok := arg.(*ast.Ident); ok {
+								z.params[id.Name] = true
+							}
+						}
+					}
+					return true
+				})
+			}
+		case *ast.FuncLit:
+			signature = n.Type
+		}
+		if signature != nil && signature.TypeParams != nil {
+			for _, f := range signature.TypeParams.List {
+				for _, id := range f.Names {
+					z.params[id.Name] = true
+				}
+			}
+		}
+		return true
+	})
+	r := results(ft)
+	if !fallible(ft) {
+		return nil, false
+	}
+	var out []string
+	for _, e := range r[:len(r)-1] {
+		v, ok := z.zero(e, exprText(e), map[string]bool{})
+		if !ok {
+			return nil, false
+		}
+		out = append(out, v)
+	}
+	return out, true
+}
+func exprText(e ast.Expr) string { var b strings.Builder; _ = printerNode(&b, e); return b.String() }
+

@@ -65,7 +65,7 @@ func Lower(text string, o Options) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	text, err = s.inferImports(o)
+	text, err = s.inferImports(o, prefix)
 	if err != nil {
 		return "", err
 	}

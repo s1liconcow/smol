@@ -1,4 +1,4 @@
-// Run with: go run ./scripts/validate_v02.go -output measurements/spec-v0.2-validation/probes.json
+// Run with: go run ./scripts/validate_v02.go -output measurements/spec-v0.2-conformance/probes.json
 // This is an audit, not a golden-output generator: expectations come from SPEC.md.
 package main
 
@@ -88,7 +88,7 @@ func codeFor(src string) (string, string, error) {
 }
 
 func main() {
-	output := flag.String("output", "measurements/spec-v0.2-validation/probes.json", "JSON audit report")
+	output := flag.String("output", "measurements/spec-v0.2-conformance/probes.json", "JSON audit report")
 	flag.Parse()
 	start := time.Now()
 	var results []result

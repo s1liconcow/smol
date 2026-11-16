@@ -1,0 +1,34 @@
+{
+  "version": "go1.26.3",
+  "source_archive": "https://go.dev/dl/go1.26.3.src.tar.gz",
+  "archive_sha256": "1c646875d0aa8799133184ed57cf79ff24bdefe8c8820470602a9d3d6d9192b8",
+  "compared_files": 2800,
+  "differences": [],
+  "generated_files_copied_from_installed_toolchain": [
+    {
+      "path": "src/cmd/go/internal/cfg/zdefaultcc.go",
+      "sha256": "447ead8defcf01c9cb4284c19fa3a8d391d2d4f2222c6e41a21d7779ded8ff8a"
+    },
+    {
+      "path": "src/cmd/internal/objabi/zbootstrap.go",
+      "sha256": "d747f1f15f91fd8154c3572b1ecd48ccdf991bee4ea06650cbc1177c76917f76"
+    },
+    {
+      "path": "src/cmd/cgo/zdefaultcc.go",
+      "sha256": "8cf104c191b56a95158aa973408f4cf401b338360f01fd22a4ffc37b93473e20"
+    },
+    {
+      "path": "src/internal/buildcfg/zbootstrap.go",
+      "sha256": "d8d769917fa283b6acee862663926ef6cca34d8ed96094a6831545761c502171"
+    },
+    {
+      "path": "src/internal/runtime/sys/zversion.go",
+      "sha256": "f69c03727973664529c2e6fa2d2c53b2d3440c887938d0d9b22254f7984052f2"
+    },
+    {
+      "path": "src/time/tzdata/zzipdata.go",
+      "sha256": "b1cd92e2ea67506152ecdfe00958fb50940eb20e74ed64ebf9efa477d00f40df"
+    }
+  ],
+  "method": "Official source archive, installed bin/pkg symlinks and generated z*.go files; supplies omitted Homebrew testdata without modifying the installation."
+}

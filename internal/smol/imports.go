@@ -216,6 +216,17 @@ func Normalize(text string) (string, error) {
 }
 func (s *source) liftImports(o Options) {
 	m := table(o)
+	used := map[string]bool{}
+	if facts, err := newScopeFacts(s.text, o); err == nil {
+		ast.Inspect(facts.file, func(n ast.Node) bool {
+			if sel, ok := n.(*ast.SelectorExpr); ok {
+				if id, ok := sel.X.(*ast.Ident); ok && id.Obj == nil && !facts.ctx.names[id.Name] {
+					used[id.Name] = true
+				}
+			}
+			return true
+		})
+	}
 	for _, d := range s.file.Decls {
 		g, ok := d.(*ast.GenDecl)
 		if !ok || g.Tok != token.IMPORT {
@@ -226,7 +237,7 @@ func (s *source) liftImports(o Options) {
 		}
 		// A block whose only comments belong to its specs keeps those specs
 		// after a "..." line that stands for the inferred imports.
-		partial := false
+		partial := g.Lparen.IsValid()
 		if !s.clean(s.off(g.Pos()), s.off(g.End())) {
 			if !g.Lparen.IsValid() || !s.specComments(g) {
 				continue
@@ -244,7 +255,7 @@ func (s *source) liftImports(o Options) {
 			}
 			cgo = cgo || p == "C"
 			binding, ok := m[name]
-			if name == "_" || name == "." || p == "C" || im.Doc != nil || im.Comment != nil || !ok || binding.Path != p || binding.Alias != (im.Name != nil) {
+			if !used[name] || name == "_" || name == "." || p == "C" || im.Doc != nil || im.Comment != nil || !ok || binding.Path != p || binding.Alias != (im.Name != nil) {
 				a, b := im.Pos(), im.End()
 				if im.Doc != nil {
 					a = im.Doc.Pos()
@@ -258,7 +269,7 @@ func (s *source) liftImports(o Options) {
 		if len(keep) == len(g.Specs) || (partial && cgo) {
 			continue
 		}
-		if partial {
+		if partial && len(keep) > 0 {
 			s.replace(g, "import (\n...\n"+strings.Join(keep, "\n")+"\n)")
 			continue
 		}
@@ -293,7 +304,7 @@ func makeExportImporter(fs *token.FileSet) types.Importer {
 		return os.Open(strings.TrimSpace(string(b)))
 	})
 }
-func (s *source) inferImports(o Options) (string, error) {
+func (s *source) inferImports(o Options, prefix string) (string, error) {
 	info := &types.Info{Uses: map[*ast.Ident]types.Object{}, Scopes: map[ast.Node]*types.Scope{}}
 	files := []*ast.File{s.file}
 	ctx := o.Context
@@ -359,22 +370,48 @@ func (s *source) inferImports(o Options) (string, error) {
 		imports = append(imports, l)
 	}
 	sort.Strings(imports)
-	if i := strings.Index(s.text, importsMarker); i >= 0 {
+	for _, im := range s.file.Imports {
+		// Only the synthetic spec created by this lowering pass is a marker.
+		// Its name uses a prefix absent from the input, so literals, comments
+		// and even an explicit import of the sentinel path cannot collide.
+		if im.Name == nil || im.Name.Name != prefix+"imports" || im.Path.Value != strconv.Quote(importsMarkerPath) {
+			continue
+		}
+		i, j := s.off(im.Pos()), s.off(im.End())
 		lines := strings.Join(imports, "\n")
-		j := i + len(importsMarker)
 		if lines == "" && j < len(s.text) && s.text[j] == '\n' {
 			j++
 		}
-		return s.text[:i] + lines + s.text[j:], nil
+		for _, d := range s.file.Decls {
+			g, ok := d.(*ast.GenDecl)
+			if !ok || g.Tok != token.IMPORT || im.Pos() < g.Pos() || im.End() > g.End() {
+				continue
+			}
+			a, b := s.off(g.Pos()), s.off(g.End())
+			block := s.text[a:i] + lines + s.text[j:b]
+			// A partial block has no group separators. Sort the restored specs
+			// inside that block without reordering unrelated explicit imports.
+			formatted, err := formatPreservingComments("package p\n\n"+block+"\n", true)
+			if err != nil {
+				return "", err
+			}
+			block = strings.TrimSpace(strings.TrimPrefix(formatted, "package p"))
+			return s.text[:a] + block + s.text[b:], nil
+		}
 	}
 	if len(imports) == 0 {
 		return s.text, nil
 	}
 	p := s.packageEnd()
-	return s.text[:p] + "\n\nimport (\n" + strings.Join(imports, "\n") + "\n)" + s.text[p:], nil
+	generated, err := Normalize("package p\n\nimport (\n" + strings.Join(imports, "\n") + "\n)\n")
+	if err != nil {
+		return "", err
+	}
+	decl := strings.TrimRight(strings.TrimPrefix(generated, "package p"), "\n")
+	return s.text[:p] + decl + s.text[p:], nil
 }
 
-const importsMarker = `_ "smol.invalid/inferred-imports"`
+const importsMarkerPath = "smol.invalid/inferred-imports"
 
 // specComments reports whether an import block has no blank lines and every
 // comment in it is the doc or line comment of one of its specs.
@@ -395,12 +432,12 @@ func (s *source) specComments(g *ast.GenDecl) bool {
 
 // lowerImportMarker turns the "..." line of an import block into a
 // placeholder spec that inferImports replaces.
-func lowerImportMarker(text string) (string, error) {
+func lowerImportMarker(text, prefix string) (string, error) {
 	ts := significant(lex(text))
 	var es []edit
 	for i := 0; i+2 < len(ts); i++ {
 		if ts[i].lit == "import" && ts[i+1].lit == "(" && ts[i+2].lit == "..." {
-			es = append(es, edit{ts[i+2].a, ts[i+2].b, importsMarker})
+			es = append(es, edit{ts[i+2].a, ts[i+2].b, prefix + "imports " + strconv.Quote(importsMarkerPath)})
 		}
 	}
 	return apply(text, es)

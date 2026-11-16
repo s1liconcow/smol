@@ -68,7 +68,7 @@ def prepare(a):
         (out / "validation.json").write_text(json.dumps(checks, indent=2) + "\n")
     manifest = {"package": package["ImportPath"], "go_version": version,
                 "selection": "All active GoFiles and CgoFiles; excludes tests, dependencies, inactive build variants.",
-                "go_source": "Normalized Go produced by lower(lift(original)); L1-L3 checked before bundling.",
+                "go_source": "Normalized Go produced by lower(lift(original)); L1-L4 checked before bundling.",
                 "smol_source": "Canonical code channel (name.smol): identifiers and literals preserved; comments and blank lines are in the notes channel (name.smol.notes), bundled separately as package.notes.txt and not part of the measured input.",
                 "outline": "package.outline.txt and package.outline-docs.txt: read-only views without function bodies; not round-trippable.",
                 "bundle_format": "Concatenated files in filename order, identical // File: markers in both inputs.",
@@ -93,5 +93,5 @@ if __name__ == "__main__":
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("package", nargs="?", default="encoding/json")
     p.add_argument("--smol", type=Path, default=Path("bin/smol"))
-    p.add_argument("--output", type=Path, default=Path("measurements/encoding-json"))
+    p.add_argument("--output", type=Path, default=Path("measurements/spec-v0.2-conformance/encoding-json"))
     prepare(p.parse_args())

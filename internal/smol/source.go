@@ -5,6 +5,7 @@ import (
 	"go/ast"
 	"go/format"
 	"go/parser"
+	"go/printer"
 	"go/scanner"
 	"go/token"
 	"sort"
@@ -211,6 +212,10 @@ func compact(text string) string {
 // Smol comments already have normalized Go contents. Hide them from gofmt's
 // documentation reflow, whose interpretation depends on surrounding indentation.
 func normalizePreservingComments(text string) (string, error) {
+	return formatPreservingComments(text, false)
+}
+
+func formatPreservingComments(text string, sortImports bool) (string, error) {
 	prefix := "SMOL_PRESERVED_COMMENT_"
 	for strings.Contains(text, prefix) {
 		prefix += "X"
@@ -219,6 +224,12 @@ func normalizePreservingComments(text string) (string, error) {
 	var es []edit
 	for _, t := range lex(text) {
 		if t.k != token.COMMENT {
+			continue
+		}
+		// gofmt never reflows a single-line block comment, even in doc
+		// position. Leave its width intact: it affects inline-body decisions
+		// and alignment of adjacent declarations.
+		if strings.HasPrefix(t.lit, "/*") && !strings.Contains(t.lit, "\n") {
 			continue
 		}
 		key := fmt.Sprintf("%s%08d_END", prefix, len(originals))
@@ -233,10 +244,22 @@ func normalizePreservingComments(text string) (string, error) {
 	if e != nil {
 		return "", e
 	}
-	formatted, e := Normalize(protected)
+	// Explicit declaration boundaries carry information even when the notes
+	// that originally documented an import are omitted. Generated imports are
+	// normalized by inferImports; do not merge the remaining declarations here.
+	parsed, e := parse(protected)
 	if e != nil {
 		return "", e
 	}
+	var output strings.Builder
+	if sortImports {
+		ast.SortImports(parsed.fs, parsed.file)
+	}
+	cfg := printer.Config{Mode: printer.UseSpaces | printer.TabIndent, Tabwidth: 8}
+	if e := cfg.Fprint(&output, parsed.fs, parsed.file); e != nil {
+		return "", e
+	}
+	formatted := output.String()
 	var restore []edit
 	for _, t := range lex(formatted) {
 		if t.k != token.COMMENT {
